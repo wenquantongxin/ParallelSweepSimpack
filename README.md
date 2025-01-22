@@ -1,9 +1,11 @@
+
 # ParallelSweepSimpack
-ä½¿ç”¨å¹¶è¡ŒåŒ–ç¼–ç¨‹è¿›è¡Œè½¬å‘æ¶è®¾è®¡å‚æ•°çš„æ‰«ç•¥ï¼Œå¹¶è¡Œè°ƒç”¨SIMPACKè½¦è¾†æ¨¡å‹è®¡ç®—ä¸´ç•Œé€Ÿåº¦ã€‚
 
-å·¥ç¨‹æ–‡ä»¶å¤¹æ‰€å«å†…å®¹å¦‚ä¸‹ï¼š
+Ê¹ÓÃ²¢ĞĞ»¯±à³Ì½øĞĞ×ªÏò¼ÜÉè¼Æ²ÎÊıµÄÉ¨ÂÔ£¬²¢ĞĞµ÷ÓÃSIMPACK³µÁ¾Ä£ĞÍ¼ÆËãÁÙ½çËÙ¶È¡£
 
-F:\...\å‚æ•°ä¼˜åŒ–\å‚æ•°ä¼˜åŒ–å®ç°\åŸºäºPYMOOæ¡†æ¶ä¼˜åŒ–
+¹¤³ÌÎÄ¼ş¼ĞËùº¬ÄÚÈİÈçÏÂ£º
+
+F:\...\²ÎÊıÓÅ»¯\²ÎÊıÓÅ»¯ÊµÏÖ\»ùÓÚPYMOO¿ò¼ÜÓÅ»¯
 |   config_opt.xlsx
 |   HalfSearch_CrticalVelocity.py
 |   myCriticalVel.npy
@@ -15,7 +17,7 @@ F:\...\å‚æ•°ä¼˜åŒ–\å‚æ•°ä¼˜åŒ–å®ç°\åŸºäºPYMOOæ¡†æ¶ä¼˜åŒ–
 |   SweepL1xL2xL3x.py
 |   SweepLx123.ipynb
 |   Vehicle_Genera_OptBase.spck
-|   
+|
 +---BatchTmp
 |   |   OptResult_Test_160.dat
 |   |   OptResult_Test_XXX.dat
@@ -29,44 +31,43 @@ F:\...\å‚æ•°ä¼˜åŒ–\å‚æ•°ä¼˜åŒ–å®ç°\åŸºäºPYMOOæ¡†æ¶ä¼˜åŒ–
 |   |   Vehicle_Opt_Test_160.spck
 |   |   Vehicle_Opt_Test_XXX.spck
 |   |   Vehicle_Opt_Test_YYY.spck
-|   |   
+|   |
 |   +---Vehicle_Opt_Test_160.output
 |   |       Vehicle_Opt_Test_160.intinfo
 |   |       Vehicle_Opt_Test_160.licreq.log
 |   |       Vehicle_Opt_Test_160.sbr
 |   |       Vehicle_Opt_Test_160.sir
 |   |       Vehicle_Opt_Test_160.spckst
-|   |       
+|   |
 |   +---Vehicle_Opt_Test_XXX.output
 |   |       Vehicle_Opt_Test_XXX.intinfo
 |   |       Vehicle_Opt_Test_XXX.licreq.log
 |   |       Vehicle_Opt_Test_XXX.sbr
 |   |       Vehicle_Opt_Test_XXX.sir
 |   |       Vehicle_Opt_Test_XXX.spckst
-|   |       
+|   |
 |   \---Vehicle_Opt_Test_YYY.output
 |           Vehicle_Opt_Test_168.intinfo
 |           Vehicle_Opt_Test_168.licreq.log
 |           Vehicle_Opt_Test_168.sbr
 |           Vehicle_Opt_Test_168.sir
 |           Vehicle_Opt_Test_168.spckst
-|           
+|
 +---ref_files
 |   |   Bogie_IRWs_4WDBv3.spck
 |   |   IRW_4WDBv31.spck
-|   |   subvars_FWDBv31-å¤‡ä»½.subvar
-|   |   å‡ ä½•æ¨¡å‹_STLç‰ˆæœ¬_æ„æ¶.STL
-|   |   å‡ ä½•æ¨¡å‹_STLç‰ˆæœ¬_è½´æ¡¥.STL
-|   |   
+|   |   subvars_FWDBv31-±¸·İ.subvar
+|   |   ¼¸ºÎÄ£ĞÍ_STL°æ±¾_¹¹¼Ü.STL
+|   |   ¼¸ºÎÄ£ĞÍ_STL°æ±¾_ÖáÇÅ.STL
+|   |
 |   \---Bogie_IRWs_4WDBv3.output
 |           Bogie_IRWs_4WDBv3.licreq.log
-|           
+|
 +---Vehicle_Genera_OptBase.output
 |       Vehicle_Genera_OptBase.licreq.log
-|       
+|
 \---__pycache__
         check_SPCK_stable.cpython-310.pyc
         HalfSearch_CrticalVelocity.cpython-310.pyc
         PrepareBatchFiles.cpython-310.pyc
         SweepL1xL2xL3x.cpython-310.pyc
-        

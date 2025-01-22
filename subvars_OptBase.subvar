@@ -1,0 +1,66 @@
+!file.version=3.5! Removing this line will make the file unreadable
+
+subvar.str (                        $_TargetVelocity              ) = '148.047'               ! Definition
+
+subvar.str (                        $_sprCpz                      ) = '10000'                 ! Definition
+
+subvar.str (                        $_Kpx                         ) = '800000'                ! Definition
+
+subvar.str (                        $_Kpy                         ) = '800000'                ! Definition
+
+subvar.str (                        $_Kpz                         ) = '600000'                ! Definition
+
+subvar.str (                        $_Cpz                         ) = '5e+06'                 ! Definition
+
+subvar.str (                        $_Ksx                         ) = '120000'                ! Definition
+
+subvar.str (                        $_Ksy                         ) = '120000'                ! Definition
+
+subvar.str (                        $_Ksz                         ) = '150000'                ! Definition
+
+subvar.str (                        $_Csz                         ) = '20000'                 ! Definition
+
+subvar.str (                        $_Kld                         ) = '8e+06'                 ! Definition
+
+subvar.str (                        $_Cld                         ) = '50000'                 ! Definition
+
+subvar.str (                        $_Kaar                        ) = '2.5e+06'               ! Definition
+
+subvar.str (                        $_Kstr                        ) = '2e+07'                 ! Definition
+
+subvar.str (                        $_Chx                         ) = '600000'                ! Definition
+
+subvar.str (                        $_Mc                          ) = '25000'                 ! Definition
+
+subvar.str (                        $_hc                          ) = '-1.8'                  ! Definition
+
+subvar.str (                        $_Icx                         ) = '50000'                 ! Definition
+
+subvar.str (                        $_Icy                         ) = '1.2e+06'               ! Definition
+
+subvar.str (                        $_Icz                         ) = '1.2e+06'               ! Definition
+
+subvar.str (                        $_Mt                          ) = '5000'                  ! Definition
+
+subvar.str (                        $_ht                          ) = '0'                     ! Definition
+
+subvar.str (                        $_Itx                         ) = '2000'                  ! Definition
+
+subvar.str (                        $_Ity                         ) = '3000'                  ! Definition
+
+subvar.str (                        $_Itz                         ) = '5000'                  ! Definition
+
+subvar.str (                        $_Mw                          ) = '1000'                  ! Definition
+
+subvar.str (                        $_Iwx                         ) = '560'                   ! Definition
+
+subvar.str (                        $_Iwy                         ) = '100'                   ! Definition
+
+subvar.str (                        $_Iwz                         ) = '560'                   ! Definition
+
+subvar.str (                        $_Lx1                         ) = '0.4'                   ! Definition
+
+subvar.str (                        $_Lx2                         ) = '0.6'                   ! Definition
+
+subvar.str (                        $_Lx3                         ) = '-0.6'                  ! Definition
+
