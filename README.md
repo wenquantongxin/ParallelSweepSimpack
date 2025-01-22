@@ -1,0 +1,2 @@
+# ParallelSweepSimpack
+使用并行化编程进行转向架设计参数的扫略，并行调用SIMPACK车辆模型计算临界速度。
