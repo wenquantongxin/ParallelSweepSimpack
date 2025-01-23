@@ -93,7 +93,7 @@ def MaxLatY_idx(
     tag,
     idx,
     qs_script="SbrExport_Opt.qs",
-    wait_seconds=5
+    wait_seconds = 3
 ):
     """
     Python版函数，对应 MATLAB 的 Fun_maxLatY_fromSPCKpost。
@@ -128,14 +128,25 @@ def MaxLatY_idx(
     if not os.path.isfile(spf_path):
         raise FileNotFoundError(f".spf文件不存在: {spf_path}")
 
-    # 1) 调用 simpack-post
+    # 1) 调用 simpack-post 的脚本 .qs
     cmd = [
         "simpack-post",
         "-s", qs_script_path,
         spf_path,               # SPF 文件路径
         out_result_full_prefix  # 输出前缀
     ]
-    subprocess.run(cmd, cwd=work_dir)
+    
+    try:
+        ret = subprocess.run(cmd, cwd=work_dir, check=True)
+    except subprocess.CalledProcessError as e:
+        # 外部命令返回非 0
+        print(f"[ERROR] simpack-post命令出错，返回码={e.returncode}")
+        raise e
+    except Exception as e:
+        # 其他异常，如找不到可执行文件、工作目录不存在等
+        print(f"[ERROR] 无法执行simpack-post命令，异常信息：{e}")
+        raise e 
+       
     time.sleep(wait_seconds)
     
     # 2) 拼出最终 .dat 文件所在路径
@@ -296,7 +307,17 @@ def Check_SPCK_IsStable_Idx(WorkingDir, X_vars, tag, idx, TargetVel):
             return 0.2  # 表示失稳
         else:
             return 1.0  # 表示稳定
-        
+
+# 曲线性能评估
+def CurvePerf_idx(WorkingDir, X_vars, tag, actual_idx):
+    # some code
+    print(f"对于模型 {actual_idx} 进行曲线性能测试")
+    
+    WearNumber = 0.0
+    LatDisp = 0.0
+    return (WearNumber, LatDisp)
+
+
 # Python版本的二分搜索临界速度函数，对应于MATLAB的 Fun_HalfSearchCrticalVelocity
 def HalfSearch_CrticalVelocity(
     WorkingDir,
@@ -361,7 +382,7 @@ def HalfSearch_CrticalVelocity(
         else:
             # 返回 0.1 或 0.2，均视为不稳定 => 临界速度在 mid_vel 以下
             high_vel = mid_vel
-            print(f"深度 {i_depth}: {mid_vel:.2f} m/s 不稳定, 收缩区间到 [{low_vel:.2f}, {high_vel:.2f}]")
+            print(f"模型{idx}: 二分深度 {i_depth} 运行速度{mid_vel:.2f} m/s时不稳定, 收缩区间到 [{low_vel:.2f}, {high_vel:.2f}]")
 
     # 取收缩区间的中值作为近似临界速度
     critical_vel = 0.5 * (low_vel + high_vel)

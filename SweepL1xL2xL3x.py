@@ -1,6 +1,7 @@
 # SweepL1xL2xL3x.py
 # -*- coding: gbk -*-
 
+import os
 import pandas as pd
 import numpy as np
 import itertools
@@ -9,14 +10,17 @@ import concurrent.futures
 import matplotlib
 import matplotlib.pyplot as plt
 matplotlib.use("TkAgg")  # 或者 "TkAgg"
+import shutil
 
 from PrepareBatchFiles import (
     read_config_opt_excel,
     ClearBatchTmpFolder,
     prepare_SpckFiles_eachBatch
 )
-from HalfSearch_CrticalVelocity import HalfSearch_CrticalVelocity
+from HalfSearch_CrticalVelocity import (HalfSearch_CrticalVelocity, CurvePerf_idx)
 
+
+# 并行任务函数
 def parallel_worker(args):
     """
     顶层作用域定义的并行任务函数，避免pickle错误。
@@ -31,7 +35,9 @@ def parallel_worker(args):
     # 实际上的全局列索引
     actual_idx = start_idx + col_idx_in_batch
 
-    # 调用半搜索函数，返回临界速度
+    # 修改点 0
+    
+    # 并行任务1：调用半搜索函数，返回临界速度
     cVel = HalfSearch_CrticalVelocity(
         WorkingDir,
         X_vars,
@@ -41,7 +47,12 @@ def parallel_worker(args):
         EndVel,
         N_depth
     )
-    return (col_idx_in_batch, cVel)
+    
+    # 并行任务2：调用曲线计算程序，返回曲线磨耗数、横移量
+    WearNumber, LatDisp = CurvePerf_idx(WorkingDir, X_vars, tag, actual_idx)
+    
+    # 返回并行计算该 idx 的结果组向量
+    return (col_idx_in_batch, cVel, WearNumber, LatDisp)
 
 # 做三维图，显示 临界速度与 L1、L2 的关系
 def ShowMeshgrid():
@@ -77,23 +88,25 @@ def ShowMeshgrid():
     ax.set_xlabel("Lx1")
     ax.set_ylabel("Lx2")
     ax.invert_yaxis()  # 使得 Y 轴反向递增
-    ax.set_zlabel("Critical Velocity (units?)")
+    ax.set_zlabel("Critical Velocity (m/s)")
 
     fig.colorbar(surf, shrink=0.5)
     plt.show()
 
-
+# 主函数
 def main():
+    
+    # 修改点 1    
     # 工作目录路径定义
-    WorkingDir = r"F:\ResearchMainStream\0.ResearchBySection\C.动力学模型\参数优化\参数优化实现\基于Pymoo框架优化"
-
+    WorkingDir = r"F:\ResearchMainStream\0.ResearchBySection\C.动力学模型\参数优化\参数优化实现\并行化参数扫略计算SIMPACK模型临界速度"
     # 实验标识符
-    tag="Test"
-
+    tag="Test"  
+    
+    # 修改点 2
     # 二分法速度上下限、二分深度
-    StartVel = 50/3.6
+    StartVel = 50/3.6 
     EndVel =  800/3.6
-    N_depth = 7
+    N_depth = 7 
     
     # 1) 调用函数读取 config_opt.xlsx，获取基准值 X_base
     Opt_Config = read_config_opt_excel(WorkingDir)
@@ -101,9 +114,10 @@ def main():
     print("基准值 X_base:", X_base)
 
     # 2) 生成 X_vars (32 x N_combos)
+    # 修改点 3
     Lx1_sweep = np.arange(0, 0.6 + 0.001, 0.05)  
     Lx2_sweep = np.arange(0, 0.6 + 0.001, 0.05)  
-    Lx3_sweep = np.arange(0, 0.01, 0.05)  # 示例
+    Lx3_sweep = np.arange(0, 0.05, 0.05)  # 示例
 
     Lx123_combinations = list(itertools.product(Lx1_sweep, Lx2_sweep, Lx3_sweep))
     X_vars_columns = []
@@ -118,7 +132,19 @@ def main():
     X_vars = np.column_stack(X_vars_columns)
     print("X_vars的形状: ", X_vars.shape)
     
+    # 保存整个 X_vars 
+    # 创建子文件夹 ChkPnt（checkpoint (检查点)）如果不存在
+    checkpoint_dir = os.path.join(WorkingDir, "ChkPnt")
+     # 如果子文件夹已经存在且不为空，先删除它以及它包含的所有内容
+    if os.path.exists(checkpoint_dir):
+        shutil.rmtree(checkpoint_dir)
+    # 再次新建一个空白的 ChkPnt(checkpoint) 文件夹，便于后续写入
+    os.makedirs(checkpoint_dir, exist_ok=True)
+    
+    np.save(os.path.join(checkpoint_dir, f"myXvars_{tag}.npy"), X_vars)
+    
     # 3) 设置批次和并行
+    # 修改点 4
     BatchSize_parallel = 10
     total_columns = X_vars.shape[1]
     num_batches = math.ceil(total_columns / BatchSize_parallel)
@@ -126,8 +152,9 @@ def main():
     print("并行任务数：", BatchSize_parallel)
     print("批次数量：", num_batches)
 
-    # 假设每个组合最终只保存1个数(临界速度)，则 result_dim=1
-    result_dim = 1  
+    # 假设每个组合计算和保存的维度数
+    # 修改点 5
+    result_dim = 3  
     all_batch_results = []
 
     for batch_idx in range(num_batches):
@@ -154,17 +181,24 @@ def main():
 
             # 收集结果
             for future in concurrent.futures.as_completed(future_list):
-                col_idx_in_batch, cVel = future.result()
+                col_idx_in_batch, cVel, WearNumber, LatDisp = future.result()
+                # 修改点 6
                 batch_result[0, col_idx_in_batch] = cVel
+                batch_result[1, col_idx_in_batch] = WearNumber
+                batch_result[2, col_idx_in_batch] = LatDisp
         
         all_batch_results.append(batch_result)
+        # 这里 all_batch_results 是一个 list，其中每个元素都是当前批次的结果 (batch_result)
+
+        batch_result_toSave = batch_result # 保存数据解耦，避免保存“列表”时，NumPy 内部会尝试把 all_batch_results 转成一个统一的 ndarray
+        np.save(os.path.join(checkpoint_dir, f"batch_result_{tag}_batch{batch_idx}.npy"), batch_result_toSave)
 
     # 拼接所有批次的结果
     final_results = np.concatenate(all_batch_results, axis=1)
     print("final_results shape:", final_results.shape)
     print("示例：前10列临界速度 = ", final_results[0, :10])
     
-    # 结果保存
+    # 最终结果保存
     np.save("myXvars.npy", X_vars)
     np.save("myCriticalVel.npy", final_results)
     
@@ -177,7 +211,7 @@ if __name__ == "__main__":
 
     启动 pypack 环境的命令行
     F:  切换盘符
-    cd F:\ResearchMainStream\0.ResearchBySection\C.动力学模型\参数优化\参数优化实现\基于Pymoo框架优化
+    cd F:\ResearchMainStream\0.ResearchBySection\C.动力学模型\参数优化\参数优化实现\并行化参数扫略计算SIMPACK模型临界速度
     python SweepL1xL2xL3x.py 执行本程序
     
 环境安装：
