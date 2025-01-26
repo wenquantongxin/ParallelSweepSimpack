@@ -125,6 +125,50 @@ def ReadCriticalVelDat(dat_path):
     
     return maxLatY_fromDat
 
+# 执行 simpack-cmd 调用 simpack-slv 或者 simpack-qs 脚本
+def run_simpack_cmd (cmd, work_dir, timeout_seconds):
+    """
+    运行 simpack-post 命令，并在指定时间内监控其执行，超时则终止进程。
+
+    参数:
+    cmd : list
+        需要执行的命令及其参数。
+    work_dir : str
+        工作目录路径，指向 simpack-post 需要运行的目录。
+    timeout_seconds : int
+        最大执行时间（秒）。如果命令运行超时，将会终止它。
+
+    返回:
+    result : int
+        返回 0 表示成功执行，其他值表示错误。
+    """
+    try:
+        # 使用 Popen 启动进程
+        process = subprocess.Popen(cmd, cwd=work_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+         # 等待进程完成，最多等待 timeout_seconds 时间
+        stdout, stderr = process.communicate(timeout=timeout_seconds)
+
+        # 如果进程在时间限制内完成
+        if process.returncode == 0:
+            return 0
+        else:
+            # 打印标准错误输出
+            print(f"[ERROR] simpack 执行失败，返回码={process.returncode}")
+            return -99.5  # 返回错误码
+
+    except subprocess.TimeoutExpired:
+        # 如果超时，终止进程
+        print("[ERROR] simpack 执行超时，终止进程！")
+        process.terminate()
+        process.wait()  # 确保进程被完全终止
+        return -99.4  # 返回超时错误码
+
+    except Exception as e:
+        print(f"[ERROR] 执行命令失败: {e}")
+        return -99.3  # 其他错误
+
+
 # 单线程内计算四组轮对的最大横移量
 def MaxLatY_idx(
     work_dir,
@@ -178,16 +222,25 @@ def MaxLatY_idx(
         out_result_full_prefix  # 输出前缀
     ]
     
-    try:
-        ret = subprocess.run(cmd, cwd=work_dir, check=True)
-    except subprocess.CalledProcessError as e:
-        # 外部命令返回非 0
-        print(f"[ERROR] simpack-post命令出错，返回码={e.returncode}")
+    # 调用函数执行
+    result = run_simpack_cmd(cmd, work_dir, timeout_seconds = 10 * 60) # 10 * 60
+    if result != 0:
+        print(f"运行失败，错误码：{result}")
         return -99.2 
-    except Exception as e:
-        # 其他异常，如找不到可执行文件、工作目录不存在等
-        print(f"[ERROR] 无法执行simpack-post命令，异常信息：{e}")
-        return -99.3 
+    else:
+        print(f"成功执行 qs 脚本调用")
+
+    
+    # try:
+    #     ret = subprocess.run(cmd, cwd=work_dir, check=True)
+    # except subprocess.CalledProcessError as e:
+    #     # 外部命令返回非 0
+    #     print(f"[ERROR] simpack-post命令出错，返回码={e.returncode}")
+    #     
+    # except Exception as e:
+    #     # 其他异常，如找不到可执行文件、工作目录不存在等
+    #     print(f"[ERROR] 无法执行simpack-post命令，异常信息：{e}")
+    #     return -99.3 
        
     time.sleep(wait_seconds)
     
@@ -302,24 +355,14 @@ def Check_SPCK_IsStable_Idx(WorkingDir, X_vars, tag, idx, TargetVel):
     cmd = ["simpack-slv.exe", "--silent", spck_path]
 
     # 执行命令
-    try:
-        ret = subprocess.run(cmd, cwd=WorkingDir)
-        status = ret.returncode
-        # 如果需要查看输出： ret.stdout, ret.stderr
-    except Exception as e:
-        # 如果出现异常，比如命令行执行错误
-        print(f"[ERROR] SIMPACK仿真调用出现异常: {e}")
-        return 0.1
-    
-    # =========== 5. 分析返回值 ===========
+    status = run_simpack_cmd(cmd, WorkingDir, timeout_seconds = 10 * 60) # 10 * 60
     if status != 0:
-        # 仿真失败
         print(f"[ERROR] SIMPACK仿真失败，命令返回码: {status}")
-        return 0.1  # 不稳定（视为仿真错误）
+        return 0.1
     else:
         # 仿真成功, 继续后处理 -> 读取最大横移量
         maxLatY = MaxLatY_idx(WorkingDir, tag, idx)
-
+        
         # 与阈值比较
         if abs(maxLatY) >= UnstableThreshold:
             return 0.2  # 表示失稳

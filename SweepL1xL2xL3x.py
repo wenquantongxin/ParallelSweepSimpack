@@ -23,35 +23,6 @@ from FindCrticalVelocity import (HalfSearch_CrticalVelocity)
 from STRPerf import (STRPerf_idx)
 from CRVPerf import (CRVPerf_idx)
 
-# 并行任务函数
-def parallel_worker(args):
-    """
-    顶层作用域定义的并行任务函数，避免pickle错误。
-    
-    args 是一个元组，包含：
-        (col_idx_in_batch, start_idx, WorkingDir, X_vars, tag, StartVel, EndVel, N_depth)
-    我们在函数中解包后执行 HalfSearch_CrticalVelocity。
-    返回 (col_idx_in_batch, cVel)，外部可由此了解各列的结果
-    """
-    (col_idx_in_batch, start_idx, WorkingDir, X_vars, tag, StartVel, EndVel, N_depth) = args
-    
-    # 实际上的全局列索引
-    actual_idx = start_idx + col_idx_in_batch
-
-    # 修改点 0：并行任务 N
-    # 并行任务 1：调用半搜索函数，返回临界速度
-    CrticalVelocity = HalfSearch_CrticalVelocity(WorkingDir, X_vars, tag, actual_idx, StartVel, EndVel, N_depth)
-    time.sleep(1)
-    # print("[INFO] 测试，临时跳过临界速度计算")  # CrticalVelocity = 666.66
-    # 并行任务 2：调用曲线计算模型，返回曲线磨耗数、横移量
-    SumWearNumber_RigidCRV300m_CRV, maxLatDisp_RigidCRV300m_CRV, SumWearNumber_IRWCRV300m_CRV, maxLatDisp_IRWCRV300m_CRV = CRVPerf_idx(WorkingDir, X_vars, tag, actual_idx)
-    time.sleep(1)
-    # 并行任务 3：调用典型 AAR5 直线计算模型 性能评估，返回Sperling指标
-    SperlingY_AAR5, SperlingZ_AAR5 = STRPerf_idx(WorkingDir, X_vars, tag, actual_idx)
-    time.sleep(1)
-    # 返回并行计算该 idx 的结果组向量
-    return (col_idx_in_batch, CrticalVelocity, SumWearNumber_RigidCRV300m_CRV, maxLatDisp_RigidCRV300m_CRV, SumWearNumber_IRWCRV300m_CRV, maxLatDisp_IRWCRV300m_CRV, SperlingY_AAR5, SperlingZ_AAR5)
-
 # 做三维图，显示 临界速度与 L1、L2 的关系
 def ShowMeshgrid():
     CriticalVel = np.load("myCriticalVel.npy") 
@@ -84,6 +55,35 @@ def ShowMeshgrid():
     ax.set_zlabel("Critical Velocity (m/s)")
     fig.colorbar(surf, shrink=0.5)
     plt.show()
+    
+# 并行任务函数
+def parallel_worker(args):
+    """
+    顶层作用域定义的并行任务函数，避免pickle错误。
+    
+    args 是一个元组，包含：
+        (col_idx_in_batch, start_idx, WorkingDir, X_vars, tag, StartVel, EndVel, N_depth)
+    我们在函数中解包后执行 HalfSearch_CrticalVelocity。
+    返回 (col_idx_in_batch, cVel)，外部可由此了解各列的结果
+    """
+    (col_idx_in_batch, start_idx, WorkingDir, X_vars, tag, StartVel, EndVel, N_depth) = args
+    
+    # 实际上的全局列索引
+    actual_idx = start_idx + col_idx_in_batch
+
+    # 修改点 0：并行任务 N
+    # 并行任务 1：调用半搜索函数，返回临界速度
+    CrticalVelocity = HalfSearch_CrticalVelocity(WorkingDir, X_vars, tag, actual_idx, StartVel, EndVel, N_depth)
+    time.sleep(1)
+    # print("[INFO] 测试，临时跳过临界速度计算")  # CrticalVelocity = 666.66
+    # 并行任务 2：调用曲线计算模型，返回曲线磨耗数、横移量
+    SumWearNumber_RigidCRV300m_CRV, maxLatDisp_RigidCRV300m_CRV, SumWearNumber_IRWCRV300m_CRV, maxLatDisp_IRWCRV300m_CRV = CRVPerf_idx(WorkingDir, X_vars, tag, actual_idx)
+    time.sleep(1)
+    # 并行任务 3：调用典型 AAR5 直线计算模型 性能评估，返回Sperling指标
+    SperlingY_AAR5, SperlingZ_AAR5 = STRPerf_idx(WorkingDir, X_vars, tag, actual_idx)
+    time.sleep(1)
+    # 返回并行计算该 idx 的结果组向量
+    return (col_idx_in_batch, CrticalVelocity, SumWearNumber_RigidCRV300m_CRV, maxLatDisp_RigidCRV300m_CRV, SumWearNumber_IRWCRV300m_CRV, maxLatDisp_IRWCRV300m_CRV, SperlingY_AAR5, SperlingZ_AAR5)
 
 # 主函数
 def main():
@@ -94,7 +94,7 @@ def main():
     # 工作目录路径定义
     WorkingDir = r"F:\ResearchMainStream\0.ResearchBySection\C.动力学模型\参数优化\参数优化实现\并行化直曲线运行综合评价"
     # 实验标识符
-    tag="ALL"  
+    tag="0126C"  
     
     # 修改点 2
     # 二分法速度上下限、二分深度
@@ -111,13 +111,13 @@ def main():
     # 修改点 3
     # Lx1_sweep = np.arange(0, 0.64 + 0.001, 0.32)  
     # Lx2_sweep = np.arange(0, 0.64 + 0.001, 0.32)  
-    # Lx3_sweep = np.arange(-0.1, 0.1 + 0.001, 0.1) # 参数组合{0,0,-0.1} 模型在 118.06 m/s 不稳定，可能刚开始运行会报错
-    # Lx1_sweep = 0 : 0.04 : 0.64;   % 17 个点
+    # Lx3_sweep = np.arange(-0.6, 0.40 + 0.001, 0.1) # 参数组合{0,0,-0.1} 模型在 118.06 m/s 不稳定，可能刚开始运行会报错
+    # Lx1_sweep = 0 : 0.04 : 0.64;   % 17 个点 （MATLAB参考代码）
     # Lx2_sweep = 0 : 0.04 : 0.60;   % 16 个点
     # Lx3_sweep = -0.6 : 0.1 : 0.4;  % 11 个点
     Lx1_sweep = np.arange(0, 0.64 + 0.001, 0.04)  
     Lx2_sweep = np.arange(0, 0.60 + 0.001, 0.04)  
-    Lx3_sweep = np.arange(0, 0.05, 0.05) 
+    Lx3_sweep = np.arange(-0.6, 0.40 + 0.001, 0.1) 
 
     Lx123_combinations = list(itertools.product(Lx1_sweep, Lx2_sweep, Lx3_sweep))
     X_vars_columns = []
@@ -218,9 +218,9 @@ if __name__ == "__main__":
 命令行调用：
 
     启动 pypack 环境的命令行
-    F:  切换盘符
-    cd F:\ResearchMainStream\0.ResearchBySection\C.动力学模型\参数优化\参数优化实现\并行化直曲线运行综合评价
-    python SweepL1xL2xL3x.py 执行本程序
+    F:  # 切换盘符                                                                                                             
+    cd F:\ResearchMainStream\0.ResearchBySection\C.动力学模型\参数优化\参数优化实现\并行化直曲线运行综合评价                        
+    python SweepL1xL2xL3x.py # 执行本程序                                                                        
     
 环境安装：
     conda install pytorch torchvision torchaudio pytorch-cuda=12.1 -c pytorch -c nvidia

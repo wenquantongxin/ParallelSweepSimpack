@@ -7,7 +7,7 @@ import time
 import numpy as np
 import pandas as pd
 import subprocess
-from FindCrticalVelocity import (Import_Subvars_To_File_idx)
+from FindCrticalVelocity import (Import_Subvars_To_File_idx, run_simpack_cmd)
 
 # 读取指定 .dat 数据
 # 返回从数据文件中获得的 Sperling 指标
@@ -64,16 +64,25 @@ def STRSperling_idx(
         out_result_full_prefix  # 输出前缀
     ]
     
-    try:
-        ret = subprocess.run(cmd, cwd=work_dir, check=True)
-    except subprocess.CalledProcessError as e:
-        # 外部命令返回非 0
-        print(f"[ERROR] simpack-post命令出错，返回码={e.returncode}")
-        return (-99.0231, -99.0232) 
-    except Exception as e:
-        # 其他异常，如找不到可执行文件、工作目录不存在等
-        print(f"[ERROR] 无法执行simpack-post命令，异常信息：{e}")
-        return (-99.0241, -99.0242) 
+    # 调用函数执行
+    result = run_simpack_cmd(cmd, work_dir, timeout_seconds = 10 * 60)
+    if result != 0:
+        print(f"运行失败，错误码：{result}")
+        return (-99.0231, -99.0232)
+    else:
+        print(f"成功执行 slv 或 qs 脚本调用")
+        print("命令执行完成")
+        
+    # try:
+    #     ret = subprocess.run(cmd, cwd=work_dir, check=True)
+    # except subprocess.CalledProcessError as e:
+    #     # 外部命令返回非 0
+    #     print(f"[ERROR] simpack-post命令出错，返回码={e.returncode}")
+    #     return (-99.0231, -99.0232) 
+    # except Exception as e:
+    #     # 其他异常，如找不到可执行文件、工作目录不存在等
+    #     print(f"[ERROR] 无法执行simpack-post命令，异常信息：{e}")
+    #     return (-99.0241, -99.0242) 
     time.sleep(2)
     
     # 2) 拼出最终 .dat 文件所在路径
@@ -162,17 +171,27 @@ def STRPerf_idx(WorkingDir, X_vars, tag, idx):
     # 构建运行命令
     # 例如 "simpack-slv.exe" + spck_path
     cmd = ["simpack-slv.exe", "--silent", spck_path]
-
-    # 执行命令
-    try:
-        ret = subprocess.run(cmd, cwd=WorkingDir)
-        status = ret.returncode
-        # 如果需要查看输出： ret.stdout, ret.stderr
-    except Exception as e:
-        # 如果出现异常，比如命令行执行错误
-        print(f"[ERROR] SIMPACK仿真调用出现异常: {e}")
-        return (-99.31, -99.32) # 故障标记返回值
+    
+    result = run_simpack_cmd(cmd, WorkingDir, timeout_seconds = 10 * 60)
+    if result != 0:
+        print(f"运行失败，错误码：{result}")
+        return (-99.31, -99.32)
+    else:
+        print(f"成功执行 qs 脚本调用")
+        print("命令执行完成")
+        
     time.sleep(1)
+
+    # # 执行命令
+    # try:
+    #     ret = subprocess.run(cmd, cwd=WorkingDir)
+    #     status = ret.returncode
+    #     # 如果需要查看输出： ret.stdout, ret.stderr
+    # except Exception as e:
+    #     # 如果出现异常，比如命令行执行错误
+    #     print(f"[ERROR] SIMPACK仿真调用出现异常: {e}")
+    #     return (-99.31, -99.32) # 故障标记返回值
+    
     
     # =========== 4. 分析返回值 ===========    
     # 刚性轮对后处理结果导出与分析
