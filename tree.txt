@@ -1,0 +1,327 @@
+卷 业务卷 的文件夹 PATH 列表
+卷序列号为 A493-9E1C
+F:.
+│  config_opt.xlsx
+│  CRVPerf.py
+│  FindCrticalVelocity.py
+│  PrepareBatchFiles.py
+│  Result_IRWCRV300m.spf
+│  Result_RigidCriticalVel.spf
+│  Result_RigidCRV300m.spf
+│  Result_RigidSTR80kmph.spf
+│  SbrExport_SPCKResult.qs
+│  STRPerf.py
+│  subvars_OptBase.subvar
+│  SweepL1xL2xL3x.py
+│  tree.txt
+│  Untitled-1.ipynb
+│  Vehicle4WDB_IRWCRV300m_OptBase.spck
+│  Vehicle4WDB_RigidCriticalVel_OptBase.spck
+│  Vehicle4WDB_RigidCRV300m_OptBase.spck
+│  Vehicle4WDB_RigidSTR80kmph_OptBase.spck
+│  
+├─BatchTmp
+│  │  DatResult_RigidCriticalVel_ALL_120.dat
+│  │  DatResult_RigidCriticalVel_ALL_121.dat
+│  │  DatResult_RigidCriticalVel_ALL_122.dat
+│  │  DatResult_RigidCriticalVel_ALL_123.dat
+│  │  DatResult_RigidCriticalVel_ALL_124.dat
+│  │  DatResult_RigidCriticalVel_ALL_125.dat
+│  │  DatResult_RigidCriticalVel_ALL_126.dat
+│  │  DatResult_RigidCriticalVel_ALL_127.dat
+│  │  DatResult_RigidCriticalVel_ALL_128.dat
+│  │  DatResult_RigidCriticalVel_ALL_129.dat
+│  │  Result_IRWCRV300m_Opt_ALL_120.spf
+│  │  Result_IRWCRV300m_Opt_ALL_121.spf
+│  │  Result_IRWCRV300m_Opt_ALL_122.spf
+│  │  Result_IRWCRV300m_Opt_ALL_123.spf
+│  │  Result_IRWCRV300m_Opt_ALL_124.spf
+│  │  Result_IRWCRV300m_Opt_ALL_125.spf
+│  │  Result_IRWCRV300m_Opt_ALL_126.spf
+│  │  Result_IRWCRV300m_Opt_ALL_127.spf
+│  │  Result_IRWCRV300m_Opt_ALL_128.spf
+│  │  Result_IRWCRV300m_Opt_ALL_129.spf
+│  │  Result_RigidCriticalVel_Opt_ALL_120.spf
+│  │  Result_RigidCriticalVel_Opt_ALL_121.spf
+│  │  Result_RigidCriticalVel_Opt_ALL_122.spf
+│  │  Result_RigidCriticalVel_Opt_ALL_123.spf
+│  │  Result_RigidCriticalVel_Opt_ALL_124.spf
+│  │  Result_RigidCriticalVel_Opt_ALL_125.spf
+│  │  Result_RigidCriticalVel_Opt_ALL_126.spf
+│  │  Result_RigidCriticalVel_Opt_ALL_127.spf
+│  │  Result_RigidCriticalVel_Opt_ALL_128.spf
+│  │  Result_RigidCriticalVel_Opt_ALL_129.spf
+│  │  Result_RigidCRV300m_Opt_ALL_120.spf
+│  │  Result_RigidCRV300m_Opt_ALL_121.spf
+│  │  Result_RigidCRV300m_Opt_ALL_122.spf
+│  │  Result_RigidCRV300m_Opt_ALL_123.spf
+│  │  Result_RigidCRV300m_Opt_ALL_124.spf
+│  │  Result_RigidCRV300m_Opt_ALL_125.spf
+│  │  Result_RigidCRV300m_Opt_ALL_126.spf
+│  │  Result_RigidCRV300m_Opt_ALL_127.spf
+│  │  Result_RigidCRV300m_Opt_ALL_128.spf
+│  │  Result_RigidCRV300m_Opt_ALL_129.spf
+│  │  Result_RigidSTR80kmph_Opt_ALL_120.spf
+│  │  Result_RigidSTR80kmph_Opt_ALL_121.spf
+│  │  Result_RigidSTR80kmph_Opt_ALL_122.spf
+│  │  Result_RigidSTR80kmph_Opt_ALL_123.spf
+│  │  Result_RigidSTR80kmph_Opt_ALL_124.spf
+│  │  Result_RigidSTR80kmph_Opt_ALL_125.spf
+│  │  Result_RigidSTR80kmph_Opt_ALL_126.spf
+│  │  Result_RigidSTR80kmph_Opt_ALL_127.spf
+│  │  Result_RigidSTR80kmph_Opt_ALL_128.spf
+│  │  Result_RigidSTR80kmph_Opt_ALL_129.spf
+│  │  subvars_Opt_ALL_120.subvar
+│  │  subvars_Opt_ALL_121.subvar
+│  │  subvars_Opt_ALL_122.subvar
+│  │  subvars_Opt_ALL_123.subvar
+│  │  subvars_Opt_ALL_124.subvar
+│  │  subvars_Opt_ALL_125.subvar
+│  │  subvars_Opt_ALL_126.subvar
+│  │  subvars_Opt_ALL_127.subvar
+│  │  subvars_Opt_ALL_128.subvar
+│  │  subvars_Opt_ALL_129.subvar
+│  │  Vehicle4WDB_IRWCRV300m_Opt_ALL_120.spck
+│  │  Vehicle4WDB_IRWCRV300m_Opt_ALL_121.spck
+│  │  Vehicle4WDB_IRWCRV300m_Opt_ALL_122.spck
+│  │  Vehicle4WDB_IRWCRV300m_Opt_ALL_123.spck
+│  │  Vehicle4WDB_IRWCRV300m_Opt_ALL_124.spck
+│  │  Vehicle4WDB_IRWCRV300m_Opt_ALL_125.spck
+│  │  Vehicle4WDB_IRWCRV300m_Opt_ALL_126.spck
+│  │  Vehicle4WDB_IRWCRV300m_Opt_ALL_127.spck
+│  │  Vehicle4WDB_IRWCRV300m_Opt_ALL_128.spck
+│  │  Vehicle4WDB_IRWCRV300m_Opt_ALL_129.spck
+│  │  Vehicle4WDB_RigidCriticalVel_Opt_ALL_120.spck
+│  │  Vehicle4WDB_RigidCriticalVel_Opt_ALL_121.spck
+│  │  Vehicle4WDB_RigidCriticalVel_Opt_ALL_122.spck
+│  │  Vehicle4WDB_RigidCriticalVel_Opt_ALL_123.spck
+│  │  Vehicle4WDB_RigidCriticalVel_Opt_ALL_124.spck
+│  │  Vehicle4WDB_RigidCriticalVel_Opt_ALL_125.spck
+│  │  Vehicle4WDB_RigidCriticalVel_Opt_ALL_126.spck
+│  │  Vehicle4WDB_RigidCriticalVel_Opt_ALL_127.spck
+│  │  Vehicle4WDB_RigidCriticalVel_Opt_ALL_128.spck
+│  │  Vehicle4WDB_RigidCriticalVel_Opt_ALL_129.spck
+│  │  Vehicle4WDB_RigidCRV300m_Opt_ALL_120.spck
+│  │  Vehicle4WDB_RigidCRV300m_Opt_ALL_121.spck
+│  │  Vehicle4WDB_RigidCRV300m_Opt_ALL_122.spck
+│  │  Vehicle4WDB_RigidCRV300m_Opt_ALL_123.spck
+│  │  Vehicle4WDB_RigidCRV300m_Opt_ALL_124.spck
+│  │  Vehicle4WDB_RigidCRV300m_Opt_ALL_125.spck
+│  │  Vehicle4WDB_RigidCRV300m_Opt_ALL_126.spck
+│  │  Vehicle4WDB_RigidCRV300m_Opt_ALL_127.spck
+│  │  Vehicle4WDB_RigidCRV300m_Opt_ALL_128.spck
+│  │  Vehicle4WDB_RigidCRV300m_Opt_ALL_129.spck
+│  │  Vehicle4WDB_RigidSTR80kmph_Opt_ALL_120.spck
+│  │  Vehicle4WDB_RigidSTR80kmph_Opt_ALL_121.spck
+│  │  Vehicle4WDB_RigidSTR80kmph_Opt_ALL_122.spck
+│  │  Vehicle4WDB_RigidSTR80kmph_Opt_ALL_123.spck
+│  │  Vehicle4WDB_RigidSTR80kmph_Opt_ALL_124.spck
+│  │  Vehicle4WDB_RigidSTR80kmph_Opt_ALL_125.spck
+│  │  Vehicle4WDB_RigidSTR80kmph_Opt_ALL_126.spck
+│  │  Vehicle4WDB_RigidSTR80kmph_Opt_ALL_127.spck
+│  │  Vehicle4WDB_RigidSTR80kmph_Opt_ALL_128.spck
+│  │  Vehicle4WDB_RigidSTR80kmph_Opt_ALL_129.spck
+│  │  
+│  ├─Vehicle4WDB_RigidCriticalVel_Opt_ALL_120.output
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_120.intinfo
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_120.licreq.log
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_120.sbr
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_120.sir
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_120.spckst
+│  │      
+│  ├─Vehicle4WDB_RigidCriticalVel_Opt_ALL_121.output
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_121.intinfo
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_121.licreq.log
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_121.sbr
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_121.sir
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_121.spckst
+│  │      
+│  ├─Vehicle4WDB_RigidCriticalVel_Opt_ALL_122.output
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_122.intinfo
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_122.licreq.log
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_122.sbr
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_122.sir
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_122.spckst
+│  │      
+│  ├─Vehicle4WDB_RigidCriticalVel_Opt_ALL_123.output
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_123.intinfo
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_123.licreq.log
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_123.sbr
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_123.sir
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_123.spckst
+│  │      
+│  ├─Vehicle4WDB_RigidCriticalVel_Opt_ALL_124.output
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_124.intinfo
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_124.licreq.log
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_124.sbr
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_124.sir
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_124.spckst
+│  │      
+│  ├─Vehicle4WDB_RigidCriticalVel_Opt_ALL_125.output
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_125.intinfo
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_125.licreq.log
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_125.sbr
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_125.sir
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_125.spckst
+│  │      
+│  ├─Vehicle4WDB_RigidCriticalVel_Opt_ALL_126.output
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_126.intinfo
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_126.licreq.log
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_126.sbr
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_126.sir
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_126.spckst
+│  │      
+│  ├─Vehicle4WDB_RigidCriticalVel_Opt_ALL_127.output
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_127.intinfo
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_127.licreq.log
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_127.sbr
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_127.sir
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_127.spckst
+│  │      
+│  ├─Vehicle4WDB_RigidCriticalVel_Opt_ALL_128.output
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_128.intinfo
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_128.licreq.log
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_128.sbr
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_128.sir
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_128.spckst
+│  │      
+│  ├─Vehicle4WDB_RigidCriticalVel_Opt_ALL_129.output
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_129.intinfo
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_129.licreq.log
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_129.sbr
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_129.sir
+│  │      Vehicle4WDB_RigidCriticalVel_Opt_ALL_129.spckst
+│  │      
+│  ├─Vehicle4WDB_RigidCRV300m_Opt_ALL_120.output
+│  │      Vehicle4WDB_RigidCRV300m_Opt_ALL_120.intinfo
+│  │      Vehicle4WDB_RigidCRV300m_Opt_ALL_120.licreq.log
+│  │      Vehicle4WDB_RigidCRV300m_Opt_ALL_120.sir
+│  │      
+│  ├─Vehicle4WDB_RigidCRV300m_Opt_ALL_121.output
+│  │      Vehicle4WDB_RigidCRV300m_Opt_ALL_121.intinfo
+│  │      Vehicle4WDB_RigidCRV300m_Opt_ALL_121.licreq.log
+│  │      Vehicle4WDB_RigidCRV300m_Opt_ALL_121.sir
+│  │      
+│  ├─Vehicle4WDB_RigidCRV300m_Opt_ALL_122.output
+│  │      Vehicle4WDB_RigidCRV300m_Opt_ALL_122.intinfo
+│  │      Vehicle4WDB_RigidCRV300m_Opt_ALL_122.licreq.log
+│  │      Vehicle4WDB_RigidCRV300m_Opt_ALL_122.sir
+│  │      
+│  ├─Vehicle4WDB_RigidCRV300m_Opt_ALL_123.output
+│  │      Vehicle4WDB_RigidCRV300m_Opt_ALL_123.intinfo
+│  │      Vehicle4WDB_RigidCRV300m_Opt_ALL_123.licreq.log
+│  │      Vehicle4WDB_RigidCRV300m_Opt_ALL_123.sir
+│  │      
+│  ├─Vehicle4WDB_RigidCRV300m_Opt_ALL_124.output
+│  │      Vehicle4WDB_RigidCRV300m_Opt_ALL_124.intinfo
+│  │      Vehicle4WDB_RigidCRV300m_Opt_ALL_124.licreq.log
+│  │      Vehicle4WDB_RigidCRV300m_Opt_ALL_124.sir
+│  │      
+│  ├─Vehicle4WDB_RigidCRV300m_Opt_ALL_125.output
+│  │      Vehicle4WDB_RigidCRV300m_Opt_ALL_125.intinfo
+│  │      Vehicle4WDB_RigidCRV300m_Opt_ALL_125.licreq.log
+│  │      Vehicle4WDB_RigidCRV300m_Opt_ALL_125.sir
+│  │      
+│  ├─Vehicle4WDB_RigidCRV300m_Opt_ALL_126.output
+│  │      Vehicle4WDB_RigidCRV300m_Opt_ALL_126.intinfo
+│  │      Vehicle4WDB_RigidCRV300m_Opt_ALL_126.licreq.log
+│  │      Vehicle4WDB_RigidCRV300m_Opt_ALL_126.sir
+│  │      
+│  └─Vehicle4WDB_RigidCRV300m_Opt_ALL_127.output
+│          Vehicle4WDB_RigidCRV300m_Opt_ALL_127.intinfo
+│          Vehicle4WDB_RigidCRV300m_Opt_ALL_127.licreq.log
+│          Vehicle4WDB_RigidCRV300m_Opt_ALL_127.sir
+│          
+├─ChkPnt
+│      batch_result_ALL_batch0.npy
+│      batch_result_ALL_batch1.npy
+│      batch_result_ALL_batch10.npy
+│      batch_result_ALL_batch11.npy
+│      batch_result_ALL_batch2.npy
+│      batch_result_ALL_batch3.npy
+│      batch_result_ALL_batch4.npy
+│      batch_result_ALL_batch5.npy
+│      batch_result_ALL_batch6.npy
+│      batch_result_ALL_batch7.npy
+│      batch_result_ALL_batch8.npy
+│      batch_result_ALL_batch9.npy
+│      myXvars_ALL.npy
+│      
+├─ref_files
+│  │  Bogie_IRWs_4WDBv3.spck
+│  │  IRW_4WDBv31.spck
+│  │  subvars_FWDBv31-备份.subvar
+│  │  几何模型_STL版本_构架.STL
+│  │  几何模型_STL版本_轴桥.STL
+│  │  
+│  └─Bogie_IRWs_4WDBv3.output
+│          Bogie_IRWs_4WDBv3.licreq.log
+│          
+├─Vehicle4WDB_IRWCRV300m_OptBase.output
+│      Vehicle4WDB_IRWCRV300m_OptBase.intinfo
+│      Vehicle4WDB_IRWCRV300m_OptBase.licreq.log
+│      Vehicle4WDB_IRWCRV300m_OptBase.sbr
+│      Vehicle4WDB_IRWCRV300m_OptBase.sir
+│      Vehicle4WDB_IRWCRV300m_OptBase.spckst
+│      
+├─Vehicle4WDB_RigidCriticalVel_OptBase.output
+│      Result_RigidCriticalVel.spf
+│      Result_RigidCriticalVel.spf.bak
+│      Vehicle4WDB_RigidCriticalVel_OptBase.intinfo
+│      Vehicle4WDB_RigidCriticalVel_OptBase.licreq.log
+│      Vehicle4WDB_RigidCriticalVel_OptBase.sbr
+│      Vehicle4WDB_RigidCriticalVel_OptBase.sir
+│      Vehicle4WDB_RigidCriticalVel_OptBase.spckst
+│      
+├─Vehicle4WDB_RigidCRV300m_OptBase.output
+│      Vehicle4WDB_RigidCRV300m_OptBase.intinfo
+│      Vehicle4WDB_RigidCRV300m_OptBase.licreq.log
+│      Vehicle4WDB_RigidCRV300m_OptBase.sbr
+│      Vehicle4WDB_RigidCRV300m_OptBase.sir
+│      Vehicle4WDB_RigidCRV300m_OptBase.spckst
+│      
+├─Vehicle4WDB_RigidSTR80kmph_OptBase.output
+│      Result_RigidSTR80kmph.spf
+│      Result_RigidSTR80kmph.spf.bak
+│      Vehicle4WDB_RigidSTR80kmph_OptBase.intinfo
+│      Vehicle4WDB_RigidSTR80kmph_OptBase.licreq.log
+│      Vehicle4WDB_RigidSTR80kmph_OptBase.sbr
+│      Vehicle4WDB_RigidSTR80kmph_OptBase.sir
+│      Vehicle4WDB_RigidSTR80kmph_OptBase.spckst
+│      
+├─__pycache__
+│      CRVPerf.cpython-310.pyc
+│      FindCrticalVelocity.cpython-310.pyc
+│      PrepareBatchFiles.cpython-310.pyc
+│      STRPerf.cpython-310.pyc
+│      
+├─备份
+│  └─0125凌晨未出错前checkpoint
+│          batch_result_ALL_batch0.npy
+│          batch_result_ALL_batch1.npy
+│          batch_result_ALL_batch10.npy
+│          batch_result_ALL_batch11.npy
+│          batch_result_ALL_batch12.npy
+│          batch_result_ALL_batch2.npy
+│          batch_result_ALL_batch3.npy
+│          batch_result_ALL_batch4.npy
+│          batch_result_ALL_batch5.npy
+│          batch_result_ALL_batch6.npy
+│          batch_result_ALL_batch7.npy
+│          batch_result_ALL_batch8.npy
+│          batch_result_ALL_batch9.npy
+│          myXvars_ALL.npy
+│          X(2).csv
+│          Y.csv
+│          
+└─结果分析组
+    ├─L123网格扫描结果
+    │      Analysis_L1L2L3_Sweep_From_Python.mlx
+    │      myCriticalVel_123.npy
+    │      myXvars_123.npy
+    │      
+    └─SPF文件
+            Result_RigidCRV300m_Opt.spf
+            Result_RigidCRV300m_Opt.spf.bak
+            Result_RigidSTR80kmph.spf
+            
