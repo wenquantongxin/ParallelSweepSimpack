@@ -75,13 +75,17 @@ def parallel_worker(args):
     # 并行任务 1：调用半搜索函数，返回临界速度
     CrticalVelocity = HalfSearch_CrticalVelocity(WorkingDir, X_vars, tag, actual_idx, StartVel, EndVel, N_depth)
     time.sleep(1)
-    # print("[INFO] 测试，临时跳过临界速度计算")  # CrticalVelocity = 666.66
+    # print("[INFO] 测试，临时跳过临界速度计算")  
+    # CrticalVelocity = 666.66
+    
     # 并行任务 2：调用曲线计算模型，返回曲线磨耗数、横移量
     SumWearNumber_RigidCRV300m_CRV, maxLatDisp_RigidCRV300m_CRV, SumWearNumber_IRWCRV300m_CRV, maxLatDisp_IRWCRV300m_CRV = CRVPerf_idx(WorkingDir, X_vars, tag, actual_idx)
     time.sleep(1)
+    
     # 并行任务 3：调用典型 AAR5 直线计算模型 性能评估，返回Sperling指标
     SperlingY_AAR5, SperlingZ_AAR5 = STRPerf_idx(WorkingDir, X_vars, tag, actual_idx)
     time.sleep(1)
+    
     # 返回并行计算该 idx 的结果组向量
     return (col_idx_in_batch, CrticalVelocity, SumWearNumber_RigidCRV300m_CRV, maxLatDisp_RigidCRV300m_CRV, SumWearNumber_IRWCRV300m_CRV, maxLatDisp_IRWCRV300m_CRV, SperlingY_AAR5, SperlingZ_AAR5)
 

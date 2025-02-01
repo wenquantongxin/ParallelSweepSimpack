@@ -71,7 +71,7 @@ def STRSperling_idx(
         return (-99.0231, -99.0232)
     else:
         print(f"成功执行 slv 或 qs 脚本调用")
-        print("命令执行完成")
+        # print("命令执行完成")
         
     # try:
     #     ret = subprocess.run(cmd, cwd=work_dir, check=True)
@@ -178,7 +178,7 @@ def STRPerf_idx(WorkingDir, X_vars, tag, idx):
         return (-99.31, -99.32)
     else:
         print(f"成功执行 qs 脚本调用")
-        print("命令执行完成")
+        # print("命令执行完成")
         
     time.sleep(1)
 

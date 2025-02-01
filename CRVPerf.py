@@ -221,7 +221,7 @@ def CRVPerf_idx(WorkingDir, X_vars, tag, idx):
         return (-99.11, -99.12, -99.13, -99.14) # 故障标记返回值
     else:
         print(f"成功执行 qs 脚本调用")
-        print("命令执行完成")
+        # print("命令执行完成")
     time.sleep(1)  
         
     # # 执行命令
@@ -248,12 +248,14 @@ def CRVPerf_idx(WorkingDir, X_vars, tag, idx):
     
     # 调用函数执行
     result = run_simpack_cmd(cmd, WorkingDir, timeout_seconds = 10 * 60)
+    # print(f"[INFO] 跳过 IRW 模型测试"); result = 0
+ 
     if result != 0:
         print(f"运行失败，错误码：{result}")
         return (-99.21, -99.22, -99.23, -99.24)
     else:
         print(f"成功执行 qs 脚本调用")
-        print("命令执行完成")
+        # print("命令执行完成")
 
     # 执行命令
     # try:
@@ -273,7 +275,10 @@ def CRVPerf_idx(WorkingDir, X_vars, tag, idx):
     # 独立轮对后处理结果导出与分析
     filemidname = r"IRWCRV300m"
     SumWearNumber_IRWCRV300m_CRV, maxLatDisp_IRWCRV300m_CRV = CRVCal_idx(WorkingDir, filemidname, tag, idx)
-
+    
+    # # print(f"[INFO] IRW 模型输出结果，使用123代替");
+    # SumWearNumber_IRWCRV300m_CRV= 123 
+    # maxLatDisp_IRWCRV300m_CRV = 123
     # WearNumber_CRV = 0.0
     # LatDispMax_CRV = 0.0
     
