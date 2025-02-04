@@ -62,5 +62,5 @@ subvar.str (                        $_Lx1                         ) = '0.00'    
 
 subvar.str (                        $_Lx2                         ) = '0.08'                   ! Definition
 
-subvar.str (                        $_Lx3                         ) = '0'                  ! Definition
+subvar.str (                        $_Lx3                         ) = '0.4'                  ! Definition
 
