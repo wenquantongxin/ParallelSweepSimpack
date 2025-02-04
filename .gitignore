@@ -1,7 +1,7 @@
 ref_files/
 BatchTmp/
 ChkPnt/
-结果分析组/**
+/结果分析组/**
 Vehicle4WDB_IRWCRV300m_OptBase.output/**
 Vehicle4WDB_RigidCriticalVel_OptBase.output/**
 Vehicle4WDB_RigidCRV300m_OptBase.output/**
@@ -13,3 +13,8 @@ __pycache__/**
 *.ini
 *.txt
 *.vscode
+*.pdf
+*.mat
+*.zip
+*.pkl
+*.bak
