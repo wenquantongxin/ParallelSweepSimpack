@@ -864,7 +864,7 @@ def opt_parallel_worker(args):
     # 实际上的全局列索引
     actual_idx = start_idx + col_idx_in_batch
 
-    # 修改点 0：并行任务 N
+    # 并行任务组
     # 并行任务 1：调用半搜索函数，返回临界速度
     CrticalVelocity = opt_HalfSearchCrticalVelocity(WorkingDir, X_vars, tag, actual_idx, StartVel, EndVel, N_depth)
     time.sleep(1)
@@ -977,22 +977,28 @@ def opt_XEvalPrl(X, WorkingDir, tag, StartVel, EndVel, N_depth, BatchSize_parall
     
     return F
 
-
+# 保存最终结果，包括所有历史迭代优化的记录
 def SaveItersResult(res, filename):
+    """
+    将 pymoo 'Result' 对象的部分信息写入 npz 文件:
+      - X, F, G, CV, history
+
+    注意:
+      - 不包含 'feasible' 等其他属性, 以避免某些场景下报错.
+      - 'history' 中包含每一代的快照, 若问题规模很大, 文件也可能较大.
+    """
     data_dict = {
-        "X"       : res.X,
-        "F"       : res.F,
-        "G"       : res.G,
-        "CV"      : res.CV,
-        "feasible": res.feasible,
-        "history" : res.history  # 如果不需要可不放
+        "X"      : res.X,         # 非支配解(多目标)或最优解(单目标)
+        "F"      : res.F,         # 对应的目标值
+        "G"      : res.G,         # 不等式约束(若无则可能是 None)
+        "CV"     : res.CV,        # 约束违反度 (Constraint Violation), 同样可能 None
+        "history": res.history    # 如果 save_history=True, 则这里有每代历史
     }
-    # np.savez压缩保存
+    # 保存为 npz
     np.savez(filename, **data_dict)
-    
-################################################################
-# 3) 在 Problem 中使用以上并行评估
-################################################################
+    print(f"[SaveItersResult] 已将 X, F, G, CV, history 保存到 {filename}.")
+
+# callback 函数回调，保存迭代过程中的 X, F, G
 def my_callback(algorithm, working_dir=None, **kwargs):
     """
     在每一代结束后被调用:
@@ -1003,28 +1009,27 @@ def my_callback(algorithm, working_dir=None, **kwargs):
     这里将当前种群的 X, F, G 等保存到 working_dir/ChkPnt 下，
     并且提取非支配解 (nd_X, nd_F, nd_G) 另外保存.
     """
+    
+    global history_F # 全局列表，用于存储历代种群目标值
 
-    # 1) 获取当前代数
     n_gen = algorithm.n_gen
-
-    # 2) 获取当前种群(已评估)的解、目标、约束
     pop = algorithm.pop
     X = pop.get("X")  # shape=(pop_size, n_var)
     F = pop.get("F")  # shape=(pop_size, n_obj)
     G = pop.get("G")  # shape=(pop_size, n_ieq_constr) 或 None
-
-    # 如未指定 working_dir, 使用默认
+    history_F.append(F.copy())
+    print(f"[Callback] 第 {n_gen} 代, F_gen.shape = {F.shape}")
+    
+    # 准备 res 代际结果的目录
     if working_dir is None:
-        working_dir = r"F:\ResearchMainStream\0.ResearchBySection\C.动力学模型\参数优化\参数优化实现\并行化直曲线运行综合评价"
-
-    # 准备输出路径
+        working_dir = os.getcwd() 
     chkpt_dir = os.path.join(working_dir, "ChkPnt")
     if not os.path.exists(chkpt_dir):
         os.makedirs(chkpt_dir, exist_ok=True)
 
     # 以 generation_{n_gen}.npz 形式保存所有解
     filename_all = os.path.join(chkpt_dir, f"generation_{n_gen}.npz")
-    print(f"[Callback] 正在保存第 {n_gen} 代的所有种群到 {filename_all} ...")
+    print(f"[Callback] 正在保存第 {n_gen} 代的所有种群到 {filename_all}")
     np.savez(filename_all, X=X, F=F, G=G)
 
     # ============== 提取当代非支配解并单独保存 ==============
@@ -1039,11 +1044,10 @@ def my_callback(algorithm, working_dir=None, **kwargs):
 
     print(f"[Callback] 第 {n_gen} 代数据保存完毕, 种群规模 = {X.shape[0]}, 非支配解数量 = {len(nd_front)}")
 
-
 class MyBatchProblem(Problem):
     def __init__(self,
                  batch_size=5,
-                 WorkingDir=r"F:\ResearchMainStream\0.ResearchBySection\C.动力学模型\参数优化\参数优化实现\并行化直曲线运行综合评价",
+                 WorkingDir=os.getcwd(),
                  tag="demo",
                  StartVel = 100/3.6,
                  EndVel = 900/3.6,
@@ -1102,23 +1106,31 @@ class MyBatchProblem(Problem):
         out["F"] = F
         out["G"] = G
 
-
 ################################################################
 # 4) 测试入口
 ################################################################
 def main():
+    
+    # 历史适应度函数 F
+    global history_F
+    history_F = []
+    
     # 定义问题
-    problem = MyBatchProblem( batch_size = 12)
-
+    problem = MyBatchProblem( batch_size = 3)
     # 定义算法 (多目标 NSGA2)
-    algorithm = NSGA2( pop_size = 60 )
-
+    algorithm = NSGA2( pop_size = 5 )
     # 终止条件
-    termination = get_termination("n_gen", 10)  # 遗传迭代数
-
+    termination = get_termination("n_gen", 3)  # 遗传迭代数，仅做测试实验
     # 运行优化
-    res = minimize(problem, algorithm, termination, seed=1, verbose=True, save_history=True, callback=my_callback)  # <---- 传入回调
-
+    res = minimize(
+        problem, 
+        algorithm, 
+        termination, 
+        seed=1, 
+        verbose=True, 
+        save_history=True, 
+        callback=my_callback)  # 传入回调函数
+    
     # 查看结果
     print("\n==== 优化完成 ====")
     print("非支配解数量:", len(res.X))
@@ -1127,30 +1139,25 @@ def main():
     print("约束G[0]:", res.G[0], "(注: G[i] <= 0表示可行)")
     
     # 结果保存(2种方法，csv 和 npz)
-    # 假设 res 是 minimize(...) 的结果
     nd_X = res.X 
     nd_F = res.F
-    
-    # 写入 CSV 文件
+
     np.savetxt("final_solutions.csv",
             np.hstack([nd_X, nd_F]),
             delimiter=",",
             comments="",  # 去掉注释符号
             fmt="%.6f")   # 控制输出精度
-    
     np.savez("final_solutions.npz", X=nd_X, F=nd_F)
     
-    SaveItersResult(res, "res_history.npz")
-
-    # # 2) 在后续（同一机器、相同Python环境）想离线查看时，加载:
-    # with open("res.pkl", "rb") as f:
-    #     res_loaded = pickle.load(f)
-
-    # # 现在 res_loaded 就是之前保存的 res 对象，可以直接访问:
-    # # print(res_loaded.X)
-    # # print(res_loaded.F)
-    # # 以及查看 res_loaded.history, res_loaded.algorithm 等
-
+    # res 的结果保存
+    #  `res.X, res.F` => 最终解；history_F => (list of arrays)
+    np.savez(
+        "res_history.npz",
+        final_X=res.X,
+        final_F=res.F,
+        history_F=np.array(history_F, dtype=object) # history_F 是一个列表, 其中每代都是一个 (pop_size, n_obj) 的数组
+    )
+    print("[Main] 已保存 final_X, final_F, 以及各代 F_gen 到 res_history.npz.")
 
 if __name__ == "__main__":
     main()
@@ -1159,7 +1166,7 @@ if __name__ == "__main__":
     命令行调用：
     
     F:  # 切换盘符                                                                                                             
-    cd F:\ResearchMainStream\0.ResearchBySection\C.动力学模型\参数优化\参数优化实现\并行化直曲线运行综合评价                        
+    cd F:\ResearchMainStream\0.ResearchBySection\C.动力学模型\参数优化\参数优化实现\ParallelSweepSimpack                        
     python Opt_12vars_to_3dims.py # 执行本程序                    
     
     """    
@@ -1170,25 +1177,6 @@ if __name__ == "__main__":
     PopulationSize 功能：设置种群大小（即每一代的个体数量）。如果变量数 ≤ 5，默认 50；否则默认 200。
     
     附录B: 在后处理时，查看 Pareto Front 分布，详见 Analysis_FindOpts.ipynb
-    %matplotlib widget
-    import numpy as np
-    import matplotlib.pyplot as plt
-    from mpl_toolkits.mplot3d import Axes3D
-    data = np.loadtxt("final_solutions.csv", delimiter=",")
-    # 假设前 12 列是决策变量 X，后 3 列是目标值 F。
-    X = data[:, :12]   # (N, 12)
-    F = data[:, 12:]   # (N, 3)
-    f0 = F[:, 0]
-    f1 = F[:, 1]
-    f2 = F[:, 2]
-    fig = plt.figure()
-    ax = fig.add_subplot(111, projection='3d')
-    ax.scatter(f0, f1, f2, c='b', marker='o')
-    ax.set_xlabel("Objective 1 (f0)")
-    ax.set_ylabel("Objective 2 (f1)")
-    ax.set_zlabel("Objective 3 (f2)")
-    plt.title("Pareto Front in 3D")
-    plt.show()
 
     """
     
