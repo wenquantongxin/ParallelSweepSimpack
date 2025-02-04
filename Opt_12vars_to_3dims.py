@@ -1,6 +1,5 @@
 # -*- coding: gbk -*-
 
-
 import numpy as np
 import os
 import math
@@ -1166,47 +1165,31 @@ if __name__ == "__main__":
     """    
     
     """
-    MATLAB GA 函数对应设置
-    
+    附录A: MATLAB GA 函数对应设置
     MaxGenerations (Generations) 功能：算法的最大迭代数。默认 ga 是 100×变量数，gamultiobj 是 200×变量数。
-    
     PopulationSize 功能：设置种群大小（即每一代的个体数量）。如果变量数 ≤ 5，默认 50；否则默认 200。
     
-    
-    在后处理时，查看 Pareto Front 分布
-    
+    附录B: 在后处理时，查看 Pareto Front 分布，详见 Analysis_FindOpts.ipynb
     %matplotlib widget
-
     import numpy as np
-
+    import matplotlib.pyplot as plt
+    from mpl_toolkits.mplot3d import Axes3D
     data = np.loadtxt("final_solutions.csv", delimiter=",")
-
-    # data.shape = (N, 15)
     # 假设前 12 列是决策变量 X，后 3 列是目标值 F。
     X = data[:, :12]   # (N, 12)
     F = data[:, 12:]   # (N, 3)
-
-    import matplotlib.pyplot as plt
-    from mpl_toolkits.mplot3d import Axes3D
-
-    # 这里假设 F 里的三列已经是我们要画的数值(若需反转/还原，请在此之前做)
     f0 = F[:, 0]
     f1 = F[:, 1]
     f2 = F[:, 2]
-
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
-
     ax.scatter(f0, f1, f2, c='b', marker='o')
-
     ax.set_xlabel("Objective 1 (f0)")
     ax.set_ylabel("Objective 2 (f1)")
     ax.set_zlabel("Objective 3 (f2)")
     plt.title("Pareto Front in 3D")
-
     plt.show()
-    
-    
+
     """
     
     

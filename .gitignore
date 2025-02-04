@@ -1,0 +1,14 @@
+ref_files/
+BatchTmp/
+ChkPnt/
+结果分析组/
+Vehicle4WDB_IRWCRV300m_OptBase.output/
+Vehicle4WDB_RigidCriticalVel_OptBase.output/
+Vehicle4WDB_RigidCRV300m_OptBase.output/
+Vehicle4WDB_RigidSTR80kmph_OptBase.output/
+__pycache__/
+*.npy
+*.npz
+*.csv
+*.ini
+*.txt

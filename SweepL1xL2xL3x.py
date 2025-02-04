@@ -223,12 +223,7 @@ if __name__ == "__main__":
 
     启动 pypack 环境的命令行
     F:  # 切换盘符                                                                                                             
-    cd F:\ResearchMainStream\0.ResearchBySection\C.动力学模型\参数优化\参数优化实现\并行化直曲线运行综合评价                        
-    python SweepL1xL2xL3x.py # 执行本程序                                                                        
-    
-环境安装：
-    conda install pytorch torchvision torchaudio pytorch-cuda=12.1 -c pytorch -c nvidia
-    conda install  pymoo pandas numpy ipywidgets matplotlib openpyxl
-    pip install -U pymoo
-    
+    cd F:\ResearchMainStream\0.ResearchBySection\C.动力学模型\参数优化\参数优化实现\并行化直曲线运行综合评价                            
+    python SweepL1xL2xL3x.py # 执行本程序                                                                                                                                   
+
 """
