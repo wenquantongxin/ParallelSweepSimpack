@@ -1,7 +1,7 @@
 # ParallelSweepSimpack
 
-（1）使用并行化编程进行转向架设计参数的扫略，并行调用 SIMPACK 车辆模型计算临界速度。
-（2）使用 pymoo 以三种动力学指标为目标，包括曲线磨耗数之和、典型地铁直线运行工况 Sperling 均方根、临界速度，进行悬挂参数的迭代寻优。
+- 使用并行化编程进行转向架设计参数的扫略，并行调用 SIMPACK 车辆模型计算临界速度。
+- 使用 pymoo 以三种动力学指标为目标，包括曲线磨耗数之和、典型地铁直线运行工况 Sperling 均方根、临界速度，进行悬挂参数的迭代寻优。
 
 ## 工程简介
 
@@ -17,7 +17,8 @@
 
 ## 环境安装
 
-- 在 pypack 环境之中，使用 Anaconda Prompt 安装
+在 pypack 环境之中，使用 Anaconda Prompt 安装
+
 - conda install pytorch torchvision torchaudio pytorch-cuda=12.1 -c pytorch -c nvidia
 - conda install pymoo pandas numpy ipywidgets matplotlib openpyxl ipykernel
 - pip install -U pymoo ipympl
