@@ -16,9 +16,13 @@ import pickle
 
 from pymoo.core.problem import Problem
 from pymoo.algorithms.moo.nsga2 import NSGA2
+from pymoo.algorithms.moo.rnsga2 import RNSGA2
+from pymoo.algorithms.moo.nsga3 import NSGA3
 from pymoo.termination import get_termination
 from pymoo.optimize import minimize
+from pymoo.util.ref_dirs import get_reference_directions
 from pymoo.util.nds.non_dominated_sorting import NonDominatedSorting
+from pymoo.visualization.scatter import Scatter
 
 #############################################################################################################
 ##############################               准备仿真文件函数组                    ##########################
@@ -1118,20 +1122,37 @@ def main():
     history_F = []
     
     # 定义问题
-    problem = MyBatchProblem( batch_size = 3)
-    # 定义算法 (多目标 NSGA2)
-    algorithm = NSGA2( pop_size = 5 )
+    problem = MyBatchProblem( batch_size = 3) # 并行计算池
+    
+    #--------------------------------------------------------------------------------------------#
+    # 多目标 NSGA2 算法
+    algorithm_NSGA2 = NSGA2(pop_size = 5)
+    # RNSGA2 算法
+    ref_points = np.load('RefPnt_fromNSGA2.npy') # 导入 Analysis_GenRefPnt.ipynb 生成的参考点
+    algorithm_RNSGA2 = RNSGA2(ref_points=ref_points, pop_size=66, epsilon=15, normalization='no') 
+    # NSGA3 算法
+    ref_dirs = get_reference_directions("das-dennis", 3, n_partitions=17) 
+    # 组合结果C(17+2,2)=171<180=pop_size, pop_size is equal or larger than the number of reference directions. 
+    algorithm_NSGA3 = NSGA3(pop_size=180,ref_dirs=ref_dirs)
+    
+    # 选择一个优化算法
+    selected_algorithm = algorithm_NSGA2  # 可以选择 algorithm_NSGA2 或 algorithm_NSGA3
+    #--------------------------------------------------------------------------------------------#
+    
+    # tag 在1055行定义 tag="demo"
+    
     # 终止条件
-    termination = get_termination("n_gen", 3)  # 遗传迭代数，仅做测试实验
+    termination = get_termination("n_gen", 88)  # 遗传迭代数
+    
     # 运行优化
     res = minimize(
         problem, 
-        algorithm, 
+        selected_algorithm,
         termination, 
-        seed=6, 
-        verbose=True, 
-        save_history=True, 
-        callback=my_callback)  # 传入回调函数
+        seed=1,
+        verbose = True, 
+        save_history = True, 
+        callback = my_callback)  # 传入回调函数
     
     # 查看结果
     print("\n==== 优化完成 ====")
@@ -1169,18 +1190,16 @@ if __name__ == "__main__":
     
     F:  # 切换盘符                                                                                                             
     cd F:\ResearchMainStream\0.ResearchBySection\C.动力学模型\参数优化\参数优化实现\ParallelSweepSimpack                        
-    python Opt_12vars_to_3dims.py # 执行本程序                    
+    python Opt_12vars_to_3dims.py # 执行本程序                                  
     
-    """    
-    
-    """
+
     附录A: MATLAB GA 函数对应设置
     MaxGenerations (Generations) 功能：算法的最大迭代数。默认 ga 是 100×变量数，gamultiobj 是 200×变量数。
     PopulationSize 功能：设置种群大小（即每一代的个体数量）。如果变量数 ≤ 5，默认 50；否则默认 200。
     
-    附录B: 在后处理时，查看 Pareto Front 分布，详见 Analysis_FindOpts.ipynb
+    附录B: 后处理
+    (1) 查看 Pareto Front 分布，详见 Analysis_OptsResults.ipynb
+    (2) 根据{X,F}计算结果，分析参数变化对于各动力学指标的相关性，详见 Analysis_Corr.ipynb
+    (3) 根据NSGA2最终前沿解，拟合分布曲面上的散点作为参考点，详见 Analysis_GenRefPnt.ipynb
 
     """
-    
-    
-    
