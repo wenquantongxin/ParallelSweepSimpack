@@ -22,4 +22,5 @@
 
 - conda install pytorch torchvision torchaudio pytorch-cuda=12.1 -c pytorch -c nvidia
 - conda install pymoo pandas numpy ipywidgets matplotlib openpyxl ipykernel
-- pip install -U pymoo ipympl
+- pip install -U pymoo ipympl scikit-learn seaborn SALib
+
