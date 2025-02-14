@@ -71,7 +71,7 @@ def parallel_worker(args):
     # 实际上的全局列索引
     actual_idx = start_idx + col_idx_in_batch
 
-    # 修改点 0：并行任务 N
+    # 并行任务组
     # 并行任务 1：调用半搜索函数，返回临界速度
     CrticalVelocity = HalfSearch_CrticalVelocity(WorkingDir, X_vars, tag, actual_idx, StartVel, EndVel, N_depth)
     time.sleep(1)
@@ -89,52 +89,135 @@ def parallel_worker(args):
     # 返回并行计算该 idx 的结果组向量
     return (col_idx_in_batch, CrticalVelocity, SumWearNumber_RigidCRV300m_CRV, maxLatDisp_RigidCRV300m_CRV, SumWearNumber_IRWCRV300m_CRV, maxLatDisp_IRWCRV300m_CRV, SperlingY_AAR5, SperlingZ_AAR5)
 
+# 生成计算所需的完整车辆参数组合 X_vars
+def GenerateVehicleParamater(WorkingDir, Filename, method="JustSweepL123"):
+    
+    if method == "JustSweepL123":
+         
+        # 示例调用: X_vars = GenerateVehicleParamater(WorkingDir, Filename="config_opt.xlsx", method="JustSweepL123")
+        
+        print(f"[INFO] 仅需扫略 L1、L2、L3 三个参数, 其他车辆参数保持与基准值相同") # 扫略 L1、L2、L3
+        
+        # 1) 调用函数读取 config_opt.xlsx，获取基准值 X_base
+        Opt_Config = read_config_opt_excel(WorkingDir)
+        X_base = Opt_Config["基准值"].to_list()
+        # print("基准值 X_base:", X_base)
+
+        # 2) 生成 X_vars (32 x N_combos)
+
+        Lx1_sweep = np.arange(0, 0.64 + 0.001, 0.04)  
+        Lx2_sweep = np.arange(0, 0.60 + 0.001, 0.04)  
+        Lx3_sweep = np.arange(-0.6, 0.40 + 0.001, 0.1) 
+
+        Lx123_combinations = list(itertools.product(Lx1_sweep, Lx2_sweep, Lx3_sweep))
+        X_vars_columns = []
+
+        for (lx1, lx2, lx3) in Lx123_combinations:
+            x_temp = X_base.copy()
+            x_temp[29] = lx1 # 从 0 开始编号
+            x_temp[30] = lx2
+            x_temp[31] = lx3
+            X_vars_columns.append(x_temp)
+
+        X_vars = np.column_stack(X_vars_columns)
+        print("用于扫略计算的 X_vars的形状: ", X_vars.shape)
+        
+    elif method == "FromExcel":
+        
+        # 示例调用: X_vars = GenerateVehicleParamater(WorkingDir, Filename="ParameterSweep_fromExcel.xlsx", method="FromExcel")
+        
+        print(f"[INFO] 从 EXCEL 表格中获取车辆参数, 该表格记录了前沿解对应的被优化参数")
+        print("元文件名称:", Filename)
+        # 读取 config_opt.xlsx 获取基准值 X_base 和是否优化的标志 is2opt
+        Opt_Config = read_config_opt_excel(WorkingDir, excel_name="config_opt.xlsx")
+        X_base = Opt_Config["基准值"].to_list()
+        is2opt = Opt_Config["是否优化"].to_list()
+
+        # 读取外部文件 ParameterSweep_fromExcel.xlsx
+        Param_Sweep_Config = pd.read_excel(f"{WorkingDir}/{Filename}", sheet_name="Sheet1", header=None)
+        N_Xvars = Param_Sweep_Config.shape[1] - 1 # 从Excel 表格中读取到的有多少组 X_vars 需要被计算
+        ChangingVars = Param_Sweep_Config.iloc[..., 1: Param_Sweep_Config.shape[1]]
+
+        N_2opt = len(is2opt) # X_vars 有多少维度, 应该是32
+                
+        # 根据外部excel行数初始化 X_vars
+        X_vars = np.zeros((N_2opt, N_Xvars)) 
+
+        optCount = 0
+        for LineId in range(0, N_2opt):
+            if is2opt[LineId] == 0:
+                X_vars[LineId] = X_base[LineId] * np.ones((1, N_Xvars))
+            elif is2opt[LineId] == 1:
+                X_vars[LineId] = ChangingVars.iloc[optCount, ].to_numpy()
+                optCount = optCount + 1 
+        # 特别关心  $_Kpy	一系悬挂刚度-横向，与3耦合； $_Ksy	二系悬挂刚度-横向，与7耦合
+        X_vars[3]  = X_vars[2]
+        X_vars[7]  = X_vars[6]
+
+        print("用于扫略计算的 X_vars的形状: ", X_vars.shape)  # 打印 X_vars 的形状
+        
+    elif method == "FromNPZ":
+                
+        # 示例调用 1: X_vars = GenerateVehicleParamater(WorkingDir, Filename="res_history.npz", method="FromNPZ")
+        # 示例调用 2: X_vars = GenerateVehicleParamater(WorkingDir, Filename="generation_150_nondom.npz", method="FromNPZ")
+        
+        # print(f"[INFO] 从 res_history.npz 或者 generation_i_nondom.npz 中获取车辆参数, 该 .npz 文件记录了前沿解的 final_X")
+        data = np.load(Filename, allow_pickle=True)
+        
+        try:
+            # 尝试加载final_X
+            final_X = data["final_X"].T
+            print(f"[INFO] 从 res_history.npz 中获取车辆参数, 该 .npz 文件记录了最终前沿解的 final_X")
+            print("元文件名称:", Filename)
+        except KeyError:
+            # 如果没有final_X，尝试加载X
+            final_X = data["X"].T
+            print(f"[INFO] 从 generation_i_nondom.npz 中获取车辆参数, 该 .npz 文件记录了某一代际前沿解的 final_X")
+            print("元文件名称:", Filename)
+
+        Opt_Config = read_config_opt_excel(WorkingDir, excel_name="config_opt.xlsx")
+        X_base = Opt_Config["基准值"].to_list()
+        is2opt = Opt_Config["是否优化"].to_list()
+
+        N_Xvars = len(final_X[0])
+        N_2opt = len(is2opt) # X_vars 有多少维度, 应该是32
+                        
+        # 初始化 X_vars
+        X_vars = np.zeros((N_2opt, N_Xvars)) 
+
+        optCount = 0
+        for LineId in range(0, N_2opt):
+            if is2opt[LineId] == 0:
+                    X_vars[LineId] = X_base[LineId] * np.ones((1, N_Xvars))
+            elif is2opt[LineId] == 1:
+                    X_vars[LineId] = final_X[optCount, ]
+                    optCount = optCount + 1 
+            # 特别关心  $_Kpy	一系悬挂刚度-横向，与3耦合； $_Ksy	二系悬挂刚度-横向，与7耦合
+            X_vars[3]  = X_vars[2]
+            X_vars[7]  = X_vars[6]
+
+        print("用于扫略计算的 X_vars的形状: ", X_vars.shape)  # 打印 X_vars 的形状
+
+    return X_vars
+
 # 主函数
 def main():
     
     start_time = time.time()  # 获取当前时间戳(秒)
     
-    # 修改点 1    
     # 工作目录路径定义
-    WorkingDir = r"F:\ResearchMainStream\0.ResearchBySection\C.动力学模型\参数优化\参数优化实现\并行化直曲线运行综合评价"
+    WorkingDir = os.getcwd()
     # 实验标识符
-    tag="0126C"  
+    tag="Sweep"  
     
-    # 修改点 2
     # 二分法速度上下限、二分深度
-    StartVel = 50/3.6 
-    EndVel =  800/3.6
+    StartVel = 100/3.6 
+    EndVel =  900/3.6
     N_depth = 7 
     
-    # 1) 调用函数读取 config_opt.xlsx，获取基准值 X_base
-    Opt_Config = read_config_opt_excel(WorkingDir)
-    X_base = Opt_Config["基准值"].to_list()
-    print("基准值 X_base:", X_base)
-
-    # 2) 生成 X_vars (32 x N_combos)
-    # 修改点 3
-    # Lx1_sweep = np.arange(0, 0.64 + 0.001, 0.32)  
-    # Lx2_sweep = np.arange(0, 0.64 + 0.001, 0.32)  
-    # Lx3_sweep = np.arange(-0.6, 0.40 + 0.001, 0.1) # 参数组合{0,0,-0.1} 模型在 118.06 m/s 不稳定，可能刚开始运行会报错
-    # Lx1_sweep = 0 : 0.04 : 0.64;   % 17 个点 （MATLAB参考代码）
-    # Lx2_sweep = 0 : 0.04 : 0.60;   % 16 个点
-    # Lx3_sweep = -0.6 : 0.1 : 0.4;  % 11 个点
-    Lx1_sweep = np.arange(0, 0.64 + 0.001, 0.04)  
-    Lx2_sweep = np.arange(0, 0.60 + 0.001, 0.04)  
-    Lx3_sweep = np.arange(-0.6, 0.40 + 0.001, 0.1) 
-
-    Lx123_combinations = list(itertools.product(Lx1_sweep, Lx2_sweep, Lx3_sweep))
-    X_vars_columns = []
-
-    for (lx1, lx2, lx3) in Lx123_combinations:
-        x_temp = X_base.copy()
-        x_temp[29] = lx1 # 从 0 开始编号
-        x_temp[30] = lx2
-        x_temp[31] = lx3
-        X_vars_columns.append(x_temp)
-
-    X_vars = np.column_stack(X_vars_columns)
-    print("X_vars的形状: ", X_vars.shape)
+    # 调用 X_vars 生成函数, 以进行 参数扫略 / 前沿解回顾验证
+    # 调用方式见函数内部说明
+    X_vars = GenerateVehicleParamater(WorkingDir, Filename="config_opt.xlsx", method="JustSweepL123")
 
     # 创建子文件夹 ChkPnt（checkpoint (检查点)）如果不存在
     checkpoint_dir = os.path.join(WorkingDir, "ChkPnt")
@@ -147,7 +230,7 @@ def main():
     np.save(os.path.join(checkpoint_dir, f"myXvars_{tag}.npy"), X_vars)
     
     # 3) 设置批次和并行
-    # 修改点 4
+    # 修改点 1
     BatchSize_parallel = 10
     total_columns = X_vars.shape[1]
     num_batches = math.ceil(total_columns / BatchSize_parallel)
@@ -156,7 +239,7 @@ def main():
     print("批次数量：", num_batches)
 
     # 假设每个组合计算和保存的维度数
-    # 修改点 5
+    # 修改点 2
     result_dim = 7  
     all_batch_results = []
 
@@ -185,7 +268,7 @@ def main():
             # 收集结果
             for future in concurrent.futures.as_completed(future_list):
                 col_idx_in_batch, cVel, RigidWN_CRV, RigidLatMax_CRV, IrwWN_CRV, IrwLatMax_CRV, SperlingY_AAR5, SperlingZ_AAR5 = future.result()
-                # 修改点 6
+                # 修改点 3
                 # 并行池 return (col_idx_in_batch, cVel, WearNumber_CRV, LatDispMax_CRV, SperlingY_AAR5, SperlingZ_AAR5)
                 batch_result[0, col_idx_in_batch] = cVel 
                 batch_result[1, col_idx_in_batch] = RigidWN_CRV
@@ -223,7 +306,7 @@ if __name__ == "__main__":
 
     启动 pypack 环境的命令行
     F:  # 切换盘符                                                                                                             
-    cd F:\ResearchMainStream\0.ResearchBySection\C.动力学模型\参数优化\参数优化实现\并行化直曲线运行综合评价                            
+    cd F:\ResearchMainStream\0.ResearchBySection\C.动力学模型\参数优化\参数优化实现\ParallelSweepSimpack                            
     python SweepLx1Lx2xL3x.py # 执行本程序                                                                                                                                   
 
 """
