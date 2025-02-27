@@ -1,4 +1,4 @@
-# -*- coding: gbk -*-
+# -*- coding: utf-8 -*-
 
 import os
 import pandas as pd
@@ -6,168 +6,183 @@ import numpy as np
 import shutil
 import time
 
-# ¶ÁÈ¡¸ø¶¨¹¤×÷Ä¿Â¼(working directory)ÏÂµÄconfig_opt.xlsxÎÄ¼şµÄSheet1ÄÚÈİ
+# è¯»å–ç»™å®šå·¥ä½œç›®å½•(working directory)ä¸‹çš„config_opt.xlsxæ–‡ä»¶çš„Sheet1å†…å®¹
 def read_config_opt_excel(working_dir, excel_name="config_opt.xlsx", sheet_name="Sheet1"):
     """
-    ²ÎÊı£º
-    working_dir (str): Ö¸¶¨µÄ¹¤×÷Ä¿Â¼Â·¾¶
-    excel_name (str): excelÎÄ¼şÃû³Æ£¬Ä¬ÈÏÎª config_opt.xlsx
-    sheet_name (str): ĞèÒª¶ÁÈ¡µÄ±íÃû£¬Ä¬ÈÏÎª Sheet1
-    ·µ»Ø£º
-    DataFrame: pandasµÄDataFrameÀàĞÍ£¬°üº¬¶ÁÈ¡µÄ±í¸ñÄÚÈİ
+    å‚æ•°ï¼š
+    working_dir (str): æŒ‡å®šçš„å·¥ä½œç›®å½•è·¯å¾„
+    excel_name (str): excelæ–‡ä»¶åç§°ï¼Œé»˜è®¤ä¸º config_opt.xlsx
+    sheet_name (str): éœ€è¦è¯»å–çš„è¡¨åï¼Œé»˜è®¤ä¸º Sheet1
+    è¿”å›ï¼š
+    DataFrame: pandasçš„DataFrameç±»å‹ï¼ŒåŒ…å«è¯»å–çš„è¡¨æ ¼å†…å®¹
     """
     
-    # 1. ÉèÖÃ¹¤×÷Ä¿Â¼(working directory)
-    # 2. ¶ÁÈ¡Ö¸¶¨µÄExcel±í¸ñ£¨Ö»¶ÁSheet1£©
+    # 1. è®¾ç½®å·¥ä½œç›®å½•(working directory)
+    # 2. è¯»å–æŒ‡å®šçš„Excelè¡¨æ ¼ï¼ˆåªè¯»Sheet1ï¼‰
     excel_path = os.path.join(working_dir, excel_name)
     df = pd.read_excel(excel_path, sheet_name=sheet_name)
     
     return df
 
-# Çå¿Õ BatchTmp ×ÓÎÄ¼ş¼Ğ
+# æ¸…ç©º BatchTmp å­æ–‡ä»¶å¤¹
 def ClearBatchTmpFolder(WorkingDir):
     batch_tmp_path = os.path.join(WorkingDir, "BatchTmp")
     
-    # Èç¹û×ÓÎÄ¼ş¼ĞÒÑ¾­´æÔÚÇÒ²»Îª¿Õ£¬ÏÈÉ¾³ıËüÒÔ¼°Ëü°üº¬µÄËùÓĞÄÚÈİ
+    def on_rm_error(func, path, exc_info):
+        """
+        onerror å›è°ƒ:
+          - func: æ­£åœ¨æ‰§è¡Œçš„å‡½æ•°, æ¯”å¦‚ os.remove, os.rmdir ç­‰
+          - path: æ­£åœ¨å¤„ç†çš„æ–‡ä»¶è·¯å¾„
+          - exc_info: sys.exc_info() è¿”å›çš„ä¸‰å…ƒç»„ (type, value, traceback)
+        """
+        error_type, error_value, _ = exc_info
+        
+        # æ£€æŸ¥æ˜¯å¦ä¸ºOSErroræˆ–å…¶å­ç±»ï¼ˆåŒ…æ‹¬PermissionErrorï¼‰
+        if issubclass(error_type, OSError):
+            winerror = getattr(error_value, 'winerror', None)
+            # å¤„ç†Windowså¸¸è§é”™è¯¯ç :
+            # 32 -> æ–‡ä»¶è¢«å¦ä¸€ä¸ªè¿›ç¨‹ä½¿ç”¨
+            # 145 -> ç›®å½•ä¸æ˜¯ç©ºçš„
+            if winerror in (32, 145):
+                print(f"è·³è¿‡é—®é¢˜æ–‡ä»¶/æ–‡ä»¶å¤¹: {path}ï¼ŒWinError: {winerror}")
+                return
+        
+        # å¦‚æœä¸æ˜¯æˆ‘ä»¬è¦è·³è¿‡çš„é”™è¯¯ï¼ŒæŠ›å‡ºå¼‚å¸¸
+        raise
+
+    # å¦‚æœå­æ–‡ä»¶å¤¹å·²ç»å­˜åœ¨ï¼Œå°è¯•åˆ é™¤å®ƒä»¥åŠå®ƒåŒ…å«çš„æ‰€æœ‰å†…å®¹
     if os.path.exists(batch_tmp_path):
-        shutil.rmtree(batch_tmp_path)
+        shutil.rmtree(batch_tmp_path, onerror=on_rm_error)
     
-    # ÔÙ´ÎĞÂ½¨Ò»¸ö¿Õ°×µÄ BatchTmp ÎÄ¼ş¼Ğ£¬±ãÓÚºóĞøĞ´Èë
+    # å†æ¬¡æ–°å»ºä¸€ä¸ªç©ºç™½çš„ BatchTmp æ–‡ä»¶å¤¹ï¼Œä¾¿äºåç»­å†™å…¥
     os.makedirs(batch_tmp_path, exist_ok=True)
     
-# ¸ù¾İ Base ÎÄ¼ş£¬¸´ÖÆ²¢Éú³É .spck, .subvar, .spf ÎÄ¼ş
+# æ ¹æ® Base æ–‡ä»¶ï¼Œå¤åˆ¶å¹¶ç”Ÿæˆ .spck, .subvar, .spf æ–‡ä»¶
 def prepare_SpckFiles_eachBatch(WorkingDir, tag, start_idx, end_idx):
     """
-    ÔÚ [start_idx, end_idx) ·¶Î§ÄÚ£¬ÎªÃ¿¸ö i£¬
-    Õë¶Ô¶à¸ö base_spck / base_spf ÎÄ¼ş£¬Éú³É¶ÔÓ¦µÄÄ¿±êÎÄ¼şµ½ BatchTmp ÎÄ¼ş¼Ğ¡£
-    
-    Ã¿¶Ô (base_spck, base_spf) ÎÄ¼şÒªÉú³É 3 ¸öÎÄ¼ş£º
-      1. ¶ÔÓ¦ spck ÎÄ¼ş
-         - »ùÓÚ base_spck ¸´ÖÆ£¬ĞŞ¸ÄµÚ 26 (Ë÷Òı25)¡¢61 (Ë÷Òı60)¡¢69 (Ë÷Òı68) ĞĞ
-      2. subvar ÎÄ¼ş
-         - »ùÓÚ subvars_OptBase.subvar ¸´ÖÆ£¨ÎŞÈÎºÎÄÚÈİĞŞ¸Ä£©
-      3. ¶ÔÓ¦ spf ÎÄ¼ş
-         - »ùÓÚ base_spf ¸´ÖÆ£¬ĞŞ¸ÄµÚ 9 ĞĞ (Ë÷Òı 8)
-    
-    ²ÎÊı:
+    åœ¨ [start_idx, end_idx) èŒƒå›´å†…ï¼Œä¸ºæ¯ä¸ª iï¼Œ
+    é’ˆå¯¹å¤šä¸ª base_spck / base_spf æ–‡ä»¶ï¼Œç”Ÿæˆå¯¹åº”çš„ç›®æ ‡æ–‡ä»¶åˆ° BatchTmp æ–‡ä»¶å¤¹ã€‚
+
+    æ¯å¯¹ (base_spck, base_spf) æ–‡ä»¶è¦ç”Ÿæˆ 3 ä¸ªæ–‡ä»¶ï¼š
+      1. å¯¹åº” spck æ–‡ä»¶
+         - åŸºäº base_spck å¤åˆ¶ï¼Œä¿®æ”¹ç¬¬ 26 (ç´¢å¼•25)ã€61 (ç´¢å¼•60)ã€69 (ç´¢å¼•68) è¡Œ
+      2. subvar æ–‡ä»¶
+         - åŸºäº subvars_OptBase.subvar å¤åˆ¶ï¼ˆæ— ä»»ä½•å†…å®¹ä¿®æ”¹ï¼‰
+      3. å¯¹åº” spf æ–‡ä»¶
+         - åŸºäº base_spf å¤åˆ¶ï¼Œä¿®æ”¹ç¬¬ 9 è¡Œ (ç´¢å¼• 8)
+
+    å‚æ•°:
     ----------
     WorkingDir : str
-        ¹¤×÷Ä¿Â¼Â·¾¶, °üº¬ .spck, .subvar, .spf Ô­Ê¼ÎÄ¼ş
+        å·¥ä½œç›®å½•è·¯å¾„, åŒ…å« .spck, .subvar, .spf åŸå§‹æ–‡ä»¶
     tag : str
-        ±ê¼Ç×Ö·û´®, ÓÃÓÚÊ¶±ğ²»Í¬ÊµÑé»·¾³, Èç "test", "runA" µÈ
+        æ ‡è®°å­—ç¬¦ä¸², ç”¨äºè¯†åˆ«ä¸åŒå®éªŒç¯å¢ƒ, å¦‚ "test", "runA" ç­‰
     start_idx, end_idx : int
-        Ë÷Òı·¶Î§ [start_idx, end_idx), ¶ÔÃ¿¸ö i Éú³É¶ÔÓ¦µÄ 3 ¸öÎÄ¼ş
+        ç´¢å¼•èŒƒå›´ [start_idx, end_idx), å¯¹æ¯ä¸ª i ç”Ÿæˆå¯¹åº”çš„ 3 ä¸ªæ–‡ä»¶
     """
-    
-    # =========== 1. ¶¨Òå¹Ì¶¨µÄ subvar Ô­Ê¼ÎÄ¼şÂ·¾¶ ===========
+
+    # =========== 1. å®šä¹‰å›ºå®šçš„ subvar åŸå§‹æ–‡ä»¶è·¯å¾„ ===========
     base_subvar_path = os.path.join(WorkingDir, "subvars_OptBase.subvar")
-    
-    # base_spck1_path = os.path.join(WorkingDir, "Vehicle4WDB_IRWCRV300m_OptBase.spck")
-    # base_spf1_path = os.path.join(WorkingDir, "Result_IRWCRV300m.spf")
-    # base_spck2_path = os.path.join(WorkingDir, "Vehicle4WDB_RigidCRV300m_OptBase.spck")
-    # base_spf2_path = os.path.join(WorkingDir, "Result_RigidCRV300m.spf")
-    # base_spck3_path = os.path.join(WorkingDir, "Vehicle4WDB_RigidSTR80kmph_OptBase.spck")
-    # base_spf3_path = os.path.join(WorkingDir, "Result_RigidSTR80kmph.spf")    
-    # base_spck4_path = os.path.join(WorkingDir, "Vehicle4WDB_RigidCriticalVel_OptBase.spck")
-    # base_spf4_path = os.path.join(WorkingDir, "Result_RigidCriticalVel.spf")
-    
-    # =========== 2. ½«ËùÓĞĞèÒª´¦ÀíµÄ (spck, spf) ÎÄ¼ş·ÅÔÚÁĞ±íÖĞ ===========
-    #    Îª·½±ãÎ¬»¤£¬¿ÉÒÔÔÚÕâÀïĞÂÔö»òÉ¾¼õĞèÒª´¦ÀíµÄ Base ÎÄ¼ş¡£
-    #    ÁĞ±íÖĞÃ¿¸öÔªËØÊÇÒ»¸öÔª×é£º
-    #    ( base_spck_Â·¾¶, base_spf_Â·¾¶, ¸øÊä³öÎÄ¼şÓÃµÄÇ°×ºÃû »ò ÆäËü×Ô¶¨ÒåĞÅÏ¢... )
+
+    # =========== 2. å°†æ‰€æœ‰éœ€è¦å¤„ç†çš„ (spck, spf) æ–‡ä»¶æ”¾åœ¨åˆ—è¡¨ä¸­ ===========
     spck_spf_list = [
         (
             os.path.join(WorkingDir, "Vehicle4WDB_IRWCRV300m_OptBase.spck"),
             os.path.join(WorkingDir, "Result_IRWCRV300m.spf"),
-            "Vehicle4WDB_IRWCRV300m_Opt",    # ÓÃÓÚÃüÃûÊä³ö spck ÎÄ¼şÇ°×º
-            "Result_IRWCRV300m_Opt",        # ÓÃÓÚÃüÃûÊä³ö spf ÎÄ¼şÇ°×º
+            "Vehicle4WDB_IRWCRV300m_Opt",    # ç”¨äºå‘½åè¾“å‡º spck æ–‡ä»¶å‰ç¼€
+            "Result_IRWCRV300m_Opt",        # ç”¨äºå‘½åè¾“å‡º spf æ–‡ä»¶å‰ç¼€
         ),
         (
-            os.path.join(WorkingDir, "Vehicle4WDB_RigidCRV300m_OptBase.spck"),
-            os.path.join(WorkingDir, "Result_RigidCRV300m.spf"),
-            "Vehicle4WDB_RigidCRV300m_Opt",
-            "Result_RigidCRV300m_Opt",
+            os.path.join(WorkingDir, "Vehicle4WDB_NativeRigidCRV300m_OptBase.spck"),
+            os.path.join(WorkingDir, "Result_NativeRigidCRV300m.spf"),
+            "Vehicle4WDB_NativeRigidCRV300m_Opt",
+            "Result_NativeRigidCRV300m_Opt",
         ),
         (
-            os.path.join(WorkingDir, "Vehicle4WDB_RigidSTR80kmph_OptBase.spck"),
-            os.path.join(WorkingDir, "Result_RigidSTR80kmph.spf"),
-            "Vehicle4WDB_RigidSTR80kmph_Opt",
-            "Result_RigidSTR80kmph_Opt",
+            os.path.join(WorkingDir, "Vehicle4WDB_NativeRigidSTR80kmph_OptBase.spck"),
+            os.path.join(WorkingDir, "Result_NativeRigidSTR80kmph.spf"),
+            "Vehicle4WDB_NativeRigidSTR80kmph_Opt",
+            "Result_NativeRigidSTR80kmph_Opt",
         ),
         (
-            os.path.join(WorkingDir, "Vehicle4WDB_RigidCriticalVel_OptBase.spck"),
-            os.path.join(WorkingDir, "Result_RigidCriticalVel.spf"),
-            "Vehicle4WDB_RigidCriticalVel_Opt",
-            "Result_RigidCriticalVel_Opt",
+            os.path.join(WorkingDir, "Vehicle4WDB_NativeRigidCriticalVel_OptBase.spck"),
+            os.path.join(WorkingDir, "Result_NativeRigidCriticalVel.spf"),
+            "Vehicle4WDB_NativeRigidCriticalVel_Opt",
+            "Result_NativeRigidCriticalVel_Opt",
         ),
     ]
-    
-    # =========== 3. ´´½¨Êä³öÎÄ¼ş¼Ğ BatchTmp ===========
+
+    # =========== 3. åˆ›å»ºè¾“å‡ºæ–‡ä»¶å¤¹ BatchTmp ===========
     batch_tmp_dir = os.path.join(WorkingDir, "BatchTmp")
     os.makedirs(batch_tmp_dir, exist_ok=True)
-    
-    # =========== 4. ¶Ô spck_spf_list ÖĞµÄÃ¿Ò»¶Ô½øĞĞ´¦Àí ===========
+
+    # =========== 4. å¯¹ spck_spf_list ä¸­çš„æ¯ä¸€å¯¹è¿›è¡Œå¤„ç† ===========
     for base_spck_path, base_spf_path, spck_prefix, spf_prefix in spck_spf_list:
-        # --- 4.1 ¶ÁÈ¡Ô´ spck ºÍ spf ÎÄ¼şÄÚÈİ(ĞĞ) ---
+        # --- 4.1 è¯»å–æº spck å’Œ spf æ–‡ä»¶å†…å®¹(è¡Œ) ---
         with open(base_spck_path, "r", encoding="utf-8") as f_spck:
             base_spck_lines = f_spck.readlines()
         with open(base_spf_path, "r", encoding="utf-8") as f_spf:
             base_spf_lines = f_spf.readlines()
-        
-        # --- 4.2 ÔÚ [start_idx, end_idx) ·¶Î§ÄÚ, Öğ¸ö i Éú³ÉÄ¿±êÎÄ¼ş ---
+
+        # --- 4.2 åœ¨ [start_idx, end_idx) èŒƒå›´å†…, é€ä¸ª i ç”Ÿæˆç›®æ ‡æ–‡ä»¶ ---
         for i in range(start_idx, end_idx):
-            
-            # =========== 4.2.1 ´¦Àí spck ÎÄ¼ş ===========
-            # Êä³öÎÄ¼şÃûÊ¾Àı: Vehicle4WDB_IRWCRV300m_Opt_test_0.spck
+
+            # =========== 4.2.1 å¤„ç† spck æ–‡ä»¶ ===========
             new_spck_name = f"{spck_prefix}_{tag}_{i}.spck"
             new_spck_path = os.path.join(batch_tmp_dir, new_spck_name)
-            
+
             lines_spck_mod = base_spck_lines.copy()
-            # ĞŞ¸ÄµÚ 26(Ë÷Òı25), 61(Ë÷Òı60), 69(Ë÷Òı68) ĞĞ
-            # 1) µÚ 26 ĞĞ(Ë÷Òı 25)Ö¸¶¨ subvar ÎÄ¼şÃû³Æ
+            # ä¿®æ”¹ç¬¬ 26(ç´¢å¼•25) è¡Œ: subvar æ–‡ä»¶åç§°
             lines_spck_mod[25] = (
                 f"subvarset.file (          1                                       ) = "
                 f"'./subvars_Opt_{tag}_{i}.subvar' ! subvarset filename\n"
             )
-            # 2) µÚ 61 ĞĞ(Ë÷Òı 60)
-            lines_spck_mod[60] = (
-                "substr.file (                       $S_IRWBogie_Front             ) = "
-                "'../ref_files/Bogie_IRWs_4WDBv3.spck' ! Filename\n"
-            )
-            # 3) µÚ 69 ĞĞ(Ë÷Òı 68)
-            lines_spck_mod[68] = (
-                "substr.file (                       $S_IRWBogie_Rear              ) = "
-                "'../ref_files/Bogie_IRWs_4WDBv3.spck' ! Filename\n"
-            )
-            
-            # Ğ´³öĞÂµÄ .spck ÎÄ¼ş
+
+            # æ ¹æ® spck æ–‡ä»¶ä¸åŒï¼Œåˆ†åˆ«ä¿®æ”¹ç¬¬ 61(ç´¢å¼•60) ä¸ 69(ç´¢å¼•68) è¡Œ
+            if "Vehicle4WDB_IRWCRV300m_OptBase.spck" in base_spck_path:
+                # é’ˆå¯¹ IRWCRV300m ç‰ˆæœ¬çš„ä¿®æ”¹
+                lines_spck_mod[60] = (
+                    "substr.file (                       $S_IRWBogie_Front             ) = "
+                    "'../ref_files/Bogie_IRWs_4WDBv3.spck' ! Filename\n"
+                )
+                lines_spck_mod[68] = (
+                    "substr.file (                       $S_IRWBogie_Rear              ) = "
+                    "'../ref_files/Bogie_IRWs_4WDBv3.spck' ! Filename\n"
+                )
+            else:
+                # å¯¹äº Vehicle4WDB_NativeRigid æ¨¡å‹ï¼Œæ”¹ä¸º $S_NativeRigidWSBogie_Front/Rear ä¸ Bogie_RW_4WDBv31.spck
+                lines_spck_mod[60] = (
+                    "substr.file (                       $S_NativeRigidWSBogie_Front             ) = "
+                    "'../ref_files/Bogie_RW_4WDBv31.spck' ! Filename\n"
+                )
+                lines_spck_mod[68] = (
+                    "substr.file (                       $S_NativeRigidWSBogie_Rear              ) = "
+                    "'../ref_files/Bogie_RW_4WDBv31.spck' ! Filename\n"
+                )
+
+            # å†™å‡ºæ–°çš„ .spck æ–‡ä»¶
             with open(new_spck_path, "w", encoding="utf-8") as f_out_spck:
                 f_out_spck.writelines(lines_spck_mod)
-            
-            # =========== 4.2.2 ¸´ÖÆ subvar ÎÄ¼ş ===========
-            # ÎÄ¼şÃû£ºsubvars_Opt_test_0.subvar
+
+            # =========== 4.2.2 å¤åˆ¶ subvar æ–‡ä»¶ ===========
             new_subvar_name = f"subvars_Opt_{tag}_{i}.subvar"
             new_subvar_path = os.path.join(batch_tmp_dir, new_subvar_name)
             shutil.copyfile(base_subvar_path, new_subvar_path)
-            
-            # =========== 4.2.3 ´¦Àí spf ÎÄ¼ş ===========
-            # Êä³öÎÄ¼şÃûÊ¾Àı: Result_IRWCRV300m_Opt_test_0.spf
+
+            # =========== 4.2.3 å¤„ç† spf æ–‡ä»¶ ===========
             new_spf_name = f"{spf_prefix}_{tag}_{i}.spf"
             new_spf_path = os.path.join(batch_tmp_dir, new_spf_name)
-            
+
             lines_spf_mod = base_spf_lines.copy()
-            # ĞŞ¸ÄµÚ 9 ĞĞ(Ë÷Òı8)
+            # ä¿®æ”¹ç¬¬ 9 è¡Œ(ç´¢å¼•8)
             lines_spf_mod[8] = (
                 f'<ResFile filename="{spck_prefix}_{tag}_{i}.output/{spck_prefix}_{tag}_{i}.sbr" '
                 'generatorVersion="20210000" id="resf1" type="sbr"/>\n'
             )
-            
-            # Ğ´³öĞÂµÄ spf ÎÄ¼ş
+
+            # å†™å‡ºæ–°çš„ spf æ–‡ä»¶
             with open(new_spf_path, "w", encoding="utf-8") as f_out_spf:
                 f_out_spf.writelines(lines_spf_mod)
-            
-            # print(f"[INFO] ÒÑÉú³ÉÎÄ¼ş: {new_spck_name}, {new_subvar_name}, {new_spf_name}")
-    
-    print("[INFO] ±¾Åú´ÎËùÓĞÎÄ¼şÒÑÉú³ÉÍê±Ï£¡")
-    time.sleep(1)
 
+    print("[INFO] æœ¬æ‰¹æ¬¡æ‰€æœ‰æ–‡ä»¶å·²ç”Ÿæˆå®Œæ¯•ï¼")
+    time.sleep(1)

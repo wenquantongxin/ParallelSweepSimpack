@@ -1,20 +1,64 @@
-ref_files/
+__pycache__/**
 BatchTmp/
 ChkPnt/
+*.output/
 /结果分析组/**
-Vehicle4WDB_IRWCRV300m_OptBase.output/**
-Vehicle4WDB_RigidCriticalVel_OptBase.output/**
-Vehicle4WDB_RigidCRV300m_OptBase.output/**
-Vehicle4WDB_RigidSTR80kmph_OptBase.output/**
-__pycache__/**
+
+# 数据文件
+*.mat
 *.npy
 *.npz
-*.csv
-*.ini
-*.txt
-*.vscode
-*.pdf
-*.mat
-*.zip
 *.pkl
+*.sbr
+*.sir
+*.intinfo
+*.log
+*.csv
+
+# 几何模型文件
+*.STL
+
+# 配置和临时文件
+*.vscode
+*.ini
 *.bak
+
+# 排除 ROS2 bag 相关文件类型
+*.db3
+*.mcap
+*.yaml
+
+# 压缩文件
+*.zip
+*.7z
+
+# 编译产生的文件
+*.o
+*.so
+*.dll
+*.dylib
+
+# 日志文件
+*.log
+
+# IDE 相关
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# Office 临时文件
+~$*           # Word、Excel、PowerPoint 等的临时文件
+*.tmp         # 临时文件
+*.temp        # 临时文件
+~*.doc        # Word 备份文件
+~*.docx       # Word 备份文件
+~*.xls        # Excel 备份文件
+~*.xlsx       # Excel 备份文件
+~*.ppt        # PowerPoint 备份文件
+~*.pptx       # PowerPoint 备份文件
+.~lock.*      # LibreOffice 锁定文件

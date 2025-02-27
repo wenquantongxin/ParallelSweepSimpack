@@ -1,4 +1,4 @@
-# -*- coding: gbk -*-
+# -*- coding: utf-8 -*-
 
 # SweepLx1Lx2xL3x.py
 import os
@@ -9,7 +9,7 @@ import math
 import concurrent.futures
 import matplotlib
 import matplotlib.pyplot as plt
-matplotlib.use("TkAgg")  # »òÕß "TkAgg"
+matplotlib.use("TkAgg")
 import shutil
 import time
 
@@ -23,7 +23,7 @@ from FindCrticalVelocity import (HalfSearch_CrticalVelocity)
 from STRPerf import (STRPerf_idx)
 from CRVPerf import (CRVPerf_idx)
 
-# ×öÈıÎ¬Í¼£¬ÏÔÊ¾ ÁÙ½çËÙ¶ÈÓë L1¡¢L2 µÄ¹ØÏµ
+# åšä¸‰ç»´å›¾ï¼Œæ˜¾ç¤º ä¸´ç•Œé€Ÿåº¦ä¸ L1ã€L2 çš„å…³ç³»
 def ShowMeshgrid():
     CriticalVel = np.load("myCriticalVel.npy") 
     Xvars = np.load("myXvars.npy") 
@@ -31,7 +31,7 @@ def ShowMeshgrid():
     lx1_all = Xvars[29,:] 
     lx2_all = Xvars[30,:] 
 
-    # 1) ÕÒµ½Î¨Ò»Öµ²¢ÅÅĞò
+    # 1) æ‰¾åˆ°å”¯ä¸€å€¼å¹¶æ’åº
     lx1_unique = np.unique(lx1_all)
     lx2_unique = np.unique(lx2_all)
     m = len(lx1_unique)
@@ -39,108 +39,107 @@ def ShowMeshgrid():
     print("lx1_unique:", lx1_unique)
     print("lx2_unique:", lx2_unique)
     print("m,n =", m,n)
-    # 2) ×ö meshgrid
-    # ×¢Òâ meshgrid µÄÄ¬ÈÏ (x, y) => X.shape = (n,m), Y.shape = (n,m)
+    # 2) åš meshgrid
+    # æ³¨æ„ meshgrid çš„é»˜è®¤ (x, y) => X.shape = (n,m), Y.shape = (n,m)
     X, Y = np.meshgrid(lx1_unique, lx2_unique)
     print("X.shape = ", X.shape)  # (n,m)
     # 3) reshape Z
-    Z_mat = Z.reshape(n, m)  # ÒòÎª n ĞĞ, m ÁĞ => shape=(len(lx2_unique), len(lx1_unique))
-    # 4) »­ surf
+    Z_mat = Z.reshape(n, m)  # å› ä¸º n è¡Œ, m åˆ— => shape=(len(lx2_unique), len(lx1_unique))
+    # 4) ç”» surf
     fig = plt.figure()
     ax = fig.add_subplot(projection='3d')
     surf = ax.plot_surface(X, Y, Z_mat, cmap='viridis')
     ax.set_xlabel("Lx1")
     ax.set_ylabel("Lx2")
-    ax.invert_yaxis()  # Ê¹µÃ Y Öá·´ÏòµİÔö
+    ax.invert_yaxis()  # ä½¿å¾— Y è½´åå‘é€’å¢
     ax.set_zlabel("Critical Velocity (m/s)")
     fig.colorbar(surf, shrink=0.5)
     plt.show()
     
-# ²¢ĞĞÈÎÎñº¯Êı
+# å¹¶è¡Œä»»åŠ¡å‡½æ•°
 def parallel_worker(args):
     """
-    ¶¥²ã×÷ÓÃÓò¶¨ÒåµÄ²¢ĞĞÈÎÎñº¯Êı£¬±ÜÃâpickle´íÎó¡£
+    é¡¶å±‚ä½œç”¨åŸŸå®šä¹‰çš„å¹¶è¡Œä»»åŠ¡å‡½æ•°ï¼Œé¿å…pickleé”™è¯¯ã€‚
     
-    args ÊÇÒ»¸öÔª×é£¬°üº¬£º
+    args æ˜¯ä¸€ä¸ªå…ƒç»„ï¼ŒåŒ…å«ï¼š
         (col_idx_in_batch, start_idx, WorkingDir, X_vars, tag, StartVel, EndVel, N_depth)
-    ÎÒÃÇÔÚº¯ÊıÖĞ½â°üºóÖ´ĞĞ HalfSearch_CrticalVelocity¡£
-    ·µ»Ø (col_idx_in_batch, cVel)£¬Íâ²¿¿ÉÓÉ´ËÁË½â¸÷ÁĞµÄ½á¹û
+    æˆ‘ä»¬åœ¨å‡½æ•°ä¸­è§£åŒ…åæ‰§è¡Œ HalfSearch_CrticalVelocityã€‚
+    è¿”å› (col_idx_in_batch, cVel)ï¼Œå¤–éƒ¨å¯ç”±æ­¤äº†è§£å„åˆ—çš„ç»“æœ
     """
     (col_idx_in_batch, start_idx, WorkingDir, X_vars, tag, StartVel, EndVel, N_depth) = args
     
-    # Êµ¼ÊÉÏµÄÈ«¾ÖÁĞË÷Òı
+    # å®é™…ä¸Šçš„å…¨å±€åˆ—ç´¢å¼•
     actual_idx = start_idx + col_idx_in_batch
 
-    # ²¢ĞĞÈÎÎñ×é
-    # ²¢ĞĞÈÎÎñ 1£ºµ÷ÓÃ°ëËÑË÷º¯Êı£¬·µ»ØÁÙ½çËÙ¶È
+    # å¹¶è¡Œä»»åŠ¡ç»„
+    # å¹¶è¡Œä»»åŠ¡ 1ï¼šè°ƒç”¨åŠæœç´¢å‡½æ•°ï¼Œè¿”å›ä¸´ç•Œé€Ÿåº¦
     CrticalVelocity = HalfSearch_CrticalVelocity(WorkingDir, X_vars, tag, actual_idx, StartVel, EndVel, N_depth)
     time.sleep(1)
-    # print("[INFO] ²âÊÔ£¬ÁÙÊ±Ìø¹ıÁÙ½çËÙ¶È¼ÆËã")  
+    # print("[INFO] æµ‹è¯•ï¼Œä¸´æ—¶è·³è¿‡ä¸´ç•Œé€Ÿåº¦è®¡ç®—")  
     # CrticalVelocity = 666.66
     
-    # ²¢ĞĞÈÎÎñ 2£ºµ÷ÓÃÇúÏß¼ÆËãÄ£ĞÍ£¬·µ»ØÇúÏßÄ¥ºÄÊı¡¢ºáÒÆÁ¿
+    # å¹¶è¡Œä»»åŠ¡ 2ï¼šè°ƒç”¨æ›²çº¿è®¡ç®—æ¨¡å‹ï¼Œè¿”å›æ›²çº¿ç£¨è€—æ•°ã€æ¨ªç§»é‡
     SumWearNumber_RigidCRV300m_CRV, maxLatDisp_RigidCRV300m_CRV, SumWearNumber_IRWCRV300m_CRV, maxLatDisp_IRWCRV300m_CRV = CRVPerf_idx(WorkingDir, X_vars, tag, actual_idx)
     time.sleep(1)
     
-    # ²¢ĞĞÈÎÎñ 3£ºµ÷ÓÃµäĞÍ AAR5 Ö±Ïß¼ÆËãÄ£ĞÍ ĞÔÄÜÆÀ¹À£¬·µ»ØSperlingÖ¸±ê
+    # å¹¶è¡Œä»»åŠ¡ 3ï¼šè°ƒç”¨å…¸å‹ AAR5 ç›´çº¿è®¡ç®—æ¨¡å‹ æ€§èƒ½è¯„ä¼°ï¼Œè¿”å›SperlingæŒ‡æ ‡
     SperlingY_AAR5, SperlingZ_AAR5 = STRPerf_idx(WorkingDir, X_vars, tag, actual_idx)
     time.sleep(1)
     
-    # ·µ»Ø²¢ĞĞ¼ÆËã¸Ã idx µÄ½á¹û×éÏòÁ¿
+    # è¿”å›å¹¶è¡Œè®¡ç®—è¯¥ idx çš„ç»“æœç»„å‘é‡
     return (col_idx_in_batch, CrticalVelocity, SumWearNumber_RigidCRV300m_CRV, maxLatDisp_RigidCRV300m_CRV, SumWearNumber_IRWCRV300m_CRV, maxLatDisp_IRWCRV300m_CRV, SperlingY_AAR5, SperlingZ_AAR5)
 
-# Éú³É¼ÆËãËùĞèµÄÍêÕû³µÁ¾²ÎÊı×éºÏ X_vars
+# ç”Ÿæˆè®¡ç®—æ‰€éœ€çš„å®Œæ•´è½¦è¾†å‚æ•°ç»„åˆ X_vars
 def GenerateVehicleParamater(WorkingDir, Filename, method="JustSweepL123"):
     
     if method == "JustSweepL123":
          
-        # Ê¾Àıµ÷ÓÃ: X_vars = GenerateVehicleParamater(WorkingDir, Filename="config_opt.xlsx", method="JustSweepL123")
+        # ç¤ºä¾‹è°ƒç”¨: X_vars = GenerateVehicleParamater(WorkingDir, Filename="config_opt.xlsx", method="JustSweepL123")
         
-        print(f"[INFO] ½öĞèÉ¨ÂÔ L1¡¢L2¡¢L3 Èı¸ö²ÎÊı, ÆäËû³µÁ¾²ÎÊı±£³ÖÓë»ù×¼ÖµÏàÍ¬") # É¨ÂÔ L1¡¢L2¡¢L3
+        print(f"[INFO] ä»…éœ€æ‰«ç•¥ L1ã€L2ã€L3 ä¸‰ä¸ªå‚æ•°, å…¶ä»–è½¦è¾†å‚æ•°ä¿æŒä¸åŸºå‡†å€¼ç›¸åŒ") # æ‰«ç•¥ L1ã€L2ã€L3
         
-        # 1) µ÷ÓÃº¯Êı¶ÁÈ¡ config_opt.xlsx£¬»ñÈ¡»ù×¼Öµ X_base
+        # 1) è°ƒç”¨å‡½æ•°è¯»å– config_opt.xlsxï¼Œè·å–åŸºå‡†å€¼ X_base
         Opt_Config = read_config_opt_excel(WorkingDir)
-        X_base = Opt_Config["»ù×¼Öµ"].to_list()
-        # print("»ù×¼Öµ X_base:", X_base)
+        X_base = Opt_Config["åŸºå‡†å€¼"].to_list()
+        # print("åŸºå‡†å€¼ X_base:", X_base)
 
-        # 2) Éú³É X_vars (32 x N_combos)
-
-        Lx1_sweep = np.arange(0, 0.64 + 0.001, 0.04)  
-        Lx2_sweep = np.arange(0, 0.60 + 0.001, 0.04)  
-        Lx3_sweep = np.arange(-0.6, 0.40 + 0.001, 0.1) 
+        # 2) ç”Ÿæˆ X_vars (32 x N_combos)
+        Lx1_sweep = np.arange(0, 0.64 + 0.001, 0.04)    # ä»0åˆ°0.64ï¼Œå…±17ä¸ªå…ƒç´ 
+        Lx2_sweep = np.arange(0, 0.60 + 0.001, 0.04)    # ä»0åˆ°0.60ï¼Œå…±16ä¸ªå…ƒç´ 
+        Lx3_sweep = np.arange(0, 0.001, 0.1)            # Lx3_sweep = np.arange(-0.6, 0.40 + 0.001, 0.1)
 
         Lx123_combinations = list(itertools.product(Lx1_sweep, Lx2_sweep, Lx3_sweep))
         X_vars_columns = []
 
         for (lx1, lx2, lx3) in Lx123_combinations:
             x_temp = X_base.copy()
-            x_temp[29] = lx1 # ´Ó 0 ¿ªÊ¼±àºÅ
+            x_temp[29] = lx1 # ä» 0 å¼€å§‹ç¼–å·
             x_temp[30] = lx2
             x_temp[31] = lx3
             X_vars_columns.append(x_temp)
 
         X_vars = np.column_stack(X_vars_columns)
-        print("ÓÃÓÚÉ¨ÂÔ¼ÆËãµÄ X_varsµÄĞÎ×´: ", X_vars.shape)
+        print("ç”¨äºæ‰«ç•¥è®¡ç®—çš„ X_varsçš„å½¢çŠ¶: ", X_vars.shape)
         
     elif method == "FromExcel":
         
-        # Ê¾Àıµ÷ÓÃ: X_vars = GenerateVehicleParamater(WorkingDir, Filename="ParameterSweep_fromExcel.xlsx", method="FromExcel")
+        # ç¤ºä¾‹è°ƒç”¨: X_vars = GenerateVehicleParamater(WorkingDir, Filename="ParameterSweep_fromExcel.xlsx", method="FromExcel")
         
-        print(f"[INFO] ´Ó EXCEL ±í¸ñÖĞ»ñÈ¡³µÁ¾²ÎÊı, ¸Ã±í¸ñ¼ÇÂ¼ÁËÇ°ÑØ½â¶ÔÓ¦µÄ±»ÓÅ»¯²ÎÊı")
-        print("ÔªÎÄ¼şÃû³Æ:", Filename)
-        # ¶ÁÈ¡ config_opt.xlsx »ñÈ¡»ù×¼Öµ X_base ºÍÊÇ·ñÓÅ»¯µÄ±êÖ¾ is2opt
+        print(f"[INFO] ä» EXCEL è¡¨æ ¼ä¸­è·å–è½¦è¾†å‚æ•°, è¯¥è¡¨æ ¼è®°å½•äº†å‰æ²¿è§£å¯¹åº”çš„è¢«ä¼˜åŒ–å‚æ•°")
+        print("å…ƒæ–‡ä»¶åç§°:", Filename)
+        # è¯»å– config_opt.xlsx è·å–åŸºå‡†å€¼ X_base å’Œæ˜¯å¦ä¼˜åŒ–çš„æ ‡å¿— is2opt
         Opt_Config = read_config_opt_excel(WorkingDir, excel_name="config_opt.xlsx")
-        X_base = Opt_Config["»ù×¼Öµ"].to_list()
-        is2opt = Opt_Config["ÊÇ·ñÓÅ»¯"].to_list()
+        X_base = Opt_Config["åŸºå‡†å€¼"].to_list()
+        is2opt = Opt_Config["æ˜¯å¦ä¼˜åŒ–"].to_list()
 
-        # ¶ÁÈ¡Íâ²¿ÎÄ¼ş ParameterSweep_fromExcel.xlsx
+        # è¯»å–å¤–éƒ¨æ–‡ä»¶ ParameterSweep_fromExcel.xlsx
         Param_Sweep_Config = pd.read_excel(f"{WorkingDir}/{Filename}", sheet_name="Sheet1", header=None)
-        N_Xvars = Param_Sweep_Config.shape[1] - 1 # ´ÓExcel ±í¸ñÖĞ¶ÁÈ¡µ½µÄÓĞ¶àÉÙ×é X_vars ĞèÒª±»¼ÆËã
+        N_Xvars = Param_Sweep_Config.shape[1] - 1 # ä»Excel è¡¨æ ¼ä¸­è¯»å–åˆ°çš„æœ‰å¤šå°‘ç»„ X_vars éœ€è¦è¢«è®¡ç®—
         ChangingVars = Param_Sweep_Config.iloc[..., 1: Param_Sweep_Config.shape[1]]
 
-        N_2opt = len(is2opt) # X_vars ÓĞ¶àÉÙÎ¬¶È, Ó¦¸ÃÊÇ32
+        N_2opt = len(is2opt) # X_vars æœ‰å¤šå°‘ç»´åº¦, åº”è¯¥æ˜¯32
                 
-        # ¸ù¾İÍâ²¿excelĞĞÊı³õÊ¼»¯ X_vars
+        # æ ¹æ®å¤–éƒ¨excelè¡Œæ•°åˆå§‹åŒ– X_vars
         X_vars = np.zeros((N_2opt, N_Xvars)) 
 
         optCount = 0
@@ -150,39 +149,39 @@ def GenerateVehicleParamater(WorkingDir, Filename, method="JustSweepL123"):
             elif is2opt[LineId] == 1:
                 X_vars[LineId] = ChangingVars.iloc[optCount, ].to_numpy()
                 optCount = optCount + 1 
-        # ÌØ±ğ¹ØĞÄ  $_Kpy	Ò»ÏµĞü¹Ò¸Õ¶È-ºáÏò£¬Óë3ñîºÏ£» $_Ksy	¶şÏµĞü¹Ò¸Õ¶È-ºáÏò£¬Óë7ñîºÏ
+        # ç‰¹åˆ«å…³å¿ƒ  $_Kpy	ä¸€ç³»æ‚¬æŒ‚åˆšåº¦-æ¨ªå‘ï¼Œä¸3è€¦åˆï¼› $_Ksy	äºŒç³»æ‚¬æŒ‚åˆšåº¦-æ¨ªå‘ï¼Œä¸7è€¦åˆ
         X_vars[3]  = X_vars[2]
         X_vars[7]  = X_vars[6]
 
-        print("ÓÃÓÚÉ¨ÂÔ¼ÆËãµÄ X_varsµÄĞÎ×´: ", X_vars.shape)  # ´òÓ¡ X_vars µÄĞÎ×´
+        print("ç”¨äºæ‰«ç•¥è®¡ç®—çš„ X_varsçš„å½¢çŠ¶: ", X_vars.shape)  # æ‰“å° X_vars çš„å½¢çŠ¶
         
     elif method == "FromNPZ":
                 
-        # Ê¾Àıµ÷ÓÃ 1: X_vars = GenerateVehicleParamater(WorkingDir, Filename="res_history.npz", method="FromNPZ")
-        # Ê¾Àıµ÷ÓÃ 2: X_vars = GenerateVehicleParamater(WorkingDir, Filename="generation_150_nondom.npz", method="FromNPZ")
+        # ç¤ºä¾‹è°ƒç”¨ 1: X_vars = GenerateVehicleParamater(WorkingDir, Filename="res_history.npz", method="FromNPZ")
+        # ç¤ºä¾‹è°ƒç”¨ 2: X_vars = GenerateVehicleParamater(WorkingDir, Filename="generation_150_nondom.npz", method="FromNPZ")
         
-        # print(f"[INFO] ´Ó res_history.npz »òÕß generation_i_nondom.npz ÖĞ»ñÈ¡³µÁ¾²ÎÊı, ¸Ã .npz ÎÄ¼ş¼ÇÂ¼ÁËÇ°ÑØ½âµÄ final_X")
+        # print(f"[INFO] ä» res_history.npz æˆ–è€… generation_i_nondom.npz ä¸­è·å–è½¦è¾†å‚æ•°, è¯¥ .npz æ–‡ä»¶è®°å½•äº†å‰æ²¿è§£çš„ final_X")
         data = np.load(Filename, allow_pickle=True)
         
         try:
-            # ³¢ÊÔ¼ÓÔØfinal_X
+            # å°è¯•åŠ è½½final_X
             final_X = data["final_X"].T
-            print(f"[INFO] ´Ó res_history.npz ÖĞ»ñÈ¡³µÁ¾²ÎÊı, ¸Ã .npz ÎÄ¼ş¼ÇÂ¼ÁË×îÖÕÇ°ÑØ½âµÄ final_X")
-            print("ÔªÎÄ¼şÃû³Æ:", Filename)
+            print(f"[INFO] ä» res_history.npz ä¸­è·å–è½¦è¾†å‚æ•°, è¯¥ .npz æ–‡ä»¶è®°å½•äº†æœ€ç»ˆå‰æ²¿è§£çš„ final_X")
+            print("å…ƒæ–‡ä»¶åç§°:", Filename)
         except KeyError:
-            # Èç¹ûÃ»ÓĞfinal_X£¬³¢ÊÔ¼ÓÔØX
+            # å¦‚æœæ²¡æœ‰final_Xï¼Œå°è¯•åŠ è½½X
             final_X = data["X"].T
-            print(f"[INFO] ´Ó generation_i_nondom.npz ÖĞ»ñÈ¡³µÁ¾²ÎÊı, ¸Ã .npz ÎÄ¼ş¼ÇÂ¼ÁËÄ³Ò»´ú¼ÊÇ°ÑØ½âµÄ final_X")
-            print("ÔªÎÄ¼şÃû³Æ:", Filename)
+            print(f"[INFO] ä» generation_i_nondom.npz ä¸­è·å–è½¦è¾†å‚æ•°, è¯¥ .npz æ–‡ä»¶è®°å½•äº†æŸä¸€ä»£é™…å‰æ²¿è§£çš„ final_X")
+            print("å…ƒæ–‡ä»¶åç§°:", Filename)
 
         Opt_Config = read_config_opt_excel(WorkingDir, excel_name="config_opt.xlsx")
-        X_base = Opt_Config["»ù×¼Öµ"].to_list()
-        is2opt = Opt_Config["ÊÇ·ñÓÅ»¯"].to_list()
+        X_base = Opt_Config["åŸºå‡†å€¼"].to_list()
+        is2opt = Opt_Config["æ˜¯å¦ä¼˜åŒ–"].to_list()
 
         N_Xvars = len(final_X[0])
-        N_2opt = len(is2opt) # X_vars ÓĞ¶àÉÙÎ¬¶È, Ó¦¸ÃÊÇ32
+        N_2opt = len(is2opt) # X_vars æœ‰å¤šå°‘ç»´åº¦, åº”è¯¥æ˜¯32
                         
-        # ³õÊ¼»¯ X_vars
+        # åˆå§‹åŒ– X_vars
         X_vars = np.zeros((N_2opt, N_Xvars)) 
 
         optCount = 0
@@ -192,54 +191,59 @@ def GenerateVehicleParamater(WorkingDir, Filename, method="JustSweepL123"):
             elif is2opt[LineId] == 1:
                     X_vars[LineId] = final_X[optCount, ]
                     optCount = optCount + 1 
-            # ÌØ±ğ¹ØĞÄ  $_Kpy	Ò»ÏµĞü¹Ò¸Õ¶È-ºáÏò£¬Óë3ñîºÏ£» $_Ksy	¶şÏµĞü¹Ò¸Õ¶È-ºáÏò£¬Óë7ñîºÏ
+            # ç‰¹åˆ«å…³å¿ƒ  $_Kpy	ä¸€ç³»æ‚¬æŒ‚åˆšåº¦-æ¨ªå‘ï¼Œä¸3è€¦åˆï¼› $_Ksy	äºŒç³»æ‚¬æŒ‚åˆšåº¦-æ¨ªå‘ï¼Œä¸7è€¦åˆ
             X_vars[3]  = X_vars[2]
             X_vars[7]  = X_vars[6]
 
-        print("ÓÃÓÚÉ¨ÂÔ¼ÆËãµÄ X_varsµÄĞÎ×´: ", X_vars.shape)  # ´òÓ¡ X_vars µÄĞÎ×´
+        print("ç”¨äºæ‰«ç•¥è®¡ç®—çš„ X_varsçš„å½¢çŠ¶: ", X_vars.shape)  # æ‰“å° X_vars çš„å½¢çŠ¶
 
     return X_vars
 
-# Ö÷º¯Êı
+# ä¸»å‡½æ•°
 def main():
     
-    start_time = time.time()  # »ñÈ¡µ±Ç°Ê±¼ä´Á(Ãë)
+    start_time = time.time()  # è·å–å½“å‰æ—¶é—´æˆ³(ç§’)
     
-    # ¹¤×÷Ä¿Â¼Â·¾¶¶¨Òå
+    # å·¥ä½œç›®å½•è·¯å¾„å®šä¹‰
     WorkingDir = os.getcwd()
-    # ÊµÑé±êÊ¶·û
+    # ä¿®æ”¹ç‚¹ 0
+    # å®éªŒæ ‡è¯†ç¬¦
     tag="Sweep"  
     
-    # ¶ş·Ö·¨ËÙ¶ÈÉÏÏÂÏŞ¡¢¶ş·ÖÉî¶È
+    # äºŒåˆ†æ³•é€Ÿåº¦ä¸Šä¸‹é™ã€äºŒåˆ†æ·±åº¦
     StartVel = 100/3.6 
     EndVel =  900/3.6
     N_depth = 7 
     
-    # µ÷ÓÃ X_vars Éú³Éº¯Êı, ÒÔ½øĞĞ ²ÎÊıÉ¨ÂÔ / Ç°ÑØ½â»Ø¹ËÑéÖ¤
-    # µ÷ÓÃ·½Ê½¼ûº¯ÊıÄÚ²¿ËµÃ÷
-    X_vars = GenerateVehicleParamater(WorkingDir, Filename="config_opt.xlsx", method="JustSweepL123")
+    # è°ƒç”¨ X_vars ç”Ÿæˆå‡½æ•°, ä»¥è¿›è¡Œ æ­£å‘å‚æ•°æ‰«ç•¥ / å‰æ²¿è§£å›é¡¾éªŒè¯
 
-    # ´´½¨×ÓÎÄ¼ş¼Ğ ChkPnt£¨checkpoint (¼ì²éµã)£©Èç¹û²»´æÔÚ
+    # ä¿®æ”¹ç‚¹ 1
+    X_vars = GenerateVehicleParamater(WorkingDir, Filename="config_opt.xlsx", method="JustSweepL123")
+    
+    # X_vars = GenerateVehicleParamater(WorkingDir, Filename="Overall_FinalSolutions.npz", method="FromNPZ")
+    # ç¤ºä¾‹è°ƒç”¨ 1: X_vars = GenerateVehicleParamater(WorkingDir, Filename="res_history.npz", method="FromNPZ")
+
+    # åˆ›å»ºå­æ–‡ä»¶å¤¹ ChkPntï¼ˆcheckpoint (æ£€æŸ¥ç‚¹)ï¼‰å¦‚æœä¸å­˜åœ¨
     checkpoint_dir = os.path.join(WorkingDir, "ChkPnt")
-     # Èç¹û×ÓÎÄ¼ş¼ĞÒÑ¾­´æÔÚÇÒ²»Îª¿Õ£¬ÏÈÉ¾³ıËüÒÔ¼°Ëü°üº¬µÄËùÓĞÄÚÈİ
+     # å¦‚æœå­æ–‡ä»¶å¤¹å·²ç»å­˜åœ¨ä¸”ä¸ä¸ºç©ºï¼Œå…ˆåˆ é™¤å®ƒä»¥åŠå®ƒåŒ…å«çš„æ‰€æœ‰å†…å®¹
     if os.path.exists(checkpoint_dir):
         shutil.rmtree(checkpoint_dir)
-    # ÔÙ´ÎĞÂ½¨Ò»¸ö¿Õ°×µÄ ChkPnt(checkpoint) ÎÄ¼ş¼Ğ£¬±ãÓÚºóĞøĞ´Èë
+    # å†æ¬¡æ–°å»ºä¸€ä¸ªç©ºç™½çš„ ChkPnt(checkpoint) æ–‡ä»¶å¤¹ï¼Œä¾¿äºåç»­å†™å…¥
     os.makedirs(checkpoint_dir, exist_ok=True)
-    # ±£´æ X_vars 
+    # ä¿å­˜ X_vars 
     np.save(os.path.join(checkpoint_dir, f"myXvars_{tag}.npy"), X_vars)
     
-    # 3) ÉèÖÃÅú´ÎºÍ²¢ĞĞ
-    # ĞŞ¸Äµã 1
+    # 3) è®¾ç½®æ‰¹æ¬¡å’Œå¹¶è¡Œ
+    # ä¿®æ”¹ç‚¹ 2
     BatchSize_parallel = 10
     total_columns = X_vars.shape[1]
     num_batches = math.ceil(total_columns / BatchSize_parallel)
-    print("×ÜµÄ²ÎÊı×éºÏÊı£º", total_columns)
-    print("²¢ĞĞÈÎÎñÊı£º", BatchSize_parallel)
-    print("Åú´ÎÊıÁ¿£º", num_batches)
+    print("æ€»çš„å‚æ•°ç»„åˆæ•°ï¼š", total_columns)
+    print("å¹¶è¡Œä»»åŠ¡æ•°ï¼š", BatchSize_parallel)
+    print("æ‰¹æ¬¡æ•°é‡ï¼š", num_batches)
 
-    # ¼ÙÉèÃ¿¸ö×éºÏ¼ÆËãºÍ±£´æµÄÎ¬¶ÈÊı
-    # ĞŞ¸Äµã 2
+    # å‡è®¾æ¯ä¸ªç»„åˆè®¡ç®—å’Œä¿å­˜çš„ç»´åº¦æ•°
+    # ä¿®æ”¹ç‚¹ 3
     result_dim = 7  
     all_batch_results = []
 
@@ -247,17 +251,17 @@ def main():
         start_idx = batch_idx * BatchSize_parallel
         end_idx   = min((batch_idx + 1) * BatchSize_parallel, total_columns)
 
-        # ============== (a) ÇåÀí & Éú³ÉÎÄ¼ş ==============
+        # ============== (a) æ¸…ç† & ç”Ÿæˆæ–‡ä»¶ ==============
         ClearBatchTmpFolder(WorkingDir)
         prepare_SpckFiles_eachBatch(WorkingDir, tag, start_idx, end_idx)
 
         X_vars_batch = X_vars[:, start_idx:end_idx]
-        print(f"µÚ {batch_idx+1} Åú£ºÁĞË÷Òı·¶Î§ [{start_idx}:{end_idx}), ÅúÁ¿´óĞ¡ = {X_vars_batch.shape[1]}")
+        print(f"ç¬¬ {batch_idx+1} æ‰¹ï¼šåˆ—ç´¢å¼•èŒƒå›´ [{start_idx}:{end_idx}), æ‰¹é‡å¤§å° = {X_vars_batch.shape[1]}")
 
-        # ÓÃÀ´´æ´¢±¾Åú´ÎµÄ½á¹û (shape=(1, batch_size))
+        # ç”¨æ¥å­˜å‚¨æœ¬æ‰¹æ¬¡çš„ç»“æœ (shape=(1, batch_size))
         batch_result = np.zeros((result_dim, X_vars_batch.shape[1]))
 
-        # ============== (b) ²¢ĞĞ´¦Àí ==============
+        # ============== (b) å¹¶è¡Œå¤„ç† ==============
         with concurrent.futures.ProcessPoolExecutor(max_workers=BatchSize_parallel) as executor:
             future_list = []
             for col_idx_in_batch in range(X_vars_batch.shape[1]):
@@ -265,11 +269,11 @@ def main():
                 future = executor.submit(parallel_worker, args)
                 future_list.append(future)
 
-            # ÊÕ¼¯½á¹û
+            # æ”¶é›†ç»“æœ
             for future in concurrent.futures.as_completed(future_list):
                 col_idx_in_batch, cVel, RigidWN_CRV, RigidLatMax_CRV, IrwWN_CRV, IrwLatMax_CRV, SperlingY_AAR5, SperlingZ_AAR5 = future.result()
-                # ĞŞ¸Äµã 3
-                # ²¢ĞĞ³Ø return (col_idx_in_batch, cVel, WearNumber_CRV, LatDispMax_CRV, SperlingY_AAR5, SperlingZ_AAR5)
+                # ä¿®æ”¹ç‚¹ 4
+                # å¹¶è¡Œæ±  return (col_idx_in_batch, cVel, WearNumber_CRV, LatDispMax_CRV, SperlingY_AAR5, SperlingZ_AAR5)
                 batch_result[0, col_idx_in_batch] = cVel 
                 batch_result[1, col_idx_in_batch] = RigidWN_CRV
                 batch_result[2, col_idx_in_batch] = RigidLatMax_CRV
@@ -279,21 +283,21 @@ def main():
                 batch_result[6, col_idx_in_batch] = SperlingZ_AAR5
         
         all_batch_results.append(batch_result)
-        # ÕâÀï all_batch_results ÊÇÒ»¸ö list£¬ÆäÖĞÃ¿¸öÔªËØ¶¼ÊÇµ±Ç°Åú´ÎµÄ½á¹û (batch_result)
+        # è¿™é‡Œ all_batch_results æ˜¯ä¸€ä¸ª listï¼Œå…¶ä¸­æ¯ä¸ªå…ƒç´ éƒ½æ˜¯å½“å‰æ‰¹æ¬¡çš„ç»“æœ (batch_result)
 
-        batch_result_toSave = batch_result # ±£´æÊı¾İ½âñî£¬±ÜÃâ±£´æ¡°ÁĞ±í¡±Ê±£¬NumPy ÄÚ²¿»á³¢ÊÔ°Ñ all_batch_results ×ª³ÉÒ»¸öÍ³Ò»µÄ ndarray
+        batch_result_toSave = batch_result # ä¿å­˜æ•°æ®è§£è€¦ï¼Œé¿å…ä¿å­˜â€œåˆ—è¡¨â€æ—¶ï¼ŒNumPy å†…éƒ¨ä¼šå°è¯•æŠŠ all_batch_results è½¬æˆä¸€ä¸ªç»Ÿä¸€çš„ ndarray
         np.save(os.path.join(checkpoint_dir, f"batch_result_{tag}_batch{batch_idx}.npy"), batch_result_toSave)
 
-    # Æ´½ÓËùÓĞÅú´ÎµÄ½á¹û
+    # æ‹¼æ¥æ‰€æœ‰æ‰¹æ¬¡çš„ç»“æœ
     final_results = np.concatenate(all_batch_results, axis=1)
     print("final_results shape:", final_results.shape)
-    print("¼ÆËãÍê³É£¬Ç°10ÁĞÁÙ½çËÙ¶È = ", final_results[0, :10])
+    print("è®¡ç®—å®Œæˆï¼Œå‰10åˆ—ä¸´ç•Œé€Ÿåº¦ = ", final_results[0, :10])
     
-    # ´úÂë¼ÆÊ±
+    # ä»£ç è®¡æ—¶
     elapsed = time.time() - start_time
-    print(f"¸Ã´úÂë¿éºÄÊ±: {elapsed:.6f} Ãë")
+    print(f"è¯¥ä»£ç å—è€—æ—¶: {elapsed:.6f} ç§’")
     
-    # ×îÖÕ½á¹û±£´æ
+    # æœ€ç»ˆç»“æœä¿å­˜
     np.save(f"Xvars_{tag}.npy", X_vars)
     np.save(f"Result_{tag}.npy", final_results)
     
@@ -302,11 +306,12 @@ if __name__ == "__main__":
     # ShowMeshgrid()
     
 """
-ÃüÁîĞĞµ÷ÓÃ£º
+å‘½ä»¤è¡Œè°ƒç”¨ï¼š
 
-    Æô¶¯ pypack »·¾³µÄÃüÁîĞĞ
-    F:  # ÇĞ»»ÅÌ·û                                                                                                             
-    cd F:\ResearchMainStream\0.ResearchBySection\C.¶¯Á¦Ñ§Ä£ĞÍ\²ÎÊıÓÅ»¯\²ÎÊıÓÅ»¯ÊµÏÖ\ParallelSweepSimpack                            
-    python SweepLx1Lx2xL3x.py # Ö´ĞĞ±¾³ÌĞò                                                                                                                                   
+    # éœ€è¦å¯åŠ¨ pypack ç¯å¢ƒçš„å‘½ä»¤è¡Œ
+    
+    F:  # åˆ‡æ¢ç›˜ç¬¦                                                                                                             
+    cd F:\ResearchMainStream\0.ResearchBySection\C.åŠ¨åŠ›å­¦æ¨¡å‹\å‚æ•°ä¼˜åŒ–\å‚æ•°ä¼˜åŒ–å®ç°\ParallelSweepSimpack                           
+    python -X utf8 SweepLx1Lx2xL3x.py # æ‰§è¡Œæœ¬ç¨‹åº                                                                                                                                   
 
 """
