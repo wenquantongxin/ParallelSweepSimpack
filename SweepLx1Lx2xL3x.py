@@ -106,7 +106,7 @@ def GenerateVehicleParamater(WorkingDir, Filename, method="JustSweepL123"):
         # 2) 生成 X_vars (32 x N_combos)
         Lx1_sweep = np.arange(0, 0.64 + 0.001, 0.04)    # 从0到0.64，共17个元素
         Lx2_sweep = np.arange(0, 0.60 + 0.001, 0.04)    # 从0到0.60，共16个元素
-        Lx3_sweep = np.arange(0, 0.001, 0.1)            # Lx3_sweep = np.arange(-0.6, 0.40 + 0.001, 0.1)
+        Lx3_sweep = np.arange(-0.6, 0.40 + 0.001, 0.1)  # Lx3_sweep = np.arange(0, 0.001, 0.1)         
 
         Lx123_combinations = list(itertools.product(Lx1_sweep, Lx2_sweep, Lx3_sweep))
         X_vars_columns = []

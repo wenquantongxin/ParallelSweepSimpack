@@ -1083,9 +1083,9 @@ class MyBatchProblem(Problem):
         
         # 使 f1 <= -250/3.6，对应于临界速度大于 250 km/h
         G[:, 0] = F[:, 0] + 250.0/3.6 
-        # 使 f2 <= 1000，对应于磨耗数小于 1000
-        G[:, 1] = F[:, 1] - 1000.00 
-        # 使 f3 <= 300，对应于 Sperling 指标小于 3
+        # 使 f2 <= 2000，对应于磨耗数小于 2000
+        G[:, 1] = F[:, 1] - 2000.00 
+        # 使 f3 <= math.sqrt( (3 * 3 + 3 * 3) / 2 ) * 100，对应于 Sperling 指标 RMS 小于 3
         G[:, 2] = F[:, 2] - math.sqrt( (3 * 3 + 3 * 3) / 2 ) * 100
           
         out["F"] = F
@@ -1107,13 +1107,14 @@ def main():
     #--------------------------------------------------------------------------------------------#
     # 多目标 NSGA2 算法
     algorithm_NSGA2 = NSGA2( pop_size = 66 )
-    # RNSGA2 算法
-    ref_points = np.load('RefPnt_fromNSGA2.npy') # 导入 Analysis_GenRefPnt.ipynb 生成的参考点
-    algorithm_RNSGA2 = RNSGA2(ref_points=ref_points, pop_size=66, epsilon=15, normalization='no') 
-    # NSGA3 算法
-    ref_dirs = get_reference_directions("das-dennis", 3, n_partitions=17) 
-    # 组合结果C(17+2,2)=171<180=pop_size, pop_size is equal or larger than the number of reference directions. 
-    algorithm_NSGA3 = NSGA3(pop_size=180,ref_dirs=ref_dirs)
+    
+    # # RNSGA2 算法
+    # ref_points = np.load('RefPnt_fromNSGA2.npy') # 导入 Analysis_GenRefPnt.ipynb 生成的参考点
+    # algorithm_RNSGA2 = RNSGA2(ref_points=ref_points, pop_size=66, epsilon=15, normalization='no') 
+    # # NSGA3 算法
+    # ref_dirs = get_reference_directions("das-dennis", 3, n_partitions=17) 
+    # # 组合结果C(17+2,2)=171<180=pop_size, pop_size is equal or larger than the number of reference directions. 
+    # algorithm_NSGA3 = NSGA3(pop_size=180,ref_dirs=ref_dirs)
     
     # 修改点 3：选择优化算法
     selected_algorithm = algorithm_NSGA2  # 可以选择 algorithm_NSGA2 或 algorithm_NSGA3
