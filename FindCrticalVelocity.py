@@ -1,4 +1,4 @@
-# -*- coding: gbk -*-
+# -*- coding: utf-8 -*-
 
 import os
 import time
@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 import subprocess
 
-# ÎªÃ¿¸ö idx µÄ subvar ÎÄ¼şµ¼Èë²ÎÁ¿
+# ä¸ºæ¯ä¸ª idx çš„ subvar æ–‡ä»¶å¯¼å…¥å‚é‡
 def Import_Subvars_To_File_idx(
     WorkingDir,
     tag,
@@ -21,35 +21,35 @@ def Import_Subvars_To_File_idx(
     Lx1, Lx2, Lx3
 ):
     """
-    ¶ÔÓ¦ÓÚMATLABµÄ Fun_GenerateSubvarsFile º¯Êı¡£
-    ÔÚ×ÓÎÄ¼ş¼Ğ BatchTmp ÏÂ£¬¸ù¾İ´«ÈëµÄ tag, idx È·¶¨ÒªĞ´ÈëµÄÄ¿±ê .subvar ÎÄ¼şÃû³Æ£¬
-    È»ºó¸²¸ÇĞ´ÈëSimpackÍâ²¿²ÎÊı¶¨ÒåÎÄ¼şÄÚÈİ¡£
+    å¯¹åº”äºMATLABçš„ Fun_GenerateSubvarsFile å‡½æ•°ã€‚
+    åœ¨å­æ–‡ä»¶å¤¹ BatchTmp ä¸‹ï¼Œæ ¹æ®ä¼ å…¥çš„ tag, idx ç¡®å®šè¦å†™å…¥çš„ç›®æ ‡ .subvar æ–‡ä»¶åç§°ï¼Œ
+    ç„¶åè¦†ç›–å†™å…¥Simpackå¤–éƒ¨å‚æ•°å®šä¹‰æ–‡ä»¶å†…å®¹ã€‚
 
-    ²ÎÊı:
+    å‚æ•°:
     ----------
     WorkingDir : str
-        Ö÷¹¤×÷Ä¿Â¼£¬°üº¬ BatchTmp ×ÓÎÄ¼ş¼Ğ
+        ä¸»å·¥ä½œç›®å½•ï¼ŒåŒ…å« BatchTmp å­æ–‡ä»¶å¤¹
     tag : str
-        Çø·ÖÅú´Î»òÊÔÑé»·¾³µÄ±êÊ¶·û
+        åŒºåˆ†æ‰¹æ¬¡æˆ–è¯•éªŒç¯å¢ƒçš„æ ‡è¯†ç¬¦
     idx : int
-        ×éºÏ»òÄ£ĞÍ±àºÅ
-    ÆäÓà²ÎÊı:
-        ÓëÔ­MATLABº¯ÊıÖĞµÄ×Ó±äÁ¿Ò»Ò»¶ÔÓ¦ (TargetVelocity, sprCpz, Kpx, ... , Lx1, Lx2, Lx3)¡£
+        ç»„åˆæˆ–æ¨¡å‹ç¼–å·
+    å…¶ä½™å‚æ•°:
+        ä¸åŸMATLABå‡½æ•°ä¸­çš„å­å˜é‡ä¸€ä¸€å¯¹åº” (TargetVelocity, sprCpz, Kpx, ... , Lx1, Lx2, Lx3)ã€‚
 """
-    # ¹¹ÔìĞèÒªĞ´ÈëµÄ×Ó±äÁ¿ÎÄ¼şÂ·¾¶
-    # ÀıÈç:  .../BatchTmp/subvars_Opt_{tag}_{idx}.subvar
+    # æ„é€ éœ€è¦å†™å…¥çš„å­å˜é‡æ–‡ä»¶è·¯å¾„
+    # ä¾‹å¦‚:  .../BatchTmp/subvars_Opt_{tag}_{idx}.subvar
     subvar_filename = f"subvars_Opt_{tag}_{idx}.subvar"
     subvar_path = os.path.join(WorkingDir, "BatchTmp", subvar_filename)
 
-    # ÒÔĞ´Ä£Ê½('w')´ò¿ªÎÄ¼ş£¬¸²¸ÇÆäÔ­ÓĞÄÚÈİ
+    # ä»¥å†™æ¨¡å¼('w')æ‰“å¼€æ–‡ä»¶ï¼Œè¦†ç›–å…¶åŸæœ‰å†…å®¹
     with open(subvar_path, 'w', encoding='utf-8') as f:
-        # Ğ´ÈëÍ·²¿ĞÅÏ¢
+        # å†™å…¥å¤´éƒ¨ä¿¡æ¯
         f.write("!file.version=3.5! Removing this line will make the file unreadable\n\n")
         f.write("!**********************************************************************\n")
         f.write("! SubVars\n")
         f.write("!**********************************************************************\n")
 
-        # ÖğĞĞĞ´Èë subvar(...) Óï¾ä
+        # é€è¡Œå†™å…¥ subvar(...) è¯­å¥
         f.write(f"subvar($_TargetVelocity, str= '{TargetVelocity:.6g}') ! $_TargetVelocity\n")
         f.write(f"subvar($_sprCpz, str= '{sprCpz:.6g}') ! $_sprCpz\n")
         f.write(f"subvar($_Kpx, str= '{Kpx:.6g}') ! $_Kpx\n")
@@ -83,19 +83,19 @@ def Import_Subvars_To_File_idx(
         f.write(f"subvar($_Lx2, str= '{Lx2:.6g}') ! $_Lx2\n")
         f.write(f"subvar($_Lx3, str= '{Lx3:.6g}') ! $_Lx3\n")
 
-    # º¯Êı½áÊøÊ±£¬with ÉÏÏÂÎÄ»á×Ô¶¯¹Ø±ÕÎÄ¼ş
-    print(f"[INFO] ÒÑ¸üĞÂÎÄ¼ş: {subvar_path}")
+    # å‡½æ•°ç»“æŸæ—¶ï¼Œwith ä¸Šä¸‹æ–‡ä¼šè‡ªåŠ¨å…³é—­æ–‡ä»¶
+    print(f"[INFO] å·²æ›´æ–°æ–‡ä»¶: {subvar_path}")
 
-# ¶ÁÈ¡Ö¸¶¨ .dat Êı¾İ
-# ·µ»Ø´ÓÊı¾İÎÄ¼şÖĞ»ñµÃ¼ÆËãÁÙ½çËÙ¶ÈÊ±£¬µ±Ç°ËÙ¶ÈÏÂµÄ×î´óºáÒÆÁ¿
+# è¯»å–æŒ‡å®š .dat æ•°æ®
+# è¿”å›ä»æ•°æ®æ–‡ä»¶ä¸­è·å¾—è®¡ç®—ä¸´ç•Œé€Ÿåº¦æ—¶ï¼Œå½“å‰é€Ÿåº¦ä¸‹çš„æœ€å¤§æ¨ªç§»é‡
 def ReadCriticalVelDat(dat_path):
     val_array = [0.0]*4
     with open(dat_path, "r", encoding="utf-8") as f:
-        # Ìø¹ıÇ°5ĞĞ
+        # è·³è¿‡å‰5è¡Œ
         for _ in range(5):
             f.readline()
         
-        # ¶ÁÈ¡¹Ø¼üĞĞ
+        # è¯»å–å…³é”®è¡Œ
         line6 = f.readline()
         parts = line6.split(';')
         val_array[0] = float(parts[1].strip())
@@ -125,51 +125,51 @@ def ReadCriticalVelDat(dat_path):
     
     return maxLatY_fromDat
 
-# Ö´ĞĞ simpack-cmd µ÷ÓÃ simpack-slv »òÕß simpack-qs ½Å±¾
+# æ‰§è¡Œ simpack-cmd è°ƒç”¨ simpack-slv æˆ–è€… simpack-qs è„šæœ¬
 def run_simpack_cmd (cmd, work_dir, timeout_seconds):
     """
-    ÔËĞĞ simpack-post ÃüÁî£¬²¢ÔÚÖ¸¶¨Ê±¼äÄÚ¼à¿ØÆäÖ´ĞĞ£¬³¬Ê±ÔòÖÕÖ¹½ø³Ì¡£
+    è¿è¡Œ simpack-post å‘½ä»¤ï¼Œå¹¶åœ¨æŒ‡å®šæ—¶é—´å†…ç›‘æ§å…¶æ‰§è¡Œï¼Œè¶…æ—¶åˆ™ç»ˆæ­¢è¿›ç¨‹ã€‚
 
-    ²ÎÊı:
+    å‚æ•°:
     cmd : list
-        ĞèÒªÖ´ĞĞµÄÃüÁî¼°Æä²ÎÊı¡£
+        éœ€è¦æ‰§è¡Œçš„å‘½ä»¤åŠå…¶å‚æ•°ã€‚
     work_dir : str
-        ¹¤×÷Ä¿Â¼Â·¾¶£¬Ö¸Ïò simpack-post ĞèÒªÔËĞĞµÄÄ¿Â¼¡£
+        å·¥ä½œç›®å½•è·¯å¾„ï¼ŒæŒ‡å‘ simpack-post éœ€è¦è¿è¡Œçš„ç›®å½•ã€‚
     timeout_seconds : int
-        ×î´óÖ´ĞĞÊ±¼ä£¨Ãë£©¡£Èç¹ûÃüÁîÔËĞĞ³¬Ê±£¬½«»áÖÕÖ¹Ëü¡£
+        æœ€å¤§æ‰§è¡Œæ—¶é—´ï¼ˆç§’ï¼‰ã€‚å¦‚æœå‘½ä»¤è¿è¡Œè¶…æ—¶ï¼Œå°†ä¼šç»ˆæ­¢å®ƒã€‚
 
-    ·µ»Ø:
+    è¿”å›:
     result : int
-        ·µ»Ø 0 ±íÊ¾³É¹¦Ö´ĞĞ£¬ÆäËûÖµ±íÊ¾´íÎó¡£
+        è¿”å› 0 è¡¨ç¤ºæˆåŠŸæ‰§è¡Œï¼Œå…¶ä»–å€¼è¡¨ç¤ºé”™è¯¯ã€‚
     """
     try:
-        # Ê¹ÓÃ Popen Æô¶¯½ø³Ì
+        # ä½¿ç”¨ Popen å¯åŠ¨è¿›ç¨‹
         process = subprocess.Popen(cmd, cwd=work_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-         # µÈ´ı½ø³ÌÍê³É£¬×î¶àµÈ´ı timeout_seconds Ê±¼ä
+         # ç­‰å¾…è¿›ç¨‹å®Œæˆï¼Œæœ€å¤šç­‰å¾… timeout_seconds æ—¶é—´
         stdout, stderr = process.communicate(timeout=timeout_seconds)
 
-        # Èç¹û½ø³ÌÔÚÊ±¼äÏŞÖÆÄÚÍê³É
+        # å¦‚æœè¿›ç¨‹åœ¨æ—¶é—´é™åˆ¶å†…å®Œæˆ
         if process.returncode == 0:
             return 0
         else:
-            # ´òÓ¡±ê×¼´íÎóÊä³ö
-            print(f"[ERROR] simpack Ö´ĞĞÊ§°Ü£¬·µ»ØÂë={process.returncode}")
-            return -99.5  # ·µ»Ø´íÎóÂë
+            # æ‰“å°æ ‡å‡†é”™è¯¯è¾“å‡º
+            print(f"[ERROR] simpack æ‰§è¡Œå¤±è´¥ï¼Œè¿”å›ç ={process.returncode}")
+            return -99.5  # è¿”å›é”™è¯¯ç 
 
     except subprocess.TimeoutExpired:
-        # Èç¹û³¬Ê±£¬ÖÕÖ¹½ø³Ì
-        print("[ERROR] simpack Ö´ĞĞ³¬Ê±£¬ÖÕÖ¹½ø³Ì£¡")
+        # å¦‚æœè¶…æ—¶ï¼Œç»ˆæ­¢è¿›ç¨‹
+        print("[ERROR] simpack æ‰§è¡Œè¶…æ—¶ï¼Œç»ˆæ­¢è¿›ç¨‹ï¼")
         process.terminate()
-        process.wait()  # È·±£½ø³Ì±»ÍêÈ«ÖÕÖ¹
-        return -99.4  # ·µ»Ø³¬Ê±´íÎóÂë
+        process.wait()  # ç¡®ä¿è¿›ç¨‹è¢«å®Œå…¨ç»ˆæ­¢
+        return -99.4  # è¿”å›è¶…æ—¶é”™è¯¯ç 
 
     except Exception as e:
-        print(f"[ERROR] Ö´ĞĞÃüÁîÊ§°Ü: {e}")
-        return -99.3  # ÆäËû´íÎó
+        print(f"[ERROR] æ‰§è¡Œå‘½ä»¤å¤±è´¥: {e}")
+        return -99.3  # å…¶ä»–é”™è¯¯
 
 
-# µ¥Ïß³ÌÄÚ¼ÆËãËÄ×éÂÖ¶ÔµÄ×î´óºáÒÆÁ¿
+# å•çº¿ç¨‹å†…è®¡ç®—å››ç»„è½®å¯¹çš„æœ€å¤§æ¨ªç§»é‡
 def MaxLatY_idx(
     work_dir,
     tag,
@@ -178,122 +178,109 @@ def MaxLatY_idx(
     wait_seconds = 3
 ):
     """
-    Python°æº¯Êı£¬¶ÔÓ¦ MATLAB µÄ Fun_maxLatY_fromSPCKpost¡£
+    Pythonç‰ˆå‡½æ•°ï¼Œå¯¹åº” MATLAB çš„ Fun_maxLatY_fromSPCKpostã€‚
     
-    ²ÎÊı:
+    å‚æ•°:
     ----------
     work_dir : str
-        Ö÷¹¤×÷Ä¿Â¼£¬°üº¬½Å±¾ SbrExport_SPCKResult.qs¡£
+        ä¸»å·¥ä½œç›®å½•ï¼ŒåŒ…å«è„šæœ¬ SbrExport_SPCKResult.qsã€‚
     spf_filename : str
-        SPFÎÄ¼şÃû£¨ÀıÈç "OptTargetResult_Opt_test_66.spf"£©£¬Êµ¼ÊÎ»ÓÚ work_dir/BatchTmp ÏÂ¡£
+        SPFæ–‡ä»¶åï¼ˆä¾‹å¦‚ "OptTargetResult_Opt_test_66.spf"ï¼‰ï¼Œå®é™…ä½äº work_dir/BatchTmp ä¸‹ã€‚
     out_result_prefix : str
-        Éú³É½á¹ûµÄÇ°×º£¨"OptResult_test_66"£©£¬Êµ¼Ê dat ÎÄ¼ş»áĞ´µ½ work_dir/BatchTmp/ÏÂ¡£
+        ç”Ÿæˆç»“æœçš„å‰ç¼€ï¼ˆ"OptResult_test_66"ï¼‰ï¼Œå®é™… dat æ–‡ä»¶ä¼šå†™åˆ° work_dir/BatchTmp/ä¸‹ã€‚
     qs_script : str
-        Ä¬ÈÏ "SbrExport_SPCKResult.qs"£¬ÔÚ work_dir ÏÂ¡£
+        é»˜è®¤ "SbrExport_SPCKResult.qs"ï¼Œåœ¨ work_dir ä¸‹ã€‚
     wait_seconds : int or float
-        ÃüÁîÖ´ĞĞºóµÈ´ıÃëÊı£¬±£Ö¤ÎÄ¼şĞ´Èë¡£
+        å‘½ä»¤æ‰§è¡Œåç­‰å¾…ç§’æ•°ï¼Œä¿è¯æ–‡ä»¶å†™å…¥ã€‚
     """
-    spf_filename = f"Result_RigidCriticalVel_Opt_{tag}_{idx}.spf"
-    out_result_prefix = f"DatResult_RigidCriticalVel_{tag}_{idx}"
+    spf_filename = f"Result_NativeRigidCriticalVel_Opt_{tag}_{idx}.spf"
+    out_result_prefix = f"DatResult_NativeRigidCriticalVel_{tag}_{idx}"
     # spf_filename = f"OptTargetResult_Opt_{tag}_{idx}.spf"
     # out_result_prefix = f"OptResult_{tag}_{idx}"
     
-    # Æ´³ö SPF ÎÄ¼şµÄ¾ø¶ÔÂ·¾¶
+    # æ‹¼å‡º SPF æ–‡ä»¶çš„ç»å¯¹è·¯å¾„
     spf_path = os.path.join(work_dir, "BatchTmp", spf_filename)
-    # Æ´³öµ¼³öµÄ½á¹ûÇ°×º (dat ×îÖÕ»á³ÉÎª "BatchTmp/out_result_prefix.dat")
+    # æ‹¼å‡ºå¯¼å‡ºçš„ç»“æœå‰ç¼€ (dat æœ€ç»ˆä¼šæˆä¸º "BatchTmp/out_result_prefix.dat")
     out_result_full_prefix = os.path.join(work_dir, "BatchTmp", out_result_prefix)
-    # ½Å±¾Î»ÖÃ
+    # è„šæœ¬ä½ç½®
     qs_script_path = os.path.join(work_dir, qs_script)
 
-    # ÈôÓĞĞèÒª¿É¼ì²éÎÄ¼ş´æÔÚ
+    # è‹¥æœ‰éœ€è¦å¯æ£€æŸ¥æ–‡ä»¶å­˜åœ¨
     if not os.path.isfile(qs_script_path):
-        print(f"ºó´¦Àí½Å±¾²»´æÔÚ: {qs_script_path}")
+        print(f"åå¤„ç†è„šæœ¬ä¸å­˜åœ¨: {qs_script_path}")
         return -99.0 
     if not os.path.isfile(spf_path):
-        print(f".spfÎÄ¼ş²»´æÔÚ: {spf_path}")
+        print(f".spfæ–‡ä»¶ä¸å­˜åœ¨: {spf_path}")
         return -99.1 
 
-    # 1) µ÷ÓÃ simpack-post µÄ½Å±¾ .qs
-    # BatchTmp ×ÓÎÄ¼ş¼ĞÄÚ£¬ÒÔÃüÁîĞĞÖ´ĞĞ: simpack-post -s SbrExport_SPCKResult.qs Result_RigidCriticalVel_Opt_AAA_9.spf DatResult_RigidCriticalVel_AAA_9     
+    # 1) è°ƒç”¨ simpack-post çš„è„šæœ¬ .qs
+    # BatchTmp å­æ–‡ä»¶å¤¹å†…ï¼Œä»¥å‘½ä»¤è¡Œæ‰§è¡Œ: simpack-post -s SbrExport_SPCKResult.qs Result_NativeRigidCriticalVel_Opt_AAA_9.spf DatResult_NativeRigidCriticalVel_AAA_9     
     cmd = [
         "simpack-post",
         "-s", qs_script_path,
-        spf_path,               # SPF ÎÄ¼şÂ·¾¶
-        out_result_full_prefix  # Êä³öÇ°×º
+        spf_path,               # SPF æ–‡ä»¶è·¯å¾„
+        out_result_full_prefix  # è¾“å‡ºå‰ç¼€
     ]
     
-    # µ÷ÓÃº¯ÊıÖ´ĞĞ
+    # è°ƒç”¨å‡½æ•°æ‰§è¡Œ
     result = run_simpack_cmd(cmd, work_dir, timeout_seconds = 10 * 60) # 10 * 60
     if result != 0:
-        print(f"ÔËĞĞÊ§°Ü£¬´íÎóÂë£º{result}")
+        print(f"è¿è¡Œå¤±è´¥ï¼Œé”™è¯¯ç ï¼š{result}")
         return -99.2 
     else:
-        print(f"³É¹¦Ö´ĞĞ qs ½Å±¾µ÷ÓÃ")
-
-    
-    # try:
-    #     ret = subprocess.run(cmd, cwd=work_dir, check=True)
-    # except subprocess.CalledProcessError as e:
-    #     # Íâ²¿ÃüÁî·µ»Ø·Ç 0
-    #     print(f"[ERROR] simpack-postÃüÁî³ö´í£¬·µ»ØÂë={e.returncode}")
-    #     
-    # except Exception as e:
-    #     # ÆäËûÒì³££¬ÈçÕÒ²»µ½¿ÉÖ´ĞĞÎÄ¼ş¡¢¹¤×÷Ä¿Â¼²»´æÔÚµÈ
-    #     print(f"[ERROR] ÎŞ·¨Ö´ĞĞsimpack-postÃüÁî£¬Òì³£ĞÅÏ¢£º{e}")
-    #     return -99.3 
-       
+        print(f"æˆåŠŸæ‰§è¡Œ qs è„šæœ¬è°ƒç”¨")
     time.sleep(wait_seconds)
     
-    # 2) Æ´³ö×îÖÕ .dat ÎÄ¼şËùÔÚÂ·¾¶
+    # 2) æ‹¼å‡ºæœ€ç»ˆ .dat æ–‡ä»¶æ‰€åœ¨è·¯å¾„
     dat_path = out_result_full_prefix + ".dat"
     if not os.path.isfile(dat_path):
-        raise FileNotFoundError(f"ºó´¦Àí½á¹ûÎÄ¼şÎ´ÕÒµ½: {dat_path}")
+        raise FileNotFoundError(f"åå¤„ç†ç»“æœæ–‡ä»¶æœªæ‰¾åˆ°: {dat_path}")
 
-    # 3) ½âÎöÎÄ¼ş
+    # 3) è§£ææ–‡ä»¶
     try:
         maxLatY_fromDat = ReadCriticalVelDat(dat_path)
     except Exception as e:
-        print(f"[ERROR] ½âÎö {dat_path} Ê±³öÏÖÒì³£: {e}")
+        print(f"[ERROR] è§£æ {dat_path} æ—¶å‡ºç°å¼‚å¸¸: {e}")
         maxLatY = -99.4
     else:
         maxLatY = maxLatY_fromDat
 
     return maxLatY
 
-# ÅĞ¶Ï±àºÅÎª idx µÄSIMPACKÄ£ĞÍÊÇ·ñÎÈ¶¨
+# åˆ¤æ–­ç¼–å·ä¸º idx çš„SIMPACKæ¨¡å‹æ˜¯å¦ç¨³å®š
 def Check_SPCK_IsStable_Idx(WorkingDir, X_vars, tag, idx, TargetVel):
     """
-    ÅĞ¶ÏÔÚµ±Ç°²ÎÊıÁĞ (X_vars[:, idx]) ¶ÔÓ¦µÄËÙ¶È¡¢Ğü¹Ò²ÎÊıÏÂ£¬³µÁ¾ÊÇ·ñ»áÊ§ÎÈ¡£
+    åˆ¤æ–­åœ¨å½“å‰å‚æ•°åˆ— (X_vars[:, idx]) å¯¹åº”çš„é€Ÿåº¦ã€æ‚¬æŒ‚å‚æ•°ä¸‹ï¼Œè½¦è¾†æ˜¯å¦ä¼šå¤±ç¨³ã€‚
     
-    ÊäÈë£º
+    è¾“å…¥ï¼š
     ----------
     WorkingDir : str
-        Ö÷¹¤×÷Ä¿Â¼£¬°üº¬ "BatchTmp" ×ÓÎÄ¼ş¼Ğ£¬ÒÔ¼°Éú³ÉµÄ .spck/.subvar/.spf ÎÄ¼şµÈ¡£
+        ä¸»å·¥ä½œç›®å½•ï¼ŒåŒ…å« "BatchTmp" å­æ–‡ä»¶å¤¹ï¼Œä»¥åŠç”Ÿæˆçš„ .spck/.subvar/.spf æ–‡ä»¶ç­‰ã€‚
     tag : str
-        ±êÊ¶·û£¬ÓÃÓÚÆ´×°ÎÄ¼şÃû£¬Èç '0121A'¡£    
+        æ ‡è¯†ç¬¦ï¼Œç”¨äºæ‹¼è£…æ–‡ä»¶åï¼Œå¦‚ '0121A'ã€‚    
     X_vars : np.ndarray
-        ĞÎ×´ (32, N) µÄÊı×é£¬Ã¿Ò»ÁĞ´ú±íÒ»×é´ı·ÂÕæµÄ²ÎÊı£»
-        ¶ÔÓ¦Ë³Ğò: [ TargetVelocity, sprCpz, Kpx, Kpy, Kpz, Cpz, ... Lx1, Lx2, Lx3 ] ¹² 32 ¸ö¡£
+        å½¢çŠ¶ (32, N) çš„æ•°ç»„ï¼Œæ¯ä¸€åˆ—ä»£è¡¨ä¸€ç»„å¾…ä»¿çœŸçš„å‚æ•°ï¼›
+        å¯¹åº”é¡ºåº: [ TargetVelocity, sprCpz, Kpx, Kpy, Kpz, Cpz, ... Lx1, Lx2, Lx3 ] å…± 32 ä¸ªã€‚
     idx : int
-        Ö¸¶¨µ±Ç°Òª·ÂÕæµÄÁĞË÷Òı¡£
+        æŒ‡å®šå½“å‰è¦ä»¿çœŸçš„åˆ—ç´¢å¼•ã€‚
     TargetVel : float
-        Ö¸¶¨ÔËĞĞËÙ¶È£¬ÒÔÆÀ¼Ûµ±Ç°ÔËĞĞÌõ¼şÏÂµÄÎÈ¶¨ĞÔ¡£
-    ·µ»Ø£º
+        æŒ‡å®šè¿è¡Œé€Ÿåº¦ï¼Œä»¥è¯„ä»·å½“å‰è¿è¡Œæ¡ä»¶ä¸‹çš„ç¨³å®šæ€§ã€‚
+    è¿”å›ï¼š
     ----------
     is_stable : float
-        ÎÈ¶¨ĞÔÅĞ¶Ï½á¹û£º
-            1.0  ±íÊ¾ÎÈ¶¨£¨ÉßĞĞ£©ÔËĞĞ
-            0.2  ±íÊ¾Ê§ÎÈ£¨ºáÒÆ³¬¹ıãĞÖµ£©
-            0.1  ±íÊ¾SIMPACK·ÂÕæÊ§°Ü£¬Î´³É¹¦»ñµÃ½á¹û£»·ÂÕæ±ÀÀ£ÒâÎ¶×Å²»ÎÈ¶¨
+        ç¨³å®šæ€§åˆ¤æ–­ç»“æœï¼š
+            1.0  è¡¨ç¤ºç¨³å®šï¼ˆè›‡è¡Œï¼‰è¿è¡Œ
+            0.2  è¡¨ç¤ºå¤±ç¨³ï¼ˆæ¨ªç§»è¶…è¿‡é˜ˆå€¼ï¼‰
+            0.1  è¡¨ç¤ºSIMPACKä»¿çœŸå¤±è´¥ï¼ŒæœªæˆåŠŸè·å¾—ç»“æœï¼›ä»¿çœŸå´©æºƒæ„å‘³ç€ä¸ç¨³å®š
     """
 
-    # =========== 1. Ê§ÎÈãĞÖµÉèÖÃ ===========
+    # =========== 1. å¤±ç¨³é˜ˆå€¼è®¾ç½® ===========
     UnstableThreshold = 3.0 / 1000.0  # 3 mm
 
-    # =========== 2. ½â°ü X_vars[:, idx] ===========
+    # =========== 2. è§£åŒ… X_vars[:, idx] ===========
     X_vars_col = X_vars[:, idx]
-    # ÒÀÕÕ¼È¶¨Ë³Ğò½â°ü
-    TargetVelocity = TargetVel      # X_vars_col[0] # Ê¹ÓÃ TargetVel ¸²¸Ç¸ÃËÙ¶ÈÈ¡Öµ
+    # ä¾ç…§æ—¢å®šé¡ºåºè§£åŒ…
+    TargetVelocity = TargetVel      # X_vars_col[0] # ä½¿ç”¨ TargetVel è¦†ç›–è¯¥é€Ÿåº¦å–å€¼
     sprCpz         = X_vars_col[1]
     Kpx            = X_vars_col[2]
     Kpy            = X_vars_col[3]
@@ -326,8 +313,8 @@ def Check_SPCK_IsStable_Idx(WorkingDir, X_vars, tag, idx, TargetVel):
     Lx2            = X_vars_col[30]
     Lx3            = X_vars_col[31]
 
-    # =========== 3. Éú³É .subvar ÎÄ¼ş ===========
-    #   µ÷ÓÃ Import_Subvars_To_File_idx(...)
+    # =========== 3. ç”Ÿæˆ .subvar æ–‡ä»¶ ===========
+    #   è°ƒç”¨ Import_Subvars_To_File_idx(...)
     Import_Subvars_To_File_idx(
         WorkingDir=WorkingDir,
         tag=tag,
@@ -343,33 +330,33 @@ def Check_SPCK_IsStable_Idx(WorkingDir, X_vars, tag, idx, TargetVel):
         Lx1=Lx1, Lx2=Lx2, Lx3=Lx3
     )
 
-    # =========== 4. µ÷ÓÃ SIMPACK ·ÂÕæ ===========
-    #   ĞèÒª¸ù¾İÄãÔÚ prepare_SpckFiles_eachBatch ÖĞÉú³ÉµÄ .spck ÎÄ¼şÃûÈ·¶¨ÏÂÁĞÃû³Æ
-    #   ÀıÈç: Vehicle_Opt_{tag}_{idx}.spck
+    # =========== 4. è°ƒç”¨ SIMPACK ä»¿çœŸ ===========
+    #   éœ€è¦æ ¹æ®ä½ åœ¨ prepare_SpckFiles_eachBatch ä¸­ç”Ÿæˆçš„ .spck æ–‡ä»¶åç¡®å®šä¸‹åˆ—åç§°
+    #   ä¾‹å¦‚: Vehicle_Opt_{tag}_{idx}.spck
     # spck_name = f"Vehicle_Opt_{tag}_{idx}.spck"
-    spck_name = f"Vehicle4WDB_RigidCriticalVel_Opt_{tag}_{idx}.spck"
+    spck_name = f"Vehicle4WDB_NativeRigidCriticalVel_Opt_{tag}_{idx}.spck"
     spck_path = os.path.join(WorkingDir, "BatchTmp", spck_name)
 
-    # ¹¹½¨ÔËĞĞÃüÁî
-    # ÀıÈç "simpack-slv.exe" + spck_path
+    # æ„å»ºè¿è¡Œå‘½ä»¤
+    # ä¾‹å¦‚ "simpack-slv.exe" + spck_path
     cmd = ["simpack-slv.exe", "--silent", spck_path]
 
-    # Ö´ĞĞÃüÁî
+    # æ‰§è¡Œå‘½ä»¤
     status = run_simpack_cmd(cmd, WorkingDir, timeout_seconds = 10 * 60) # 10 * 60
     if status != 0:
-        print(f"[ERROR] SIMPACK·ÂÕæÊ§°Ü£¬ÃüÁî·µ»ØÂë: {status}")
+        print(f"[ERROR] SIMPACKä»¿çœŸå¤±è´¥ï¼Œå‘½ä»¤è¿”å›ç : {status}")
         return 0.1
     else:
-        # ·ÂÕæ³É¹¦, ¼ÌĞøºó´¦Àí -> ¶ÁÈ¡×î´óºáÒÆÁ¿
+        # ä»¿çœŸæˆåŠŸ, ç»§ç»­åå¤„ç† -> è¯»å–æœ€å¤§æ¨ªç§»é‡
         maxLatY = MaxLatY_idx(WorkingDir, tag, idx)
         
-        # ÓëãĞÖµ±È½Ï
+        # ä¸é˜ˆå€¼æ¯”è¾ƒ
         if abs(maxLatY) >= UnstableThreshold:
-            return 0.2  # ±íÊ¾Ê§ÎÈ
+            return 0.2  # è¡¨ç¤ºå¤±ç¨³
         else:
-            return 1.0  # ±íÊ¾ÎÈ¶¨
+            return 1.0  # è¡¨ç¤ºç¨³å®š
 
-# Python°æ±¾µÄ¶ş·ÖËÑË÷ÁÙ½çËÙ¶Èº¯Êı£¬¶ÔÓ¦ÓÚMATLABµÄ Fun_HalfSearchCrticalVelocity
+# Pythonç‰ˆæœ¬çš„äºŒåˆ†æœç´¢ä¸´ç•Œé€Ÿåº¦å‡½æ•°ï¼Œå¯¹åº”äºMATLABçš„ Fun_HalfSearchCrticalVelocity
 def HalfSearch_CrticalVelocity(
     WorkingDir,
     X_vars,
@@ -380,36 +367,36 @@ def HalfSearch_CrticalVelocity(
     N_depth
 ):
     """
-    ²ÎÊı£º
+    å‚æ•°ï¼š
     ----------
     WorkingDir : str
-        Ö÷¹¤×÷Ä¿Â¼Â·¾¶¡£
+        ä¸»å·¥ä½œç›®å½•è·¯å¾„ã€‚
     X_vars : np.ndarray
-        ĞÎ×´ (32, N) µÄÊı×é£¬Ã¿Ò»ÁĞ´ú±íÒ»×é´ı·ÂÕæµÄ²ÎÊı¡£
+        å½¢çŠ¶ (32, N) çš„æ•°ç»„ï¼Œæ¯ä¸€åˆ—ä»£è¡¨ä¸€ç»„å¾…ä»¿çœŸçš„å‚æ•°ã€‚
     tag : str
-        ÓÃÓÚÆ´×°ÎÄ¼şÃû£¬Èç '0121A'¡£
+        ç”¨äºæ‹¼è£…æ–‡ä»¶åï¼Œå¦‚ '0121A'ã€‚
     idx : int
-        µ±Ç°²ÎÊıÁĞË÷Òı£¬¶ÔÓ¦ X_vars[:, idx]¡£
+        å½“å‰å‚æ•°åˆ—ç´¢å¼•ï¼Œå¯¹åº” X_vars[:, idx]ã€‚
     StartVel : float
-        ¶ş·ÖËÑË÷³õÊ¼×ó±ß½ç (m/s)£¬Èç 50/3.6 ¡£
+        äºŒåˆ†æœç´¢åˆå§‹å·¦è¾¹ç•Œ (m/s)ï¼Œå¦‚ 50/3.6 ã€‚
     EndVel : float
-        ¶ş·ÖËÑË÷³õÊ¼ÓÒ±ß½ç (m/s)£¬Èç 612/3.6 ¡£
+        äºŒåˆ†æœç´¢åˆå§‹å³è¾¹ç•Œ (m/s)ï¼Œå¦‚ 612/3.6 ã€‚
     N_depth : int
-        ¶ş·Ö´ÎÊı£¬Èç 6 »ò 7¡£
+        äºŒåˆ†æ¬¡æ•°ï¼Œå¦‚ 6 æˆ– 7ã€‚
 
-    ·µ»Ø£º
+    è¿”å›ï¼š
     ----------
     critical_vel : float
-        ÔÚ [StartVel, EndVel] Çø¼äÄÚ£¬Í¨¹ı N_depth ²½¶ş·ÖËÑË÷µÃµ½µÄ½üËÆÁÙ½çËÙ¶È (µ¥Î»£ºm/s)¡£
+        åœ¨ [StartVel, EndVel] åŒºé—´å†…ï¼Œé€šè¿‡ N_depth æ­¥äºŒåˆ†æœç´¢å¾—åˆ°çš„è¿‘ä¼¼ä¸´ç•Œé€Ÿåº¦ (å•ä½ï¼šm/s)ã€‚
     """
 
-    # ÕâÀï¿É¸ù¾İĞèÒª´òÓ¡Ò»Ğ©ÌáÊ¾ĞÅÏ¢
-    print("¿ªÊ¼¶ş·ÖËÑË÷£º")
-    # Äã¿ÉÒÔÔÚÕâÀï×ö¸ü¶à´òÓ¡£¬ÀàËÆÓÚMATLAB
+    # è¿™é‡Œå¯æ ¹æ®éœ€è¦æ‰“å°ä¸€äº›æç¤ºä¿¡æ¯
+    print("å¼€å§‹äºŒåˆ†æœç´¢ï¼š")
+    # ä½ å¯ä»¥åœ¨è¿™é‡Œåšæ›´å¤šæ‰“å°ï¼Œç±»ä¼¼äºMATLAB
     print(f"  - tag: {tag}, idx: {idx}")
-    print(f"  - ÆğÊ¼ËÙ¶È£º{StartVel:.2f} m/s ({StartVel*3.6:.2f} km/h)")
-    print(f"  - ÖÕÖ¹ËÙ¶È£º{EndVel:.2f} m/s ({EndVel*3.6:.2f} km/h)")
-    print(f"  - ¶ş·Ö´ÎÊı£º{N_depth}")
+    print(f"  - èµ·å§‹é€Ÿåº¦ï¼š{StartVel:.2f} m/s ({StartVel*3.6:.2f} km/h)")
+    print(f"  - ç»ˆæ­¢é€Ÿåº¦ï¼š{EndVel:.2f} m/s ({EndVel*3.6:.2f} km/h)")
+    print(f"  - äºŒåˆ†æ¬¡æ•°ï¼š{N_depth}")
     print("-----------------------------------")
 
     low_vel = StartVel
@@ -417,28 +404,28 @@ def HalfSearch_CrticalVelocity(
 
     for i_depth in range(1, N_depth + 1):
         mid_vel = 0.5 * (low_vel + high_vel)
-        # µ÷ÓÃÎÈ¶¨ĞÔÅĞ¶Ïº¯Êı
+        # è°ƒç”¨ç¨³å®šæ€§åˆ¤æ–­å‡½æ•°
         is_stable = Check_SPCK_IsStable_Idx(
             WorkingDir=WorkingDir,
             X_vars=X_vars,
             tag=tag,
             idx=idx,
-            TargetVel=mid_vel # ´«Èë mid_vel ½øĞĞ²âÊÔ
+            TargetVel=mid_vel # ä¼ å…¥ mid_vel è¿›è¡Œæµ‹è¯•
         )
 
         if is_stable == 1.0:
-            # ³µÁ¾ÔÚ mid_vel ÏÂÎÈ¶¨ => ÁÙ½çËÙ¶È¿ÉÄÜ¸ü¸ß
+            # è½¦è¾†åœ¨ mid_vel ä¸‹ç¨³å®š => ä¸´ç•Œé€Ÿåº¦å¯èƒ½æ›´é«˜
             low_vel = mid_vel
-            print(f"Éî¶È {i_depth}: {mid_vel:.2f} m/s ÎÈ¶¨, ÊÕËõÇø¼äµ½ [{low_vel:.2f}, {high_vel:.2f}]")
+            print(f"æ·±åº¦ {i_depth}: {mid_vel:.2f} m/s ç¨³å®š, æ”¶ç¼©åŒºé—´åˆ° [{low_vel:.2f}, {high_vel:.2f}]")
         else:
-            # ·µ»Ø 0.1 »ò 0.2£¬¾ùÊÓÎª²»ÎÈ¶¨ => ÁÙ½çËÙ¶ÈÔÚ mid_vel ÒÔÏÂ
+            # è¿”å› 0.1 æˆ– 0.2ï¼Œå‡è§†ä¸ºä¸ç¨³å®š => ä¸´ç•Œé€Ÿåº¦åœ¨ mid_vel ä»¥ä¸‹
             high_vel = mid_vel
-            print(f"Ä£ĞÍ{idx}: ¶ş·ÖÉî¶È {i_depth} ÔËĞĞËÙ¶È{mid_vel:.2f} m/sÊ±²»ÎÈ¶¨, ÊÕËõÇø¼äµ½ [{low_vel:.2f}, {high_vel:.2f}]")
+            print(f"æ¨¡å‹{idx}: äºŒåˆ†æ·±åº¦ {i_depth} è¿è¡Œé€Ÿåº¦{mid_vel:.2f} m/sæ—¶ä¸ç¨³å®š, æ”¶ç¼©åŒºé—´åˆ° [{low_vel:.2f}, {high_vel:.2f}]")
 
-    # È¡ÊÕËõÇø¼äµÄÖĞÖµ×÷Îª½üËÆÁÙ½çËÙ¶È
+    # å–æ”¶ç¼©åŒºé—´çš„ä¸­å€¼ä½œä¸ºè¿‘ä¼¼ä¸´ç•Œé€Ÿåº¦
     critical_vel = 0.5 * (low_vel + high_vel)
 
     print("-----------------------------------")
-    print(f"ËÑË÷½áÊø£¬µÃµ½ÁÙ½çËÙ¶È ¡Ö {critical_vel:.2f} m/s ({critical_vel*3.6:.2f} km/h)\n")
+    print(f"æœç´¢ç»“æŸï¼Œå¾—åˆ°ä¸´ç•Œé€Ÿåº¦ â‰ˆ {critical_vel:.2f} m/s ({critical_vel*3.6:.2f} km/h)\n")
 
     return critical_vel

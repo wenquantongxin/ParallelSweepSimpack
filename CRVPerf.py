@@ -1,6 +1,6 @@
-# -*- coding: gbk -*-
+# -*- coding: utf-8 -*-
 
-# ÇúÏßĞÔÄÜÆÀ¹À
+# æ›²çº¿æ€§èƒ½è¯„ä¼°
 
 import os
 import time
@@ -9,152 +9,138 @@ import pandas as pd
 import subprocess
 from FindCrticalVelocity import (Import_Subvars_To_File_idx, run_simpack_cmd)
 
-# ¶ÁÈ¡Ö¸¶¨ .dat Êı¾İ
-# ·µ»Ø´ÓÊı¾İÎÄ¼şÖĞ»ñµÃµÄÄ¥ºÄÊıÓë×î´óºáÒÆÁ¿
-def ReadCRVDat(dat_path):
+# è¯»å–æŒ‡å®š .dat æ•°æ®
+# è¿”å›ä»æ•°æ®æ–‡ä»¶ä¸­è·å¾—çš„ç£¨è€—æ•°ä¸æœ€å¤§æ¨ªç§»é‡
+def ReadCRVDat(
+    dat_path,
+    line_sumwear=6,                 # ä» 1 è®¡æ•°çš„è¡Œæ•°
+    lines_lateral=(46, 51, 56, 61)  # ä» 1 è®¡æ•°çš„è¡Œæ•°
+):
+    """
+    è¯»å–ç»™å®š dat æ–‡ä»¶ï¼Œè¿”å›ç£¨è€—æ€»æ•°å’Œæœ€å¤§æ¨ªå‘ä½ç§»ã€‚
     
-    LatDisp_array = [0.0]*4
-    
-    with open(dat_path, "r", encoding="utf-8") as f:
-        # Ìø¹ıÇ°5ĞĞ
-        for _ in range(5):
-            f.readline()
-        # ¶ÁÈ¡¹Ø¼üĞĞ
-        line6 = f.readline()
-        parts = line6.split(';')
-        # ¼ÇÂ¼×ÜÄ¥ºÄÊı£¬ÆäÎ»ÓÚ .dat ÎÄ¼şµÄµÚ 6 ĞĞµÚÒ»¸ö·ÖºÅÖ®ºó
-        SumWearNumber_CRV_fromDat = float(parts[1].strip()) 
-        # ´ËÊ±Îª 5 + 1 = 6 ĞĞ
-        
-        for _ in range(39): 
-            f.readline()
-        # ´ËÊ±Îª 6 + 39 = 45 ĞĞ
-        
-        line46 = f.readline()
-        # ´ËÊ±Îª 45 + 1 = 46 ĞĞ
-        
-        parts = line46.split(';')
-        LatDisp_array[0] = float(parts[1].strip())
-        
-        for _ in range(4):
-            f.readline()
-        # ´ËÊ±Îª 46 + 4 = 50 ĞĞ
-        
-        line51 = f.readline()
-        # ´ËÊ±Îª 50 + 1 = 51 ĞĞ
-        
-        parts = line51.split(';')
-        LatDisp_array[1] = float(parts[1].strip())
-        
-        for _ in range(4):
-            f.readline()
-        # ´ËÊ±Îª 51 + 4 = 55 ĞĞ
-        
-        line56 = f.readline()
-        # ´ËÊ±Îª 55 + 1 = 56 ĞĞ
-        
-        parts = line56.split(';')
-        LatDisp_array[2] = float(parts[1].strip())
+    å‚æ•°:
+    ----
+    dat_path: str
+        .dat æ–‡ä»¶è·¯å¾„
+    line_sumwear: int
+        .dat æ–‡ä»¶ä¸­å­˜æ”¾æ€»ç£¨è€—æ•°æ®çš„è¡Œå·ï¼ˆä»1å¼€å§‹è®¡æ•°ï¼‰
+    lines_lateral: tuple or list
+        .dat æ–‡ä»¶ä¸­å­˜æ”¾æ¨ªå‘ä½ç§»æ•°æ®çš„è¡Œå·ï¼ˆä»1å¼€å§‹è®¡æ•°ï¼‰ï¼Œå¯ä¼ å…¥å¤šä¸ª
 
-        for _ in range(4):
-            f.readline()
-        # ´ËÊ±Îª 56 + 4 = 60 ĞĞ
-        
-        line61 = f.readline()
-        # ´ËÊ±Îª 60 + 1 = 61 ĞĞ
-        
-        parts = line61.split(';')
-        LatDisp_array[3] = float(parts[1].strip())
-            
+    è¿”å›:
+    ----
+    (SumWearNumber, maxLatDisp) : (float, float)
+        - SumWearNumber: floatï¼Œæ€»ç£¨è€—æ•°
+        - maxLatDisp: floatï¼Œæ¨ªå‘ä½ç§»ä¸­çš„æœ€å¤§å€¼
+    """
+    with open(dat_path, "r", encoding="utf-8") as f:
+        lines = f.readlines()
+    
+    # ç¡®ä¿è¡Œå·ä¸è¶…è¿‡æ–‡ä»¶æ€»è¡Œæ•°
+    total_lines = len(lines)
+    if line_sumwear > total_lines:
+        raise ValueError(f"line_sumwear = {line_sumwear} è¶…è¿‡æ–‡ä»¶æ€»è¡Œæ•° {total_lines}ã€‚")
+    for idx in lines_lateral:
+        if idx > total_lines:
+            raise ValueError(f"æ¨ªå‘ä½ç§»è¡Œå· {idx} è¶…è¿‡æ–‡ä»¶æ€»è¡Œæ•° {total_lines}ã€‚")
+
+    # è§£ææ€»ç£¨è€—(ç¬¬ line_sumwear è¡Œ)
+    # å› ä¸º Python åˆ—è¡¨æ˜¯ä» 0 å¼€å§‹ç´¢å¼•ï¼Œæ‰€ä»¥å¯¹åº”è¡Œå· line_sumwear => lines[line_sumwear - 1]
+    line_sum = lines[line_sumwear - 1]
+    parts_sum = line_sum.split(';')
+    SumWearNumber_CRV_fromDat = float(parts_sum[1].strip())
+
+    # ä¾æ¬¡è¯»å–æŒ‡å®šçš„æ¨ªå‘ä½ç§»è¡Œ
+    LatDisp_array = []
+    for idx in lines_lateral:
+        line_disp = lines[idx - 1]
+        parts_disp = line_disp.split(';')
+        LatDisp_array.append(float(parts_disp[1].strip()))
+
     maxLatDisp_CRV_fromDat = max(LatDisp_array)
     
     return SumWearNumber_CRV_fromDat, maxLatDisp_CRV_fromDat
 
-# µ¥Ïß³ÌÄÚ¼ÆËãÇúÏßÍ¨¹ıµÄÄ¥ºÄÊıÓë×î´óºáÒÆÁ¿
+# å•çº¿ç¨‹å†…è®¡ç®—æ›²çº¿é€šè¿‡çš„ç£¨è€—æ•°ä¸æœ€å¤§æ¨ªç§»é‡
 def CRVCal_idx(
     work_dir,
-    filemidname, # ÓÃÓÚÇø·Ö¸ÕĞÔÂÖ¶Ô»òÕß¶ÀÁ¢ÂÖ¶Ô£¬filemidname ¿ÉÄÜÎª IRWCRV300m »òÕß RigidCRV300m
+    filemidname, # ç”¨äºåŒºåˆ†åˆšæ€§è½®å¯¹æˆ–è€…ç‹¬ç«‹è½®å¯¹ï¼Œfilemidname å¯èƒ½ä¸º IRWCRV300m æˆ–è€… NativeRigidCRV300m
     tag,
     idx,
     qs_script="SbrExport_SPCKResult.qs"
 ):
     
-    spf_filename = f"Result_{filemidname}_Opt_{tag}_{idx}.spf" # ¶ÔÓ¦ÓÚ Result_IRWCRV300m_Opt_0125_0.spf »òÕß Result_RigidCRV300m_Opt_0125_0.spf
-    out_result_prefix = f"DatResult_{filemidname}_{tag}_{idx}" # Êä³öµÄ .dat ÎÄ¼şµÄÃû³Æ
+    spf_filename = f"Result_{filemidname}_Opt_{tag}_{idx}.spf" # å¯¹åº”äº Result_IRWCRV300m_Opt_0125_0.spf æˆ–è€… Result_NativeRigidCRV300m_Opt_0125_0.spf
+    out_result_prefix = f"DatResult_{filemidname}_{tag}_{idx}" # è¾“å‡ºçš„ .dat æ–‡ä»¶çš„åç§°
    
-    # Æ´³ö SPF ÎÄ¼şµÄ¾ø¶ÔÂ·¾¶
+    # æ‹¼å‡º SPF æ–‡ä»¶çš„ç»å¯¹è·¯å¾„
     spf_path = os.path.join(work_dir, "BatchTmp", spf_filename)
     out_result_full_prefix = os.path.join(work_dir, "BatchTmp", out_result_prefix)
-    # ½Å±¾Î»ÖÃ
+    # è„šæœ¬ä½ç½®
     qs_script_path = os.path.join(work_dir, qs_script)
 
-    # ÈôÓĞĞèÒª¿É¼ì²éÎÄ¼ş´æÔÚ
+    # è‹¥æœ‰éœ€è¦å¯æ£€æŸ¥æ–‡ä»¶å­˜åœ¨
     if not os.path.isfile(qs_script_path):
-        print(f"ºó´¦Àí½Å±¾²»´æÔÚ: {qs_script_path}")
+        print(f"åå¤„ç†è„šæœ¬ä¸å­˜åœ¨: {qs_script_path}")
         return (-99.0111, -99.0112) 
     if not os.path.isfile(spf_path):
-        print(f".spfÎÄ¼ş²»´æÔÚ: {spf_path}")
+        print(f".spfæ–‡ä»¶ä¸å­˜åœ¨: {spf_path}")
         return (-99.0121, -99.0122)
 
-    # 1) µ÷ÓÃ simpack-post µÄ½Å±¾ .qs
-    # BatchTmp ×ÓÎÄ¼ş¼ĞÄÚ£¬ÒÔÃüÁîĞĞÖ´ĞĞ: simpack-post -s SbrExport_SPCKResult.qs Result_RigidCRV300m_Opt_0125_0.spf DatResult_RigidCRV300m_0125_0    
+    # 1) è°ƒç”¨ simpack-post çš„è„šæœ¬ .qs
+    # BatchTmp å­æ–‡ä»¶å¤¹å†…ï¼Œä»¥å‘½ä»¤è¡Œæ‰§è¡Œ: simpack-post -s SbrExport_SPCKResult.qs Result_NativeRigidCRV300m_Opt_0125_0.spf DatResult_NativeRigidCRV300m_0125_0    
     cmd = [
         "simpack-post",
         "-s", qs_script_path,
-        spf_path,               # SPF ÎÄ¼şÂ·¾¶
-        out_result_full_prefix  # Êä³öÇ°×º
+        spf_path,               # SPF æ–‡ä»¶è·¯å¾„
+        out_result_full_prefix  # è¾“å‡ºå‰ç¼€
     ]
     
-    # µ÷ÓÃº¯ÊıÖ´ĞĞ
+    # è°ƒç”¨å‡½æ•°æ‰§è¡Œ
     result = run_simpack_cmd(cmd, work_dir, timeout_seconds = 10 * 60)
     if result != 0:
-        print(f"ÔËĞĞÊ§°Ü£¬´íÎóÂë£º{result}")
+        print(f"è¿è¡Œå¤±è´¥ï¼Œé”™è¯¯ç ï¼š{result}")
         return (-99.0131, -99.0132)
     else:
-        print(f"³É¹¦Ö´ĞĞ qs ½Å±¾µ÷ÓÃ")
-        print("ÃüÁîÖ´ĞĞÍê³É")
+        print(f"æˆåŠŸæ‰§è¡Œ qs è„šæœ¬è°ƒç”¨")
+        print("å‘½ä»¤æ‰§è¡Œå®Œæˆ")
     
-    # try:
-    #     ret = subprocess.run(cmd, cwd=work_dir, check=True)
-    # except subprocess.CalledProcessError as e:
-    #     # Íâ²¿ÃüÁî·µ»Ø·Ç 0
-    #     print(f"[ERROR] simpack-postÃüÁî³ö´í£¬·µ»ØÂë={e.returncode}")
-    #     return (-99.0131, -99.0132)
-    # except Exception as e:
-    #     # ÆäËûÒì³££¬ÈçÕÒ²»µ½¿ÉÖ´ĞĞÎÄ¼ş¡¢¹¤×÷Ä¿Â¼²»´æÔÚµÈ
-    #     print(f"[ERROR] ÎŞ·¨Ö´ĞĞsimpack-postÃüÁî£¬Òì³£ĞÅÏ¢£º{e}")
-    #     return (-99.0141, -99.0142)
     time.sleep(2)
     
-    # 2) Æ´³ö×îÖÕ .dat ÎÄ¼şËùÔÚÂ·¾¶
+    # 2) æ‹¼å‡ºæœ€ç»ˆ .dat æ–‡ä»¶æ‰€åœ¨è·¯å¾„
     dat_path = out_result_full_prefix + ".dat"
     if not os.path.isfile(dat_path):
-        print(f"[ERROR] ºó´¦Àí½á¹ûÎÄ¼şÎ´ÕÒµ½: {dat_path}")
+        print(f"[ERROR] åå¤„ç†ç»“æœæ–‡ä»¶æœªæ‰¾åˆ°: {dat_path}")
         return (-99.0151, -99.0152) 
       
-    # 3) ½âÎöÎÄ¼ş
+    # 3) è§£ææ–‡ä»¶
     try:
-        SumWearNumber_CRV_fromDat, maxLatDisp_CRV_fromDat = ReadCRVDat(dat_path)
+        # æ ¹æ® filemidname åŒºåˆ†è¯»å– .dat çš„æ–¹å¼
+        if filemidname == "IRWCRV300m":
+            SumWearNumber_CRV_fromDat, maxLatDisp_CRV_fromDat = ReadCRVDat(dat_path) # è¡Œå·é»˜è®¤æ˜¯ç¬¬6è¡Œä¿å­˜ç£¨è€—å€¼ï¼Œç¬¬46ã€51ã€56ã€61è¡Œä¿å­˜æ¨ªå‘ä½ç§»
+        elif filemidname == "NativeRigidCRV300m":
+            SumWearNumber_CRV_fromDat, maxLatDisp_CRV_fromDat = ReadCRVDat(dat_path, line_sumwear=6, lines_lateral=(26, 31, 36, 41))
     except Exception as e:
-        print(f"[ERROR] ½âÎö {dat_path} Ê±³öÏÖÒì³£: {e}")
+        print(f"[ERROR] è§£æ {dat_path} æ—¶å‡ºç°å¼‚å¸¸: {e}")
         SumWearNumber_CRV = -99.025
         maxLatDisp_CRV = -99.026
     else:
         SumWearNumber_CRV = SumWearNumber_CRV_fromDat
         maxLatDisp_CRV = maxLatDisp_CRV_fromDat
         
-    # ·µ»ØÉÏ²¿º¯Êı CRVPerf_idx
-    # ×¢Òâ¼ì²é CRVCal_idx ¸÷¸ö¹ÊÕÏ·µ»ØÂëµÄÎ¬¶È£¬Ó¦Óë CRVCal_idx º¯ÊıµÄ return ÏàÍ¬
+    # è¿”å›ä¸Šéƒ¨å‡½æ•° CRVPerf_idx
+    # æ³¨æ„æ£€æŸ¥ CRVCal_idx å„ä¸ªæ•…éšœè¿”å›ç çš„ç»´åº¦ï¼Œåº”ä¸ CRVCal_idx å‡½æ•°çš„ return ç›¸åŒ
     return SumWearNumber_CRV, maxLatDisp_CRV
 
 def CRVPerf_idx(WorkingDir, X_vars, tag, idx):
 
-    print(f"¶ÔÓÚÄ£ĞÍ {idx} ½øĞĞÇúÏßÏßÂ·Í¨¹ıĞÔÄÜ²âÊÔ")
+    print(f"å¯¹äºæ¨¡å‹ {idx} è¿›è¡Œæ›²çº¿çº¿è·¯é€šè¿‡æ€§èƒ½æµ‹è¯•")
     
-    # =========== 1. ½â°ü X_vars[:, idx] ===========
+    # =========== 1. è§£åŒ… X_vars[:, idx] ===========
     X_vars_col = X_vars[:, idx]
-    # ÒÀÕÕ¼È¶¨Ë³Ğò½â°ü
-    TargetVelocity = 60/3.6      # ÇúÏßÆÀ¹ÀÊ±£¬²ÉÓÃ 60 km/h ËÙ¶ÈÍ¨¹ı R300 ÇúÏß£¬Ê¹ÓÃ TargetVel ¸²¸Ç¸ÃËÙ¶ÈÈ¡Öµ
+    # ä¾ç…§æ—¢å®šé¡ºåºè§£åŒ…
+    TargetVelocity = 60/3.6      # æ›²çº¿è¯„ä¼°æ—¶ï¼Œé‡‡ç”¨ 60 km/h é€Ÿåº¦é€šè¿‡ R300 æ›²çº¿ï¼Œä½¿ç”¨ TargetVel è¦†ç›–è¯¥é€Ÿåº¦å–å€¼
     
     sprCpz         = X_vars_col[1]
     Kpx            = X_vars_col[2]
@@ -188,8 +174,8 @@ def CRVPerf_idx(WorkingDir, X_vars, tag, idx):
     Lx2            = X_vars_col[30]
     Lx3            = X_vars_col[31]
 
-    # =========== 2. Éú³É .subvar ÎÄ¼ş ===========
-    #   µ÷ÓÃ Import_Subvars_To_File_idx(...)
+    # =========== 2. ç”Ÿæˆ .subvar æ–‡ä»¶ ===========
+    #   è°ƒç”¨ Import_Subvars_To_File_idx(...)
     Import_Subvars_To_File_idx(
         WorkingDir=WorkingDir,
         tag=tag,
@@ -205,84 +191,65 @@ def CRVPerf_idx(WorkingDir, X_vars, tag, idx):
         Lx1=Lx1, Lx2=Lx2, Lx3=Lx3
     )
 
-    # =========== 3.1 µ÷ÓÃ SIMPACK ·ÂÕæ  ===========
-    # ===========      ¸ÕĞÔÂÖ¶ÔÄ£ĞÍ      ===========
-    spck_name = f"Vehicle4WDB_RigidCRV300m_Opt_{tag}_{idx}.spck"
+    # =========== 3.1 è°ƒç”¨ SIMPACK ä»¿çœŸ  ===========
+    # ===========      åˆšæ€§è½®å¯¹æ¨¡å‹      ===========
+    spck_name = f"Vehicle4WDB_NativeRigidCRV300m_Opt_{tag}_{idx}.spck"
     spck_path = os.path.join(WorkingDir, "BatchTmp", spck_name)
 
-    # ¹¹½¨ÔËĞĞÃüÁî
-    # ÀıÈç "simpack-slv.exe" + spck_path
+    # æ„å»ºè¿è¡Œå‘½ä»¤
+    # ä¾‹å¦‚ "simpack-slv.exe" + spck_path
     cmd = ["simpack-slv.exe", "--silent", spck_path]
     
-    # µ÷ÓÃº¯ÊıÖ´ĞĞ
+    # è°ƒç”¨å‡½æ•°æ‰§è¡Œ
     result = run_simpack_cmd(cmd, WorkingDir, timeout_seconds = 10 * 60)
     if result != 0:
-        print(f"ÔËĞĞÊ§°Ü£¬´íÎóÂë£º{result}")
-        return (-99.11, -99.12, -99.13, -99.14) # ¹ÊÕÏ±ê¼Ç·µ»ØÖµ
+        print(f"è¿è¡Œå¤±è´¥ï¼Œé”™è¯¯ç ï¼š{result}")
+        return (-99.11, -99.12, -99.13, -99.14) # æ•…éšœæ ‡è®°è¿”å›å€¼
     else:
-        print(f"³É¹¦Ö´ĞĞ qs ½Å±¾µ÷ÓÃ")
-        # print("ÃüÁîÖ´ĞĞÍê³É")
+        print(f"æˆåŠŸæ‰§è¡Œ qs è„šæœ¬è°ƒç”¨")
+        # print("å‘½ä»¤æ‰§è¡Œå®Œæˆ")
     time.sleep(1)  
-        
-    # # Ö´ĞĞÃüÁî
-    # try:
-    #     ret = subprocess.run(cmd, cwd=WorkingDir)
-    #     status = ret.returncode
-    #     # Èç¹ûĞèÒª²é¿´Êä³ö£º ret.stdout, ret.stderr
-    # except Exception as e:
-    #     # Èç¹û³öÏÖÒì³££¬±ÈÈçÃüÁîĞĞÖ´ĞĞ´íÎó
-    #     print(f"[ERROR] SIMPACK·ÂÕæµ÷ÓÃ³öÏÖÒì³£: {e}")
-    #     return (-99.11, -99.12, -99.13, -99.14) # ¹ÊÕÏ±ê¼Ç·µ»ØÖµ
     
+    # =========== 3.2 è°ƒç”¨ SIMPACK ä»¿çœŸ  ===========
+    # ===========      ç‹¬ç«‹è½®å¯¹æ¨¡å‹      ===========  
     
-    # =========== 3.2 µ÷ÓÃ SIMPACK ·ÂÕæ  ===========
-    # ===========      ¶ÀÁ¢ÂÖ¶ÔÄ£ĞÍ      ===========  
-    
-    # ×¢Òâ·ÂÕæÎÄ¼şÃû³ÆÇø±ğ£¬ºË¶Ô·ÂÕæÄ£ĞÍÎÄ¼ş
+    # æ³¨æ„ä»¿çœŸæ–‡ä»¶åç§°åŒºåˆ«ï¼Œæ ¸å¯¹ä»¿çœŸæ¨¡å‹æ–‡ä»¶
     spck_name = f"Vehicle4WDB_IRWCRV300m_Opt_{tag}_{idx}.spck"
     spck_path = os.path.join(WorkingDir, "BatchTmp", spck_name)
 
-    # ¹¹½¨ÔËĞĞÃüÁî
-    # ÀıÈç "simpack-slv.exe" + spck_path
+    # æ„å»ºè¿è¡Œå‘½ä»¤
+    # ä¾‹å¦‚ "simpack-slv.exe" + spck_path
     cmd = ["simpack-slv.exe", "--silent", spck_path]
     
-    # µ÷ÓÃº¯ÊıÖ´ĞĞ
+    # è°ƒç”¨å‡½æ•°æ‰§è¡Œ
     result = run_simpack_cmd(cmd, WorkingDir, timeout_seconds = 10 * 60)
-    # print(f"[INFO] Ìø¹ı IRW Ä£ĞÍ²âÊÔ"); result = 0
+    # print(f"[INFO] è·³è¿‡ IRW æ¨¡å‹æµ‹è¯•"); result = 0
  
     if result != 0:
-        print(f"ÔËĞĞÊ§°Ü£¬´íÎóÂë£º{result}")
+        print(f"è¿è¡Œå¤±è´¥ï¼Œé”™è¯¯ç ï¼š{result}")
         return (-99.21, -99.22, -99.23, -99.24)
     else:
-        print(f"³É¹¦Ö´ĞĞ qs ½Å±¾µ÷ÓÃ")
-        # print("ÃüÁîÖ´ĞĞÍê³É")
+        print(f"æˆåŠŸæ‰§è¡Œ qs è„šæœ¬è°ƒç”¨")
+        # print("å‘½ä»¤æ‰§è¡Œå®Œæˆ")
 
-    # Ö´ĞĞÃüÁî
-    # try:
-    #     ret = subprocess.run(cmd, cwd=WorkingDir)
-    #     status = ret.returncode
-    # except Exception as e:
-    #     # Èç¹û³öÏÖÒì³££¬±ÈÈçÃüÁîĞĞÖ´ĞĞ´íÎó
-    #     print(f"[ERROR] SIMPACK·ÂÕæµ÷ÓÃ³öÏÖÒì³£: {e}")
-    #     return (-99.21, -99.22, -99.23, -99.24) # ¹ÊÕÏ±ê¼Ç·µ»ØÖµ
     time.sleep(1)    
     
-    # =========== 4. ·ÖÎö·µ»ØÖµ ===========    
-    # ¸ÕĞÔÂÖ¶Ôºó´¦Àí½á¹ûµ¼³öÓë·ÖÎö
-    filemidname = r"RigidCRV300m"
+    # =========== 4. åˆ†æè¿”å›å€¼ ===========    
+    # åˆšæ€§è½®å¯¹åå¤„ç†ç»“æœå¯¼å‡ºä¸åˆ†æ
+    filemidname = r"NativeRigidCRV300m"
     SumWearNumber_RigidCRV300m_CRV, maxLatDisp_RigidCRV300m_CRV = CRVCal_idx(WorkingDir, filemidname, tag, idx)
     
-    # ¶ÀÁ¢ÂÖ¶Ôºó´¦Àí½á¹ûµ¼³öÓë·ÖÎö
+    # ç‹¬ç«‹è½®å¯¹åå¤„ç†ç»“æœå¯¼å‡ºä¸åˆ†æ
     filemidname = r"IRWCRV300m"
     SumWearNumber_IRWCRV300m_CRV, maxLatDisp_IRWCRV300m_CRV = CRVCal_idx(WorkingDir, filemidname, tag, idx)
     
-    # # print(f"[INFO] IRW Ä£ĞÍÊä³ö½á¹û£¬Ê¹ÓÃ123´úÌæ");
+    # # print(f"[INFO] IRW æ¨¡å‹è¾“å‡ºç»“æœï¼Œä½¿ç”¨123ä»£æ›¿");
     # SumWearNumber_IRWCRV300m_CRV= 123 
     # maxLatDisp_IRWCRV300m_CRV = 123
     # WearNumber_CRV = 0.0
     # LatDispMax_CRV = 0.0
     
     return (SumWearNumber_RigidCRV300m_CRV, maxLatDisp_RigidCRV300m_CRV, SumWearNumber_IRWCRV300m_CRV, maxLatDisp_IRWCRV300m_CRV)
-    # ×¢Òâ¼ì²é CRVPerf_idx ¸÷¸ö¹ÊÕÏ·µ»ØÂëµÄÎ¬¶È£¬Ó¦Óë CRVPerf_idx º¯ÊıµÄ return ÏàÍ¬
+    # æ³¨æ„æ£€æŸ¥ CRVPerf_idx å„ä¸ªæ•…éšœè¿”å›ç çš„ç»´åº¦ï¼Œåº”ä¸ CRVPerf_idx å‡½æ•°çš„ return ç›¸åŒ
 
 

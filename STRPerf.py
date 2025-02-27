@@ -1,6 +1,6 @@
-# -*- coding: gbk -*-
+# -*- coding: utf-8 -*-
 
-# µäĞÍÖ±Ïß AAR5 ÏßÂ· ĞÔÄÜÆÀ¹À
+# å…¸å‹ç›´çº¿ AAR5 çº¿è·¯ æ€§èƒ½è¯„ä¼°
 
 import os
 import time
@@ -9,12 +9,12 @@ import pandas as pd
 import subprocess
 from FindCrticalVelocity import (Import_Subvars_To_File_idx, run_simpack_cmd)
 
-# ¶ÁÈ¡Ö¸¶¨ .dat Êı¾İ
-# ·µ»Ø´ÓÊı¾İÎÄ¼şÖĞ»ñµÃµÄ Sperling Ö¸±ê
+# è¯»å–æŒ‡å®š .dat æ•°æ®
+# è¿”å›ä»æ•°æ®æ–‡ä»¶ä¸­è·å¾—çš„ Sperling æŒ‡æ ‡
 def ReadAAR5Dat(dat_path):
     with open(dat_path, "r", encoding="utf-8") as f:
         
-        # Ìø¹ıÇ°5ĞĞ
+        # è·³è¿‡å‰5è¡Œ
         for _ in range(5):
             f.readline()
         line6 = f.readline()
@@ -29,73 +29,73 @@ def ReadAAR5Dat(dat_path):
     
     return Sperling_Y_fromDat, Sperling_Z_fromDat
     
-# µ¥Ïß³ÌÄÚ¼ÆËãÖ±Ïß AAR5 ÏßÂ·µÄ Sperling ²ÎÁ¿
+# å•çº¿ç¨‹å†…è®¡ç®—ç›´çº¿ AAR5 çº¿è·¯çš„ Sperling å‚é‡
 def STRSperling_idx(
     work_dir,
-    filemidname, # ÓÃÓÚÇø·Ö¸ÕĞÔÂÖ¶Ô»òÕß¶ÀÁ¢ÂÖ¶Ô£¬filemidname ¿ÉÄÜÎª RigidSTR80kmph »ò IRWSTR80kmph£¨ÔİÎŞ£©
+    filemidname, # ç”¨äºåŒºåˆ†åˆšæ€§è½®å¯¹æˆ–è€…ç‹¬ç«‹è½®å¯¹ï¼Œfilemidname å¯èƒ½ä¸º RigidSTR80kmph æˆ– IRWSTR80kmphï¼ˆæš‚æ— ï¼‰
     tag,
     idx,
     qs_script="SbrExport_SPCKResult.qs"
 ):
     
-    spf_filename = f"Result_{filemidname}_Opt_{tag}_{idx}.spf" # ¶ÔÓ¦ÓÚ Result_RigidSTR80kmph_Opt_0125_20.spf
-    out_result_prefix = f"DatResult_{filemidname}_{tag}_{idx}" # Êä³öµÄ .dat ÎÄ¼şµÄÃû³Æ
+    spf_filename = f"Result_{filemidname}_Opt_{tag}_{idx}.spf" # å¯¹åº”äº Result_NativeRigidSTR80kmph_Opt_0125_20.spf
+    out_result_prefix = f"DatResult_{filemidname}_{tag}_{idx}" # è¾“å‡ºçš„ .dat æ–‡ä»¶çš„åç§°
    
-    # Æ´³ö SPF ÎÄ¼şµÄ¾ø¶ÔÂ·¾¶
+    # æ‹¼å‡º SPF æ–‡ä»¶çš„ç»å¯¹è·¯å¾„
     spf_path = os.path.join(work_dir, "BatchTmp", spf_filename)
     out_result_full_prefix = os.path.join(work_dir, "BatchTmp", out_result_prefix)
-    # ½Å±¾Î»ÖÃ
+    # è„šæœ¬ä½ç½®
     qs_script_path = os.path.join(work_dir, qs_script)
 
-    # ÈôÓĞĞèÒª¿É¼ì²éÎÄ¼ş´æÔÚ
+    # è‹¥æœ‰éœ€è¦å¯æ£€æŸ¥æ–‡ä»¶å­˜åœ¨
     if not os.path.isfile(qs_script_path):
-        print(f"ºó´¦Àí½Å±¾²»´æÔÚ: {qs_script_path}")
+        print(f"åå¤„ç†è„šæœ¬ä¸å­˜åœ¨: {qs_script_path}")
         return (-99.0211, -99.0212) 
     if not os.path.isfile(spf_path):
-        print(f".spfÎÄ¼ş²»´æÔÚ: {spf_path}")
+        print(f".spfæ–‡ä»¶ä¸å­˜åœ¨: {spf_path}")
         return (-99.0221, -99.0222)
 
-    # 1) µ÷ÓÃ simpack-post µÄ½Å±¾ .qs
-    # BatchTmp ×ÓÎÄ¼ş¼ĞÄÚ£¬ÒÔÃüÁîĞĞÖ´ĞĞ: simpack-post -s SbrExport_SPCKResult.qs Result_RigidCRV300m_Opt_0125_0.spf DatResult_RigidCRV300m_0125_0    
+    # 1) è°ƒç”¨ simpack-post çš„è„šæœ¬ .qs
+    # BatchTmp å­æ–‡ä»¶å¤¹å†…ï¼Œä»¥å‘½ä»¤è¡Œæ‰§è¡Œ: simpack-post -s SbrExport_SPCKResult.qs Result_NativeRigidCRV300m_Opt_0125_0.spf DatResult_NativeRigidCRV300m_0125_0    
     cmd = [
         "simpack-post",
         "-s", qs_script_path,
-        spf_path,               # SPF ÎÄ¼şÂ·¾¶
-        out_result_full_prefix  # Êä³öÇ°×º
+        spf_path,               # SPF æ–‡ä»¶è·¯å¾„
+        out_result_full_prefix  # è¾“å‡ºå‰ç¼€
     ]
     
-    # µ÷ÓÃº¯ÊıÖ´ĞĞ
+    # è°ƒç”¨å‡½æ•°æ‰§è¡Œ
     result = run_simpack_cmd(cmd, work_dir, timeout_seconds = 10 * 60)
     if result != 0:
-        print(f"ÔËĞĞÊ§°Ü£¬´íÎóÂë£º{result}")
+        print(f"è¿è¡Œå¤±è´¥ï¼Œé”™è¯¯ç ï¼š{result}")
         return (-99.0231, -99.0232)
     else:
-        print(f"³É¹¦Ö´ĞĞ slv »ò qs ½Å±¾µ÷ÓÃ")
-        # print("ÃüÁîÖ´ĞĞÍê³É")
+        print(f"æˆåŠŸæ‰§è¡Œ slv æˆ– qs è„šæœ¬è°ƒç”¨")
+        # print("å‘½ä»¤æ‰§è¡Œå®Œæˆ")
         
     # try:
     #     ret = subprocess.run(cmd, cwd=work_dir, check=True)
     # except subprocess.CalledProcessError as e:
-    #     # Íâ²¿ÃüÁî·µ»Ø·Ç 0
-    #     print(f"[ERROR] simpack-postÃüÁî³ö´í£¬·µ»ØÂë={e.returncode}")
+    #     # å¤–éƒ¨å‘½ä»¤è¿”å›é 0
+    #     print(f"[ERROR] simpack-postå‘½ä»¤å‡ºé”™ï¼Œè¿”å›ç ={e.returncode}")
     #     return (-99.0231, -99.0232) 
     # except Exception as e:
-    #     # ÆäËûÒì³££¬ÈçÕÒ²»µ½¿ÉÖ´ĞĞÎÄ¼ş¡¢¹¤×÷Ä¿Â¼²»´æÔÚµÈ
-    #     print(f"[ERROR] ÎŞ·¨Ö´ĞĞsimpack-postÃüÁî£¬Òì³£ĞÅÏ¢£º{e}")
+    #     # å…¶ä»–å¼‚å¸¸ï¼Œå¦‚æ‰¾ä¸åˆ°å¯æ‰§è¡Œæ–‡ä»¶ã€å·¥ä½œç›®å½•ä¸å­˜åœ¨ç­‰
+    #     print(f"[ERROR] æ— æ³•æ‰§è¡Œsimpack-postå‘½ä»¤ï¼Œå¼‚å¸¸ä¿¡æ¯ï¼š{e}")
     #     return (-99.0241, -99.0242) 
     time.sleep(2)
     
-    # 2) Æ´³ö×îÖÕ .dat ÎÄ¼şËùÔÚÂ·¾¶
+    # 2) æ‹¼å‡ºæœ€ç»ˆ .dat æ–‡ä»¶æ‰€åœ¨è·¯å¾„
     dat_path = out_result_full_prefix + ".dat"
     if not os.path.isfile(dat_path):
-        print(f"[ERROR] ºó´¦Àí½á¹ûÎÄ¼şÎ´ÕÒµ½: {dat_path}")
+        print(f"[ERROR] åå¤„ç†ç»“æœæ–‡ä»¶æœªæ‰¾åˆ°: {dat_path}")
         return (-99.0251, -99.0252) 
       
-    # 3) ½âÎöÎÄ¼ş
+    # 3) è§£ææ–‡ä»¶
     try:
         Sperling_Y_fromDat, Sperling_Z_fromDat = ReadAAR5Dat(dat_path)
     except Exception as e:
-        print(f"[ERROR] ½âÎö {dat_path} Ê±³öÏÖÒì³£: {e}")
+        print(f"[ERROR] è§£æ {dat_path} æ—¶å‡ºç°å¼‚å¸¸: {e}")
         Sperling_Y = -99.0261
         Sperling_Z = -99.0262
     else:
@@ -107,12 +107,12 @@ def STRSperling_idx(
 
 def STRPerf_idx(WorkingDir, X_vars, tag, idx):
 
-    print(f"¶ÔÓÚÄ£ĞÍ {idx} ½øĞĞµäĞÍÖ±ÏßÏßÂ·µÄ Sperling Ö¸±ê²âÊÔ")
+    print(f"å¯¹äºæ¨¡å‹ {idx} è¿›è¡Œå…¸å‹ç›´çº¿çº¿è·¯çš„ Sperling æŒ‡æ ‡æµ‹è¯•")
     
-    # =========== 1. ½â°ü X_vars[:, idx] ===========
+    # =========== 1. è§£åŒ… X_vars[:, idx] ===========
     X_vars_col = X_vars[:, idx]
-    # ÒÀÕÕ¼È¶¨Ë³Ğò½â°ü
-    TargetVelocity = 80/3.6      # Ö±ÏßÆÀ¹ÀÊ±£¬²ÉÓÃ 80 km/h ËÙ¶ÈÍ¨¹ı AAR5 Ö±ÏßÏßÂ·£¬Ê¹ÓÃ TargetVel ¸²¸Ç¸ÃËÙ¶ÈÈ¡Öµ
+    # ä¾ç…§æ—¢å®šé¡ºåºè§£åŒ…
+    TargetVelocity = 80/3.6      # ç›´çº¿è¯„ä¼°æ—¶ï¼Œé‡‡ç”¨ 80 km/h é€Ÿåº¦é€šè¿‡ AAR5 ç›´çº¿çº¿è·¯ï¼Œä½¿ç”¨ TargetVel è¦†ç›–è¯¥é€Ÿåº¦å–å€¼
     
     sprCpz         = X_vars_col[1]
     Kpx            = X_vars_col[2]
@@ -146,7 +146,7 @@ def STRPerf_idx(WorkingDir, X_vars, tag, idx):
     Lx2            = X_vars_col[30]
     Lx3            = X_vars_col[31]
 
-    # =========== 2. Éú³É .subvar ÎÄ¼ş ===========
+    # =========== 2. ç”Ÿæˆ .subvar æ–‡ä»¶ ===========
 
     Import_Subvars_To_File_idx(
         WorkingDir=WorkingDir,
@@ -163,39 +163,39 @@ def STRPerf_idx(WorkingDir, X_vars, tag, idx):
         Lx1=Lx1, Lx2=Lx2, Lx3=Lx3
     )
 
-    # =========== 3.1 µ÷ÓÃ SIMPACK ·ÂÕæ  ===========
-    # ===========      ¸ÕĞÔÂÖ¶ÔÄ£ĞÍ      ===========
-    spck_name = f"Vehicle4WDB_RigidSTR80kmph_Opt_{tag}_{idx}.spck"   # ÀıÈç: Vehicle4WDB_RigidSTR80kmph_Opt_0125_23
+    # =========== 3.1 è°ƒç”¨ SIMPACK ä»¿çœŸ  ===========
+    # ===========      åˆšæ€§è½®å¯¹æ¨¡å‹      ===========
+    spck_name = f"Vehicle4WDB_NativeRigidSTR80kmph_Opt_{tag}_{idx}.spck"   # ä¾‹å¦‚: Vehicle4WDB_NativeRigidSTR80kmph_Opt_0125_23
     spck_path = os.path.join(WorkingDir, "BatchTmp", spck_name)
 
-    # ¹¹½¨ÔËĞĞÃüÁî
-    # ÀıÈç "simpack-slv.exe" + spck_path
+    # æ„å»ºè¿è¡Œå‘½ä»¤
+    # ä¾‹å¦‚ "simpack-slv.exe" + spck_path
     cmd = ["simpack-slv.exe", "--silent", spck_path]
     
     result = run_simpack_cmd(cmd, WorkingDir, timeout_seconds = 10 * 60)
     if result != 0:
-        print(f"ÔËĞĞÊ§°Ü£¬´íÎóÂë£º{result}")
+        print(f"è¿è¡Œå¤±è´¥ï¼Œé”™è¯¯ç ï¼š{result}")
         return (-99.31, -99.32)
     else:
-        print(f"³É¹¦Ö´ĞĞ qs ½Å±¾µ÷ÓÃ")
-        # print("ÃüÁîÖ´ĞĞÍê³É")
+        print(f"æˆåŠŸæ‰§è¡Œ qs è„šæœ¬è°ƒç”¨")
+        # print("å‘½ä»¤æ‰§è¡Œå®Œæˆ")
         
     time.sleep(1)
 
-    # # Ö´ĞĞÃüÁî
+    # # æ‰§è¡Œå‘½ä»¤
     # try:
     #     ret = subprocess.run(cmd, cwd=WorkingDir)
     #     status = ret.returncode
-    #     # Èç¹ûĞèÒª²é¿´Êä³ö£º ret.stdout, ret.stderr
+    #     # å¦‚æœéœ€è¦æŸ¥çœ‹è¾“å‡ºï¼š ret.stdout, ret.stderr
     # except Exception as e:
-    #     # Èç¹û³öÏÖÒì³££¬±ÈÈçÃüÁîĞĞÖ´ĞĞ´íÎó
-    #     print(f"[ERROR] SIMPACK·ÂÕæµ÷ÓÃ³öÏÖÒì³£: {e}")
-    #     return (-99.31, -99.32) # ¹ÊÕÏ±ê¼Ç·µ»ØÖµ
+    #     # å¦‚æœå‡ºç°å¼‚å¸¸ï¼Œæ¯”å¦‚å‘½ä»¤è¡Œæ‰§è¡Œé”™è¯¯
+    #     print(f"[ERROR] SIMPACKä»¿çœŸè°ƒç”¨å‡ºç°å¼‚å¸¸: {e}")
+    #     return (-99.31, -99.32) # æ•…éšœæ ‡è®°è¿”å›å€¼
     
     
-    # =========== 4. ·ÖÎö·µ»ØÖµ ===========    
-    # ¸ÕĞÔÂÖ¶Ôºó´¦Àí½á¹ûµ¼³öÓë·ÖÎö
-    filemidname = r"RigidSTR80kmph"
+    # =========== 4. åˆ†æè¿”å›å€¼ ===========    
+    # åˆšæ€§è½®å¯¹åå¤„ç†ç»“æœå¯¼å‡ºä¸åˆ†æ
+    filemidname = r"NativeRigidSTR80kmph"
     SperlingY_AAR5, SperlingZ_AAR5 = STRSperling_idx(WorkingDir, filemidname, tag, idx)
   
     return (SperlingY_AAR5, SperlingZ_AAR5)

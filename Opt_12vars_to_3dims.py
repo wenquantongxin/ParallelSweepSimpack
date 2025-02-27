@@ -1,4 +1,4 @@
-# -*- coding: gbk -*-
+# -*- coding: utf-8 -*-
 
 import numpy as np
 import os
@@ -25,122 +25,114 @@ from pymoo.util.nds.non_dominated_sorting import NonDominatedSorting
 from pymoo.visualization.scatter import Scatter
 
 #############################################################################################################
-##############################               ×¼±¸·ÂÕæÎÄ¼şº¯Êı×é                    ##########################
+##############################               å‡†å¤‡ä»¿çœŸæ–‡ä»¶å‡½æ•°ç»„                    ##########################
 #############################################################################################################
 
-# ¶ÁÈ¡¸ø¶¨¹¤×÷Ä¿Â¼(working directory)ÏÂµÄconfig_opt.xlsxÎÄ¼şµÄSheet1ÄÚÈİ
+# è¯»å–ç»™å®šå·¥ä½œç›®å½•(working directory)ä¸‹çš„config_opt.xlsxæ–‡ä»¶çš„Sheet1å†…å®¹
 def opt_ReadConfigExcel(working_dir, excel_name="config_opt.xlsx", sheet_name="Sheet1"):
     excel_path = os.path.join(working_dir, excel_name)
     df = pd.read_excel(excel_path, sheet_name=sheet_name)
     return df
 
-# Çå¿Õ BatchTmp ×ÓÎÄ¼ş¼Ğ
+# æ¸…ç©º BatchTmp å­æ–‡ä»¶å¤¹
 def opt_ClearBatchTmpFolder(WorkingDir):
     batch_tmp_path = os.path.join(WorkingDir, "BatchTmp")
     if os.path.exists(batch_tmp_path):
         shutil.rmtree(batch_tmp_path)
     os.makedirs(batch_tmp_path, exist_ok=True)
     
-# ¸ù¾İ Base ÎÄ¼ş£¬¸´ÖÆ²¢Éú³É .spck, .subvar, .spf ÎÄ¼ş
+# æ ¹æ® Base æ–‡ä»¶ï¼Œå¤åˆ¶å¹¶ç”Ÿæˆ .spck, .subvar, .spf æ–‡ä»¶
 def opt_PrepareSpckFilesForEachBatch(WorkingDir, tag, start_idx, end_idx):
     base_subvar_path = os.path.join(WorkingDir, "subvars_OptBase.subvar")
     spck_spf_list = [
         (
-            os.path.join(WorkingDir, "Vehicle4WDB_IRWCRV300m_OptBase.spck"),
-            os.path.join(WorkingDir, "Result_IRWCRV300m.spf"),
-            "Vehicle4WDB_IRWCRV300m_Opt",    # ÓÃÓÚÃüÃûÊä³ö spck ÎÄ¼şÇ°×º
-            "Result_IRWCRV300m_Opt",        # ÓÃÓÚÃüÃûÊä³ö spf ÎÄ¼şÇ°×º
+            os.path.join(WorkingDir, "Vehicle4WDB_NativeRigidCRV300m_OptBase.spck"),
+            os.path.join(WorkingDir, "Result_NativeRigidCRV300m.spf"),
+            "Vehicle4WDB_NativeRigidCRV300m_Opt",
+            "Result_NativeRigidCRV300m_Opt",
         ),
         (
-            os.path.join(WorkingDir, "Vehicle4WDB_RigidCRV300m_OptBase.spck"),
-            os.path.join(WorkingDir, "Result_RigidCRV300m.spf"),
-            "Vehicle4WDB_RigidCRV300m_Opt",
-            "Result_RigidCRV300m_Opt",
+            os.path.join(WorkingDir, "Vehicle4WDB_NativeRigidSTR80kmph_OptBase.spck"),
+            os.path.join(WorkingDir, "Result_NativeRigidSTR80kmph.spf"),
+            "Vehicle4WDB_NativeRigidSTR80kmph_Opt",
+            "Result_NativeRigidSTR80kmph_Opt",
         ),
         (
-            os.path.join(WorkingDir, "Vehicle4WDB_RigidSTR80kmph_OptBase.spck"),
-            os.path.join(WorkingDir, "Result_RigidSTR80kmph.spf"),
-            "Vehicle4WDB_RigidSTR80kmph_Opt",
-            "Result_RigidSTR80kmph_Opt",
-        ),
-        (
-            os.path.join(WorkingDir, "Vehicle4WDB_RigidCriticalVel_OptBase.spck"),
-            os.path.join(WorkingDir, "Result_RigidCriticalVel.spf"),
-            "Vehicle4WDB_RigidCriticalVel_Opt",
-            "Result_RigidCriticalVel_Opt",
+            os.path.join(WorkingDir, "Vehicle4WDB_NativeRigidCriticalVel_OptBase.spck"),
+            os.path.join(WorkingDir, "Result_NativeRigidCriticalVel.spf"),
+            "Vehicle4WDB_NativeRigidCriticalVel_Opt",
+            "Result_NativeRigidCriticalVel_Opt",
         ),
     ]
     
-    # =========== 3. ´´½¨Êä³öÎÄ¼ş¼Ğ BatchTmp ===========
+    # =========== 3. åˆ›å»ºè¾“å‡ºæ–‡ä»¶å¤¹ BatchTmp ===========
     batch_tmp_dir = os.path.join(WorkingDir, "BatchTmp")
     os.makedirs(batch_tmp_dir, exist_ok=True)
     
-    # =========== 4. ¶Ô spck_spf_list ÖĞµÄÃ¿Ò»¶Ô½øĞĞ´¦Àí ===========
+    # =========== 4. å¯¹ spck_spf_list ä¸­çš„æ¯ä¸€å¯¹è¿›è¡Œå¤„ç† ===========
     for base_spck_path, base_spf_path, spck_prefix, spf_prefix in spck_spf_list:
-        # --- 4.1 ¶ÁÈ¡Ô´ spck ºÍ spf ÎÄ¼şÄÚÈİ(ĞĞ) ---
+        # --- 4.1 è¯»å–æº spck å’Œ spf æ–‡ä»¶å†…å®¹(è¡Œ) ---
         with open(base_spck_path, "r", encoding="utf-8") as f_spck:
             base_spck_lines = f_spck.readlines()
         with open(base_spf_path, "r", encoding="utf-8") as f_spf:
             base_spf_lines = f_spf.readlines()
         
-        # --- 4.2 ÔÚ [start_idx, end_idx) ·¶Î§ÄÚ, Öğ¸ö i Éú³ÉÄ¿±êÎÄ¼ş ---
+        # --- 4.2 åœ¨ [start_idx, end_idx) èŒƒå›´å†…, é€ä¸ª i ç”Ÿæˆç›®æ ‡æ–‡ä»¶ ---
         for i in range(start_idx, end_idx):
             
-            # =========== 4.2.1 ´¦Àí spck ÎÄ¼ş ===========
-            # Êä³öÎÄ¼şÃûÊ¾Àı: Vehicle4WDB_IRWCRV300m_Opt_test_0.spck
+            # =========== 4.2.1 å¤„ç† spck æ–‡ä»¶ ===========
             new_spck_name = f"{spck_prefix}_{tag}_{i}.spck"
             new_spck_path = os.path.join(batch_tmp_dir, new_spck_name)
             
             lines_spck_mod = base_spck_lines.copy()
-            # ĞŞ¸ÄµÚ 26(Ë÷Òı25), 61(Ë÷Òı60), 69(Ë÷Òı68) ĞĞ
-            # 1) µÚ 26 ĞĞ(Ë÷Òı 25)Ö¸¶¨ subvar ÎÄ¼şÃû³Æ
+            # ä¿®æ”¹ç¬¬ 26(ç´¢å¼•25), 61(ç´¢å¼•60), 69(ç´¢å¼•68) è¡Œ
+            # 1) ç¬¬ 26 è¡Œ(ç´¢å¼• 25)æŒ‡å®š subvar æ–‡ä»¶åç§°
             lines_spck_mod[25] = (
                 f"subvarset.file (          1                                       ) = "
                 f"'./subvars_Opt_{tag}_{i}.subvar' ! subvarset filename\n"
             )
-            # 2) µÚ 61 ĞĞ(Ë÷Òı 60)
+            # 2) ç¬¬ 61 è¡Œ(ç´¢å¼• 60)
             lines_spck_mod[60] = (
-                "substr.file (                       $S_IRWBogie_Front             ) = "
-                "'../ref_files/Bogie_IRWs_4WDBv3.spck' ! Filename\n"
+                "substr.file (                       $S_NativeRigidWSBogie_Front             ) = "
+                "'../ref_files/Bogie_RW_4WDBv31.spck' ! Filename\n"
             )
-            # 3) µÚ 69 ĞĞ(Ë÷Òı 68)
+            # 3) ç¬¬ 69 è¡Œ(ç´¢å¼• 68)
             lines_spck_mod[68] = (
-                "substr.file (                       $S_IRWBogie_Rear              ) = "
-                "'../ref_files/Bogie_IRWs_4WDBv3.spck' ! Filename\n"
+                "substr.file (                       $S_NativeRigidWSBogie_Rear              ) = "
+                "'../ref_files/Bogie_RW_4WDBv31.spck' ! Filename\n"
             )
             
-            # Ğ´³öĞÂµÄ .spck ÎÄ¼ş
+            # å†™å‡ºæ–°çš„ .spck æ–‡ä»¶
             with open(new_spck_path, "w", encoding="utf-8") as f_out_spck:
                 f_out_spck.writelines(lines_spck_mod)
             
-            # =========== 4.2.2 ¸´ÖÆ subvar ÎÄ¼ş ===========
-            # ÎÄ¼şÃû£ºsubvars_Opt_test_0.subvar
+            # =========== 4.2.2 å¤åˆ¶ subvar æ–‡ä»¶ ===========
+            # æ–‡ä»¶åï¼šsubvars_Opt_test_0.subvar
             new_subvar_name = f"subvars_Opt_{tag}_{i}.subvar"
             new_subvar_path = os.path.join(batch_tmp_dir, new_subvar_name)
             shutil.copyfile(base_subvar_path, new_subvar_path)
             
-            # =========== 4.2.3 ´¦Àí spf ÎÄ¼ş ===========
-            # Êä³öÎÄ¼şÃûÊ¾Àı: Result_IRWCRV300m_Opt_test_0.spf
+            # =========== 4.2.3 å¤„ç† spf æ–‡ä»¶ ===========
             new_spf_name = f"{spf_prefix}_{tag}_{i}.spf"
             new_spf_path = os.path.join(batch_tmp_dir, new_spf_name)
             
             lines_spf_mod = base_spf_lines.copy()
-            # ĞŞ¸ÄµÚ 9 ĞĞ(Ë÷Òı8)
+            # ä¿®æ”¹ç¬¬ 9 è¡Œ(ç´¢å¼•8)
             lines_spf_mod[8] = (
                 f'<ResFile filename="{spck_prefix}_{tag}_{i}.output/{spck_prefix}_{tag}_{i}.sbr" '
                 'generatorVersion="20210000" id="resf1" type="sbr"/>\n'
             )
             
-            # Ğ´³öĞÂµÄ spf ÎÄ¼ş
+            # å†™å‡ºæ–°çš„ spf æ–‡ä»¶
             with open(new_spf_path, "w", encoding="utf-8") as f_out_spf:
                 f_out_spf.writelines(lines_spf_mod)
             
-            # print(f"[INFO] ÒÑÉú³ÉÎÄ¼ş: {new_spck_name}, {new_subvar_name}, {new_spf_name}")
+            # print(f"[INFO] å·²ç”Ÿæˆæ–‡ä»¶: {new_spck_name}, {new_subvar_name}, {new_spf_name}")
     
-    print("[INFO] ±¾´óÅú´Î£¨°üº¬¶à¸ö²¢ĞĞĞ¡Åú´Î£©ËùÓĞÎÄ¼şÒÑÉú³ÉÍê±Ï£¡")
+    print("[INFO] æœ¬å¤§æ‰¹æ¬¡ï¼ˆåŒ…å«å¤šä¸ªå¹¶è¡Œå°æ‰¹æ¬¡ï¼‰æ‰€æœ‰æ–‡ä»¶å·²ç”Ÿæˆå®Œæ¯•ï¼")
     time.sleep(1)
 
-# ÎªÃ¿¸ö idx µÄ subvar ÎÄ¼şµ¼Èë²ÎÁ¿
+# ä¸ºæ¯ä¸ª idx çš„ subvar æ–‡ä»¶å¯¼å…¥å‚é‡
 def opt_WriteSubvarsFile_idx(
     WorkingDir,
     tag,
@@ -158,15 +150,15 @@ def opt_WriteSubvarsFile_idx(
     subvar_filename = f"subvars_Opt_{tag}_{idx}.subvar"
     subvar_path = os.path.join(WorkingDir, "BatchTmp", subvar_filename)
 
-    # ÒÔĞ´Ä£Ê½('w')´ò¿ªÎÄ¼ş£¬¸²¸ÇÆäÔ­ÓĞÄÚÈİ
+    # ä»¥å†™æ¨¡å¼('w')æ‰“å¼€æ–‡ä»¶ï¼Œè¦†ç›–å…¶åŸæœ‰å†…å®¹
     with open(subvar_path, 'w', encoding='utf-8') as f:
-        # Ğ´ÈëÍ·²¿ĞÅÏ¢
+        # å†™å…¥å¤´éƒ¨ä¿¡æ¯
         f.write("!file.version=3.5! Removing this line will make the file unreadable\n\n")
         f.write("!**********************************************************************\n")
         f.write("! SubVars\n")
         f.write("!**********************************************************************\n")
 
-        # ÖğĞĞĞ´Èë subvar(...) Óï¾ä
+        # é€è¡Œå†™å…¥ subvar(...) è¯­å¥
         f.write(f"subvar($_TargetVelocity, str= '{TargetVelocity:.6g}') ! $_TargetVelocity\n")
         f.write(f"subvar($_sprCpz, str= '{sprCpz:.6g}') ! $_sprCpz\n")
         f.write(f"subvar($_Kpx, str= '{Kpx:.6g}') ! $_Kpx\n")
@@ -200,22 +192,22 @@ def opt_WriteSubvarsFile_idx(
         f.write(f"subvar($_Lx2, str= '{Lx2:.6g}') ! $_Lx2\n")
         f.write(f"subvar($_Lx3, str= '{Lx3:.6g}') ! $_Lx3\n")
 
-    # º¯Êı½áÊøÊ±£¬with ÉÏÏÂÎÄ»á×Ô¶¯¹Ø±ÕÎÄ¼ş
-    print(f"[INFO] ÒÑ¸üĞÂÎÄ¼ş: {subvar_path}")
+    # å‡½æ•°ç»“æŸæ—¶ï¼Œwith ä¸Šä¸‹æ–‡ä¼šè‡ªåŠ¨å…³é—­æ–‡ä»¶
+    print(f"[INFO] å·²æ›´æ–°æ–‡ä»¶: {subvar_path}")
     
 #############################################################################################################
-##############################              ¶ÁÈ¡.datÊı¾İµÄº¯Êı×é                    ##########################
+##############################              è¯»å–.datæ•°æ®çš„å‡½æ•°ç»„                    ##########################
 #############################################################################################################
 
-# ·µ»Ø´ÓÊı¾İÎÄ¼şÖĞ»ñµÃ¼ÆËãÁÙ½çËÙ¶ÈÊ±£¬µ±Ç°ËÙ¶ÈÏÂµÄ×î´óºáÒÆÁ¿
+# è¿”å›ä»æ•°æ®æ–‡ä»¶ä¸­è·å¾—è®¡ç®—ä¸´ç•Œé€Ÿåº¦æ—¶ï¼Œå½“å‰é€Ÿåº¦ä¸‹çš„æœ€å¤§æ¨ªç§»é‡
 def opt_ReadCriticalVelDat(dat_path):
     val_array = [0.0]*4
     with open(dat_path, "r", encoding="utf-8") as f:
-        # Ìø¹ıÇ°5ĞĞ
+        # è·³è¿‡å‰5è¡Œ
         for _ in range(5):
             f.readline()
         
-        # ¶ÁÈ¡¹Ø¼üĞĞ
+        # è¯»å–å…³é”®è¡Œ
         line6 = f.readline()
         parts = line6.split(';')
         val_array[0] = float(parts[1].strip())
@@ -245,7 +237,7 @@ def opt_ReadCriticalVelDat(dat_path):
     
     return maxLatY_fromDat
 
-# ·µ»Ø´ÓÊı¾İÎÄ¼şÖĞ»ñµÃµÄ Sperling Ö¸±ê
+# è¿”å›ä»æ•°æ®æ–‡ä»¶ä¸­è·å¾—çš„ Sperling æŒ‡æ ‡
 def opt_ReadAAR5Dat(dat_path):
     with open(dat_path, "r", encoding="utf-8") as f:
         for _ in range(5):
@@ -261,104 +253,96 @@ def opt_ReadAAR5Dat(dat_path):
     
     return Sperling_Y_fromDat, Sperling_Z_fromDat
 
-# ¶ÁÈ¡ÇúÏß·ÂÕæ .dat ÎÄ¼ş£¬»ñµÃÇúÏßÄ¥ºÄÊıÓë×î´óºáÒÆ
-def opt_ReadCRVDat(dat_path):
+# è¯»å–æ›²çº¿ä»¿çœŸ .dat æ–‡ä»¶ï¼Œè·å¾—æ›²çº¿ç£¨è€—æ•°ä¸æœ€å¤§æ¨ªç§»
+def opt_ReadCRVDat(
+    dat_path,
+    line_sumwear=6,
+    lines_lateral=(26, 31, 36, 41)
+):
+    """
+    è¯»å–ç»™å®š dat æ–‡ä»¶ï¼Œè¿”å›ç£¨è€—æ€»æ•°å’Œæœ€å¤§æ¨ªå‘ä½ç§»ã€‚
     
-    LatDisp_array = [0.0]*4
-    
-    with open(dat_path, "r", encoding="utf-8") as f:
-        # Ìø¹ıÇ°5ĞĞ
-        for _ in range(5):
-            f.readline()
-        # ¶ÁÈ¡¹Ø¼üĞĞ
-        line6 = f.readline()
-        parts = line6.split(';')
-        # ¼ÇÂ¼×ÜÄ¥ºÄÊı£¬ÆäÎ»ÓÚ .dat ÎÄ¼şµÄµÚ 6 ĞĞµÚÒ»¸ö·ÖºÅÖ®ºó
-        SumWearNumber_CRV_fromDat = float(parts[1].strip()) 
-        # ´ËÊ±Îª 5 + 1 = 6 ĞĞ
-        
-        for _ in range(39): 
-            f.readline()
-        # ´ËÊ±Îª 6 + 39 = 45 ĞĞ
-        
-        line46 = f.readline()
-        # ´ËÊ±Îª 45 + 1 = 46 ĞĞ
-        
-        parts = line46.split(';')
-        LatDisp_array[0] = float(parts[1].strip())
-        
-        for _ in range(4):
-            f.readline()
-        # ´ËÊ±Îª 46 + 4 = 50 ĞĞ
-        
-        line51 = f.readline()
-        # ´ËÊ±Îª 50 + 1 = 51 ĞĞ
-        
-        parts = line51.split(';')
-        LatDisp_array[1] = float(parts[1].strip())
-        
-        for _ in range(4):
-            f.readline()
-        # ´ËÊ±Îª 51 + 4 = 55 ĞĞ
-        
-        line56 = f.readline()
-        # ´ËÊ±Îª 55 + 1 = 56 ĞĞ
-        
-        parts = line56.split(';')
-        LatDisp_array[2] = float(parts[1].strip())
+    å‚æ•°:
+    ----
+    dat_path: str
+        .dat æ–‡ä»¶è·¯å¾„
+    line_sumwear: int
+        .dat æ–‡ä»¶ä¸­å­˜æ”¾æ€»ç£¨è€—æ•°æ®çš„è¡Œå·ï¼ˆä»1å¼€å§‹è®¡æ•°ï¼‰
+    lines_lateral: tuple or list
+        .dat æ–‡ä»¶ä¸­å­˜æ”¾æ¨ªå‘ä½ç§»æ•°æ®çš„è¡Œå·ï¼ˆä»1å¼€å§‹è®¡æ•°ï¼‰ï¼Œå¯ä¼ å…¥å¤šä¸ª
 
-        for _ in range(4):
-            f.readline()
-        # ´ËÊ±Îª 56 + 4 = 60 ĞĞ
-        
-        line61 = f.readline()
-        # ´ËÊ±Îª 60 + 1 = 61 ĞĞ
-        
-        parts = line61.split(';')
-        LatDisp_array[3] = float(parts[1].strip())
-            
+    è¿”å›:
+    ----
+    (SumWearNumber, maxLatDisp) : (float, float)
+        - SumWearNumber: floatï¼Œæ€»ç£¨è€—æ•°
+        - maxLatDisp: floatï¼Œæ¨ªå‘ä½ç§»ä¸­çš„æœ€å¤§å€¼
+    """
+    with open(dat_path, "r", encoding="utf-8") as f:
+        lines = f.readlines()
+    
+    # ç¡®ä¿è¡Œå·ä¸è¶…è¿‡æ–‡ä»¶æ€»è¡Œæ•°
+    total_lines = len(lines)
+    if line_sumwear > total_lines:
+        raise ValueError(f"line_sumwear = {line_sumwear} è¶…è¿‡æ–‡ä»¶æ€»è¡Œæ•° {total_lines}ã€‚")
+    for idx in lines_lateral:
+        if idx > total_lines:
+            raise ValueError(f"æ¨ªå‘ä½ç§»è¡Œå· {idx} è¶…è¿‡æ–‡ä»¶æ€»è¡Œæ•° {total_lines}ã€‚")
+
+    # è§£ææ€»ç£¨è€—(ç¬¬ line_sumwear è¡Œ)
+    # å› ä¸º Python åˆ—è¡¨æ˜¯ä» 0 å¼€å§‹ç´¢å¼•ï¼Œæ‰€ä»¥å¯¹åº”è¡Œå· line_sumwear => lines[line_sumwear - 1]
+    line_sum = lines[line_sumwear - 1]
+    parts_sum = line_sum.split(';')
+    SumWearNumber_CRV_fromDat = float(parts_sum[1].strip())
+
+    # ä¾æ¬¡è¯»å–æŒ‡å®šçš„æ¨ªå‘ä½ç§»è¡Œ
+    LatDisp_array = []
+    for idx in lines_lateral:
+        line_disp = lines[idx - 1]
+        parts_disp = line_disp.split(';')
+        LatDisp_array.append(float(parts_disp[1].strip()))
+
     maxLatDisp_CRV_fromDat = max(LatDisp_array)
     
     return SumWearNumber_CRV_fromDat, maxLatDisp_CRV_fromDat
 
 #############################################################################################################
-##############################        ÃüÁîĞĞµ÷ÓÃSimpackÇ°´¦ÀíÓëºó´¦Àíº¯Êı×é          ##########################
+##############################        å‘½ä»¤è¡Œè°ƒç”¨Simpackå‰å¤„ç†ä¸åå¤„ç†å‡½æ•°ç»„          ##########################
 #############################################################################################################
 
-# Ö´ĞĞ simpack-cmd µ÷ÓÃ simpack-slv »òÕß simpack-qs ½Å±¾
+# æ‰§è¡Œ simpack-cmd è°ƒç”¨ simpack-slv æˆ–è€… simpack-qs è„šæœ¬
 def opt_RunSPCKCmd (cmd, work_dir, timeout_seconds):
     
     try:
-        # Ê¹ÓÃ Popen Æô¶¯½ø³Ì
+        # ä½¿ç”¨ Popen å¯åŠ¨è¿›ç¨‹
         process = subprocess.Popen(cmd, cwd=work_dir, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-         # µÈ´ı½ø³ÌÍê³É£¬×î¶àµÈ´ı timeout_seconds Ê±¼ä
+         # ç­‰å¾…è¿›ç¨‹å®Œæˆï¼Œæœ€å¤šç­‰å¾… timeout_seconds æ—¶é—´
         stdout, stderr = process.communicate(timeout=timeout_seconds)
 
-        # Èç¹û½ø³ÌÔÚÊ±¼äÏŞÖÆÄÚÍê³É
+        # å¦‚æœè¿›ç¨‹åœ¨æ—¶é—´é™åˆ¶å†…å®Œæˆ
         if process.returncode == 0:
             return 0
         else:
-            # ´òÓ¡±ê×¼´íÎóÊä³ö
-            print(f"[ERROR] simpack Ö´ĞĞÊ§°Ü£¬·µ»ØÂë={process.returncode}")
-            return -99.5  # ·µ»Ø´íÎóÂë
+            # æ‰“å°æ ‡å‡†é”™è¯¯è¾“å‡º
+            print(f"[ERROR] simpack æ‰§è¡Œå¤±è´¥ï¼Œè¿”å›ç ={process.returncode}")
+            return -99.5  # è¿”å›é”™è¯¯ç 
 
     except subprocess.TimeoutExpired:
-        # Èç¹û³¬Ê±£¬ÖÕÖ¹½ø³Ì
-        print("[ERROR] simpack Ö´ĞĞ³¬Ê±£¬ÖÕÖ¹½ø³Ì£¡")
+        # å¦‚æœè¶…æ—¶ï¼Œç»ˆæ­¢è¿›ç¨‹
+        print("[ERROR] simpack æ‰§è¡Œè¶…æ—¶ï¼Œç»ˆæ­¢è¿›ç¨‹ï¼")
         process.terminate()
-        process.wait()  # È·±£½ø³Ì±»ÍêÈ«ÖÕÖ¹
-        return -99.4  # ·µ»Ø³¬Ê±´íÎóÂë
+        process.wait()  # ç¡®ä¿è¿›ç¨‹è¢«å®Œå…¨ç»ˆæ­¢
+        return -99.4  # è¿”å›è¶…æ—¶é”™è¯¯ç 
 
     except Exception as e:
-        print(f"[ERROR] Ö´ĞĞÃüÁîÊ§°Ü: {e}")
-        return -99.3  # ÆäËû´íÎó
+        print(f"[ERROR] æ‰§è¡Œå‘½ä»¤å¤±è´¥: {e}")
+        return -99.3  # å…¶ä»–é”™è¯¯
 
 #############################################################################################################
-##########################                Ö±ÇúÏßµ¥Ïß³Ì¼ÆËã×é(ÃüÁîÆô¶¯+ºó´¦Àí)           #####################
+##########################                ç›´æ›²çº¿å•çº¿ç¨‹è®¡ç®—ç»„(å‘½ä»¤å¯åŠ¨+åå¤„ç†)           #####################
 #############################################################################################################
 
-# µ¥Ïß³ÌÄÚ¼ÆËãËÄ×éÂÖ¶ÔµÄ×î´óºáÒÆÁ¿
+# å•çº¿ç¨‹å†…è®¡ç®—å››ç»„è½®å¯¹çš„æœ€å¤§æ¨ªç§»é‡
 def opt_MaxLatY_idx(
     work_dir,
     tag,
@@ -367,174 +351,173 @@ def opt_MaxLatY_idx(
     wait_seconds = 3
 ):
     
-    spf_filename = f"Result_RigidCriticalVel_Opt_{tag}_{idx}.spf"
-    out_result_prefix = f"DatResult_RigidCriticalVel_{tag}_{idx}"
+    spf_filename = f"Result_NativeRigidCriticalVel_Opt_{tag}_{idx}.spf"
+    out_result_prefix = f"DatResult_NativeRigidCriticalVel_{tag}_{idx}"
     spf_path = os.path.join(work_dir, "BatchTmp", spf_filename)
     out_result_full_prefix = os.path.join(work_dir, "BatchTmp", out_result_prefix)
     qs_script_path = os.path.join(work_dir, qs_script)
-    # ÈôÓĞĞèÒª¿É¼ì²éÎÄ¼ş´æÔÚ
+    # è‹¥æœ‰éœ€è¦å¯æ£€æŸ¥æ–‡ä»¶å­˜åœ¨
     if not os.path.isfile(qs_script_path):
-        print(f"ºó´¦Àí½Å±¾²»´æÔÚ: {qs_script_path}")
+        print(f"åå¤„ç†è„šæœ¬ä¸å­˜åœ¨: {qs_script_path}")
         return +99.0 
     if not os.path.isfile(spf_path):
-        print(f".spfÎÄ¼ş²»´æÔÚ: {spf_path}")
+        print(f".spfæ–‡ä»¶ä¸å­˜åœ¨: {spf_path}")
         return +99.1 
     cmd = [
         "simpack-post",
         "-s", qs_script_path,
-        spf_path,               # SPF ÎÄ¼şÂ·¾¶
-        out_result_full_prefix  # Êä³öÇ°×º
+        spf_path,               # SPF æ–‡ä»¶è·¯å¾„
+        out_result_full_prefix  # è¾“å‡ºå‰ç¼€
     ]
     
-    # µ÷ÓÃº¯ÊıÖ´ĞĞ
+    # è°ƒç”¨å‡½æ•°æ‰§è¡Œ
     result = opt_RunSPCKCmd(cmd, work_dir, timeout_seconds = 10 * 60) # 10 * 60
     if result != 0:
-        print(f"ÔËĞĞÊ§°Ü£¬´íÎóÂë£º{result}")
+        print(f"è¿è¡Œå¤±è´¥ï¼Œé”™è¯¯ç ï¼š{result}")
         return +99.2 
     else:
-        print(f"³É¹¦Ö´ĞĞ qs ½Å±¾µ÷ÓÃ")
+        print(f"æˆåŠŸæ‰§è¡Œ qs è„šæœ¬è°ƒç”¨")
     time.sleep(wait_seconds)
     
-    # 2) Æ´³ö×îÖÕ .dat ÎÄ¼şËùÔÚÂ·¾¶
+    # 2) æ‹¼å‡ºæœ€ç»ˆ .dat æ–‡ä»¶æ‰€åœ¨è·¯å¾„
     dat_path = out_result_full_prefix + ".dat"
     if not os.path.isfile(dat_path):
-        raise FileNotFoundError(f"ºó´¦Àí½á¹ûÎÄ¼şÎ´ÕÒµ½: {dat_path}")
+        raise FileNotFoundError(f"åå¤„ç†ç»“æœæ–‡ä»¶æœªæ‰¾åˆ°: {dat_path}")
 
-    # 3) ½âÎöÎÄ¼ş
+    # 3) è§£ææ–‡ä»¶
     try:
         maxLatY_fromDat = opt_ReadCriticalVelDat(dat_path)
     except Exception as e:
-        print(f"[ERROR] ½âÎö {dat_path} Ê±³öÏÖÒì³£: {e}")
+        print(f"[ERROR] è§£æ {dat_path} æ—¶å‡ºç°å¼‚å¸¸: {e}")
         maxLatY = -99.4
     else:
         maxLatY = maxLatY_fromDat
 
     return maxLatY
 
-# µ¥Ïß³ÌÄÚ¼ÆËãÇúÏßÍ¨¹ıµÄÄ¥ºÄÊıÓë×î´óºáÒÆÁ¿
+# å•çº¿ç¨‹å†…è®¡ç®—æ›²çº¿é€šè¿‡çš„ç£¨è€—æ•°ä¸æœ€å¤§æ¨ªç§»é‡
 def opt_CRVCal_idx(
     work_dir,
-    filemidname, # ÓÃÓÚÇø·Ö¸ÕĞÔÂÖ¶Ô»òÕß¶ÀÁ¢ÂÖ¶Ô£¬filemidname ¿ÉÄÜÎª IRWCRV300m »òÕß RigidCRV300m
+    filemidname, # ç”¨äºåŒºåˆ†åˆšæ€§è½®å¯¹æˆ–è€…ç‹¬ç«‹è½®å¯¹ï¼Œfilemidname ä¸º NativeRigidCRV300m
     tag,
     idx,
     qs_script="SbrExport_SPCKResult.qs"
 ):
     
-    spf_filename = f"Result_{filemidname}_Opt_{tag}_{idx}.spf" # ¶ÔÓ¦ÓÚ Result_IRWCRV300m_Opt_0125_0.spf »òÕß Result_RigidCRV300m_Opt_0125_0.spf
-    out_result_prefix = f"DatResult_{filemidname}_{tag}_{idx}" # Êä³öµÄ .dat ÎÄ¼şµÄÃû³Æ
+    spf_filename = f"Result_{filemidname}_Opt_{tag}_{idx}.spf" # å¯¹åº”äº Result_NativeRigidCRV300m_Opt_0125_0.spf
+    out_result_prefix = f"DatResult_{filemidname}_{tag}_{idx}" # è¾“å‡ºçš„ .dat æ–‡ä»¶çš„åç§°
    
-    # Æ´³ö SPF ÎÄ¼şµÄ¾ø¶ÔÂ·¾¶
+    # æ‹¼å‡º SPF æ–‡ä»¶çš„ç»å¯¹è·¯å¾„
     spf_path = os.path.join(work_dir, "BatchTmp", spf_filename)
     out_result_full_prefix = os.path.join(work_dir, "BatchTmp", out_result_prefix)
-    # ½Å±¾Î»ÖÃ
+    # è„šæœ¬ä½ç½®
     qs_script_path = os.path.join(work_dir, qs_script)
 
-    # ÈôÓĞĞèÒª¿É¼ì²éÎÄ¼ş´æÔÚ
+    # è‹¥æœ‰éœ€è¦å¯æ£€æŸ¥æ–‡ä»¶å­˜åœ¨
     if not os.path.isfile(qs_script_path):
-        print(f"ºó´¦Àí½Å±¾²»´æÔÚ: {qs_script_path}")
+        print(f"åå¤„ç†è„šæœ¬ä¸å­˜åœ¨: {qs_script_path}")
         return (+999.0111, +999.0112) 
     if not os.path.isfile(spf_path):
-        print(f".spfÎÄ¼ş²»´æÔÚ: {spf_path}")
+        print(f".spfæ–‡ä»¶ä¸å­˜åœ¨: {spf_path}")
         return (+999.0121, +999.0122)
 
-    # 1) µ÷ÓÃ simpack-post µÄ½Å±¾ .qs
-    # BatchTmp ×ÓÎÄ¼ş¼ĞÄÚ£¬ÒÔÃüÁîĞĞÖ´ĞĞ: simpack-post -s SbrExport_SPCKResult.qs Result_RigidCRV300m_Opt_0125_0.spf DatResult_RigidCRV300m_0125_0    
+    # 1) è°ƒç”¨ simpack-post çš„è„šæœ¬ .qs
+    # BatchTmp å­æ–‡ä»¶å¤¹å†…ï¼Œä»¥å‘½ä»¤è¡Œæ‰§è¡Œ: simpack-post -s SbrExport_SPCKResult.qs Result_NativeRigidCRV300m_Opt_0125_0.spf DatResult_NativeRigidCRV300m_0125_0    
     cmd = [
         "simpack-post",
         "-s", qs_script_path,
-        spf_path,               # SPF ÎÄ¼şÂ·¾¶
-        out_result_full_prefix  # Êä³öÇ°×º
+        spf_path,               # SPF æ–‡ä»¶è·¯å¾„
+        out_result_full_prefix  # è¾“å‡ºå‰ç¼€
     ]
     
-    # µ÷ÓÃº¯ÊıÖ´ĞĞ
+    # è°ƒç”¨å‡½æ•°æ‰§è¡Œ
     result = opt_RunSPCKCmd(cmd, work_dir, timeout_seconds = 10 * 60)
     if result != 0:
-        print(f"ÔËĞĞÊ§°Ü£¬´íÎóÂë£º{result}")
+        print(f"è¿è¡Œå¤±è´¥ï¼Œé”™è¯¯ç ï¼š{result}")
         return (+999.0131, +999.0132)
     else:
-        print(f"³É¹¦Ö´ĞĞ qs ½Å±¾µ÷ÓÃ")
-        print("ÃüÁîÖ´ĞĞÍê³É")
+        print(f"æˆåŠŸæ‰§è¡Œ qs è„šæœ¬è°ƒç”¨")
+        print("å‘½ä»¤æ‰§è¡Œå®Œæˆ")
     
     time.sleep(2)
     
-    # 2) Æ´³ö×îÖÕ .dat ÎÄ¼şËùÔÚÂ·¾¶
+    # 2) æ‹¼å‡ºæœ€ç»ˆ .dat æ–‡ä»¶æ‰€åœ¨è·¯å¾„
     dat_path = out_result_full_prefix + ".dat"
     if not os.path.isfile(dat_path):
-        print(f"[ERROR] ºó´¦Àí½á¹ûÎÄ¼şÎ´ÕÒµ½: {dat_path}")
+        print(f"[ERROR] åå¤„ç†ç»“æœæ–‡ä»¶æœªæ‰¾åˆ°: {dat_path}")
         return (+999.0151, +999.0152) 
       
-    # 3) ½âÎöÎÄ¼ş
+    # 3) è§£ææ–‡ä»¶
     try:
         SumWearNumber_CRV_fromDat, maxLatDisp_CRV_fromDat = opt_ReadCRVDat(dat_path)
     except Exception as e:
-        print(f"[ERROR] ½âÎö {dat_path} Ê±³öÏÖÒì³£: {e}")
+        print(f"[ERROR] è§£æ {dat_path} æ—¶å‡ºç°å¼‚å¸¸: {e}")
         SumWearNumber_CRV = +9.025
         maxLatDisp_CRV = +9.026
     else:
         SumWearNumber_CRV = SumWearNumber_CRV_fromDat
         maxLatDisp_CRV = maxLatDisp_CRV_fromDat
         
-    # ·µ»ØÉÏ²¿º¯Êı CRVPerf_idx
-    # ×¢Òâ¼ì²é CRVCal_idx ¸÷¸ö¹ÊÕÏ·µ»ØÂëµÄÎ¬¶È£¬Ó¦Óë CRVCal_idx º¯ÊıµÄ return ÏàÍ¬
+    # è¿”å›ä¸Šéƒ¨å‡½æ•° CRVPerf_idx
+    # æ³¨æ„æ£€æŸ¥ CRVCal_idx å„ä¸ªæ•…éšœè¿”å›ç çš„ç»´åº¦ï¼Œåº”ä¸ CRVCal_idx å‡½æ•°çš„ return ç›¸åŒ
     return SumWearNumber_CRV, maxLatDisp_CRV
 
-# µ¥Ïß³ÌÄÚ¼ÆËãÖ±Ïß AAR5 ÏßÂ·µÄ Sperling ²ÎÁ¿
+# å•çº¿ç¨‹å†…è®¡ç®—ç›´çº¿ AAR5 çº¿è·¯çš„ Sperling å‚é‡
 def STRSperling_idx(
     work_dir,
-    filemidname, # ÓÃÓÚÇø·Ö¸ÕĞÔÂÖ¶Ô»òÕß¶ÀÁ¢ÂÖ¶Ô£¬filemidname ¿ÉÄÜÎª RigidSTR80kmph »ò IRWSTR80kmph£¨ÔİÎŞ£©
+    filemidname, # ç”¨äºåŒºåˆ†åˆšæ€§è½®å¯¹æˆ–è€…ç‹¬ç«‹è½®å¯¹ï¼Œfilemidname ä¸º RigidSTR80kmph
     tag,
     idx,
     qs_script="SbrExport_SPCKResult.qs"
 ):
     
-    spf_filename = f"Result_{filemidname}_Opt_{tag}_{idx}.spf" # ¶ÔÓ¦ÓÚ Result_RigidSTR80kmph_Opt_0125_20.spf
-    out_result_prefix = f"DatResult_{filemidname}_{tag}_{idx}" # Êä³öµÄ .dat ÎÄ¼şµÄÃû³Æ
+    spf_filename = f"Result_{filemidname}_Opt_{tag}_{idx}.spf" # å¯¹åº”äº Result_NativeRigidSTR80kmph_Opt_0125_20.spf
+    out_result_prefix = f"DatResult_{filemidname}_{tag}_{idx}" # è¾“å‡ºçš„ .dat æ–‡ä»¶çš„åç§°
    
-    # Æ´³ö SPF ÎÄ¼şµÄ¾ø¶ÔÂ·¾¶
+    # æ‹¼å‡º SPF æ–‡ä»¶çš„ç»å¯¹è·¯å¾„
     spf_path = os.path.join(work_dir, "BatchTmp", spf_filename)
     out_result_full_prefix = os.path.join(work_dir, "BatchTmp", out_result_prefix)
-    # ½Å±¾Î»ÖÃ
+    # è„šæœ¬ä½ç½®
     qs_script_path = os.path.join(work_dir, qs_script)
 
-    # ÈôÓĞĞèÒª¿É¼ì²éÎÄ¼ş´æÔÚ
+    # è‹¥æœ‰éœ€è¦å¯æ£€æŸ¥æ–‡ä»¶å­˜åœ¨
     if not os.path.isfile(qs_script_path):
-        print(f"ºó´¦Àí½Å±¾²»´æÔÚ: {qs_script_path}")
+        print(f"åå¤„ç†è„šæœ¬ä¸å­˜åœ¨: {qs_script_path}")
         return (+9.0211, +9.0212) 
     if not os.path.isfile(spf_path):
-        print(f".spfÎÄ¼ş²»´æÔÚ: {spf_path}")
+        print(f".spfæ–‡ä»¶ä¸å­˜åœ¨: {spf_path}")
         return (+9.0221, +9.0222)
 
-    # 1) µ÷ÓÃ simpack-post µÄ½Å±¾ .qs
-    # BatchTmp ×ÓÎÄ¼ş¼ĞÄÚ£¬ÒÔÃüÁîĞĞÖ´ĞĞ: simpack-post -s SbrExport_SPCKResult.qs Result_RigidCRV300m_Opt_0125_0.spf DatResult_RigidCRV300m_0125_0    
+    # 1) è°ƒç”¨ simpack-post çš„è„šæœ¬ .qs
     cmd = [
         "simpack-post",
         "-s", qs_script_path,
-        spf_path,               # SPF ÎÄ¼şÂ·¾¶
-        out_result_full_prefix  # Êä³öÇ°×º
+        spf_path,               # SPF æ–‡ä»¶è·¯å¾„
+        out_result_full_prefix  # è¾“å‡ºå‰ç¼€
     ]
     
-    # µ÷ÓÃº¯ÊıÖ´ĞĞ
+    # è°ƒç”¨å‡½æ•°æ‰§è¡Œ
     result = opt_RunSPCKCmd(cmd, work_dir, timeout_seconds = 10 * 60)
     if result != 0:
-        print(f"ÔËĞĞÊ§°Ü£¬´íÎóÂë£º{result}")
+        print(f"è¿è¡Œå¤±è´¥ï¼Œé”™è¯¯ç ï¼š{result}")
         return (+9.0231, +9.0232)
     else:
-        print(f"³É¹¦Ö´ĞĞ slv »ò qs ½Å±¾µ÷ÓÃ")
-        # print("ÃüÁîÖ´ĞĞÍê³É")
+        print(f"æˆåŠŸæ‰§è¡Œ slv æˆ– qs è„šæœ¬è°ƒç”¨")
+        # print("å‘½ä»¤æ‰§è¡Œå®Œæˆ")
     
     time.sleep(2)
     
-    # 2) Æ´³ö×îÖÕ .dat ÎÄ¼şËùÔÚÂ·¾¶
+    # 2) æ‹¼å‡ºæœ€ç»ˆ .dat æ–‡ä»¶æ‰€åœ¨è·¯å¾„
     dat_path = out_result_full_prefix + ".dat"
     if not os.path.isfile(dat_path):
-        print(f"[ERROR] ºó´¦Àí½á¹ûÎÄ¼şÎ´ÕÒµ½: {dat_path}")
+        print(f"[ERROR] åå¤„ç†ç»“æœæ–‡ä»¶æœªæ‰¾åˆ°: {dat_path}")
         return (+9.0251, +9.0252) 
       
-    # 3) ½âÎöÎÄ¼ş
+    # 3) è§£ææ–‡ä»¶
     try:
         Sperling_Y_fromDat, Sperling_Z_fromDat = opt_ReadAAR5Dat(dat_path)
     except Exception as e:
-        print(f"[ERROR] ½âÎö {dat_path} Ê±³öÏÖÒì³£: {e}")
+        print(f"[ERROR] è§£æ {dat_path} æ—¶å‡ºç°å¼‚å¸¸: {e}")
         Sperling_Y = +9.0261
         Sperling_Z = +9.0262
     else:
@@ -545,19 +528,19 @@ def STRSperling_idx(
 
 
 #############################################################################################################
-##########################           Ö±ÇúÏßµ¥Ïß³Ì¼ÆËã×é(²ÎÊıÔØÈë+ÉÏÊö¼ÆËãº¯Êıµ÷ÓÃ)          #####################
+##########################           ç›´æ›²çº¿å•çº¿ç¨‹è®¡ç®—ç»„(å‚æ•°è½½å…¥+ä¸Šè¿°è®¡ç®—å‡½æ•°è°ƒç”¨)          #####################
 #############################################################################################################
 
-# ÇúÏßÓÅ»¯Ä¿±ê - IRW ×ªËÙ¿ØÖÆÄ£ĞÍµÄÄ¥ºÄÊı
-# ×¢ÒâÓë CRVPerf_idx º¯ÊıÇø·Ö
+# æ›²çº¿ä¼˜åŒ–ç›®æ ‡ - åˆšæ€§è½®å¯¹è½¬å‘æ¶æ›²çº¿é€šè¿‡çš„ç£¨è€—æ•°
+# æ³¨æ„ä¸ CRVPerf_idx å‡½æ•°åŒºåˆ†
 def opt_CRVPerf_idx(WorkingDir, X_vars, tag, idx):
 
-    print(f"²ÎÊıÑ°ÓÅB£º¶ÔÓÚÄ£ĞÍ {idx} ½øĞĞÇúÏßÍ¨¹ıĞÔÄÜÆÀ¹À")
+    print(f"å‚æ•°å¯»ä¼˜Bï¼šå¯¹äºæ¨¡å‹ {idx} è¿›è¡Œæ›²çº¿é€šè¿‡æ€§èƒ½è¯„ä¼°")
     
-    # =========== 1. ½â°ü X_vars[:, idx] ===========
+    # =========== 1. è§£åŒ… X_vars[:, idx] ===========
     X_vars_col = X_vars[:, idx]
-    # ÒÀÕÕ¼È¶¨Ë³Ğò½â°ü
-    TargetVelocity = 60/3.6      # ÇúÏßÆÀ¹ÀÊ±£¬²ÉÓÃ 60 km/h ËÙ¶ÈÍ¨¹ı R300 ÇúÏß£¬Ê¹ÓÃ TargetVel ¸²¸Ç¸ÃËÙ¶ÈÈ¡Öµ
+    # ä¾ç…§æ—¢å®šé¡ºåºè§£åŒ…
+    TargetVelocity = 60/3.6      # æ›²çº¿è¯„ä¼°æ—¶ï¼Œé‡‡ç”¨ 60 km/h é€Ÿåº¦é€šè¿‡ R300 æ›²çº¿ï¼Œä½¿ç”¨ TargetVel è¦†ç›–è¯¥é€Ÿåº¦å–å€¼
     
     sprCpz         = X_vars_col[0]
     Kpx            = X_vars_col[1]
@@ -591,7 +574,7 @@ def opt_CRVPerf_idx(WorkingDir, X_vars, tag, idx):
     Lx2            = X_vars_col[10]
     Lx3            = X_vars_col[11]
 
-    # =========== 2. Éú³É .subvar ÎÄ¼ş ===========
+    # =========== 2. ç”Ÿæˆ .subvar æ–‡ä»¶ ===========
 
     opt_WriteSubvarsFile_idx(
         WorkingDir=WorkingDir,
@@ -608,45 +591,43 @@ def opt_CRVPerf_idx(WorkingDir, X_vars, tag, idx):
         Lx1=Lx1, Lx2=Lx2, Lx3=Lx3
     )
 
-    # ===========  µ÷ÓÃ SIMPACK ·ÂÕæ  ===========
-    # ===========      ¶ÀÁ¢ÂÖ¶ÔÄ£ĞÍ      ===========  
-    
-    spck_name = f"Vehicle4WDB_IRWCRV300m_Opt_{tag}_{idx}.spck"
+    # ===========  è°ƒç”¨ SIMPACK ä»¿çœŸ  ===========
+    # ===========      ç‹¬ç«‹è½®å¯¹æ¨¡å‹      ===========  
+    spck_name = f"Vehicle4WDB_NativeRigidCRV300m_Opt_{tag}_{idx}.spck"
     spck_path = os.path.join(WorkingDir, "BatchTmp", spck_name)
 
-    # ¹¹½¨ÔËĞĞÃüÁî
-    # ÀıÈç "simpack-slv.exe" + spck_path
+    # æ„å»ºè¿è¡Œå‘½ä»¤
+    # ä¾‹å¦‚ "simpack-slv.exe" + spck_path
     cmd = ["simpack-slv.exe", "--silent", spck_path]
     
-    # µ÷ÓÃº¯ÊıÖ´ĞĞ
+    # è°ƒç”¨å‡½æ•°æ‰§è¡Œ
     result = opt_RunSPCKCmd(cmd, WorkingDir, timeout_seconds = 10 * 60)
 
     if result != 0:
-        print(f"ÔËĞĞÊ§°Ü£¬´íÎóÂë£º{result}")
+        print(f"è¿è¡Œå¤±è´¥ï¼Œé”™è¯¯ç ï¼š{result}")
         return (+999.21, +999.22)
     else:
-        print(f"³É¹¦Ö´ĞĞ qs ½Å±¾µ÷ÓÃ")
-        # print("ÃüÁîÖ´ĞĞÍê³É")
+        print(f"æˆåŠŸæ‰§è¡Œ qs è„šæœ¬è°ƒç”¨")
+        # print("å‘½ä»¤æ‰§è¡Œå®Œæˆ")
 
     time.sleep(1)    
     
-    # =========== 4. ·ÖÎö·µ»ØÖµ ===========    
-
-    # ¶ÀÁ¢ÂÖ¶Ôºó´¦Àí½á¹ûµ¼³öÓë·ÖÎö
-    filemidname = r"IRWCRV300m"
-    SumWearNumber_IRWCRV300m_CRV, maxLatDisp_IRWCRV300m_CRV = opt_CRVCal_idx(WorkingDir, filemidname, tag, idx)
+    # =========== 4. åˆ†æè¿”å›å€¼ ===========    
+    # ç‹¬ç«‹è½®å¯¹åå¤„ç†ç»“æœå¯¼å‡ºä¸åˆ†æ
+    filemidname = r"NativeRigidCRV300m"
+    SumWearNumber_NativeRigidCRV300m_CRV, maxLatDisp_NativeRigidCRV300m_CRV = opt_CRVCal_idx(WorkingDir, filemidname, tag, idx)
         
-    return (SumWearNumber_IRWCRV300m_CRV, maxLatDisp_IRWCRV300m_CRV)
+    return (SumWearNumber_NativeRigidCRV300m_CRV, maxLatDisp_NativeRigidCRV300m_CRV)
 
-# Ö±Ïß AAR5 ÆÀ¹À
+# ç›´çº¿ AAR5 è¯„ä¼°
 def opt_STRPerf_idx(WorkingDir, X_vars, tag, idx):
 
-    print(f"¶ÔÓÚÄ£ĞÍ {idx} ½øĞĞµäĞÍÖ±ÏßÏßÂ·µÄ Sperling Ö¸±ê²âÊÔ")
+    print(f"å¯¹äºæ¨¡å‹ {idx} è¿›è¡Œå…¸å‹ç›´çº¿çº¿è·¯çš„ Sperling æŒ‡æ ‡æµ‹è¯•")
     
-    # =========== 1. ½â°ü X_vars[:, idx] ===========
+    # =========== 1. è§£åŒ… X_vars[:, idx] ===========
     X_vars_col = X_vars[:, idx]
-    # ÒÀÕÕ¼È¶¨Ë³Ğò½â°ü
-    TargetVelocity = 80/3.6      # Ö±ÏßÆÀ¹ÀÊ±£¬²ÉÓÃ 80 km/h ËÙ¶ÈÍ¨¹ı AAR5 Ö±ÏßÏßÂ·£¬Ê¹ÓÃ TargetVel ¸²¸Ç¸ÃËÙ¶ÈÈ¡Öµ
+    # ä¾ç…§æ—¢å®šé¡ºåºè§£åŒ…
+    TargetVelocity = 80/3.6      # ç›´çº¿è¯„ä¼°æ—¶ï¼Œé‡‡ç”¨ 80 km/h é€Ÿåº¦é€šè¿‡ AAR5 ç›´çº¿çº¿è·¯ï¼Œä½¿ç”¨ TargetVel è¦†ç›–è¯¥é€Ÿåº¦å–å€¼
 
     sprCpz         = X_vars_col[0]
     Kpx            = X_vars_col[1]
@@ -680,7 +661,7 @@ def opt_STRPerf_idx(WorkingDir, X_vars, tag, idx):
     Lx2            = X_vars_col[10]
     Lx3            = X_vars_col[11]
 
-    # =========== 2. Éú³É .subvar ÎÄ¼ş ===========
+    # =========== 2. ç”Ÿæˆ .subvar æ–‡ä»¶ ===========
     opt_WriteSubvarsFile_idx(
         WorkingDir=WorkingDir,
         tag=tag,
@@ -696,43 +677,43 @@ def opt_STRPerf_idx(WorkingDir, X_vars, tag, idx):
         Lx1=Lx1, Lx2=Lx2, Lx3=Lx3
     )
 
-    # =========== 3.1 µ÷ÓÃ SIMPACK ·ÂÕæ  ===========
-    # ===========      ¸ÕĞÔÂÖ¶ÔÄ£ĞÍ      ===========
-    spck_name = f"Vehicle4WDB_RigidSTR80kmph_Opt_{tag}_{idx}.spck"   # ÀıÈç: Vehicle4WDB_RigidSTR80kmph_Opt_0125_23
+    # =========== 3.1 è°ƒç”¨ SIMPACK ä»¿çœŸ  ===========
+    # ===========      åˆšæ€§è½®å¯¹æ¨¡å‹      ===========
+    spck_name = f"Vehicle4WDB_NativeRigidSTR80kmph_Opt_{tag}_{idx}.spck"   # ä¾‹å¦‚: Vehicle4WDB_NativeRigidSTR80kmph_Opt_0125_23
     spck_path = os.path.join(WorkingDir, "BatchTmp", spck_name)
 
-    # ¹¹½¨ÔËĞĞÃüÁî
-    # ÀıÈç "simpack-slv.exe" + spck_path
+    # æ„å»ºè¿è¡Œå‘½ä»¤
+    # ä¾‹å¦‚ "simpack-slv.exe" + spck_path
     cmd = ["simpack-slv.exe", "--silent", spck_path]
     
     result = opt_RunSPCKCmd(cmd, WorkingDir, timeout_seconds = 10 * 60)
     if result != 0:
-        print(f"ÔËĞĞÊ§°Ü£¬´íÎóÂë£º{result}")
+        print(f"è¿è¡Œå¤±è´¥ï¼Œé”™è¯¯ç ï¼š{result}")
         return (+99.31, +99.32)
     else:
-        print(f"³É¹¦Ö´ĞĞ qs ½Å±¾µ÷ÓÃ")
-        # print("ÃüÁîÖ´ĞĞÍê³É")
+        print(f"æˆåŠŸæ‰§è¡Œ qs è„šæœ¬è°ƒç”¨")
+        # print("å‘½ä»¤æ‰§è¡Œå®Œæˆ")
         
     time.sleep(1)
 
-    # =========== 4. ·ÖÎö·µ»ØÖµ ===========    
-    # ¸ÕĞÔÂÖ¶Ôºó´¦Àí½á¹ûµ¼³öÓë·ÖÎö
-    filemidname = r"RigidSTR80kmph"
+    # =========== 4. åˆ†æè¿”å›å€¼ ===========    
+    # åˆšæ€§è½®å¯¹åå¤„ç†ç»“æœå¯¼å‡ºä¸åˆ†æ
+    filemidname = r"NativeRigidSTR80kmph"
     SperlingY_AAR5, SperlingZ_AAR5 = STRSperling_idx(WorkingDir, filemidname, tag, idx)
   
     return (SperlingY_AAR5, SperlingZ_AAR5)
 
-# ÁÙ½çËÙ¶È¼ÆËã×ÓÏîÄ¿
-# ÅĞ¶Ï±àºÅÎª idx µÄSIMPACKÄ£ĞÍÊÇ·ñÎÈ¶¨
+# ä¸´ç•Œé€Ÿåº¦è®¡ç®—å­é¡¹ç›®
+# åˆ¤æ–­ç¼–å·ä¸º idx çš„SIMPACKæ¨¡å‹æ˜¯å¦ç¨³å®š
 def opt_CheckStable_Idx(WorkingDir, X_vars, tag, idx, TargetVel):
     
-    # =========== 1. Ê§ÎÈãĞÖµÉèÖÃ ===========
+    # =========== 1. å¤±ç¨³é˜ˆå€¼è®¾ç½® ===========
     UnstableThreshold = 3.0 / 1000.0  # 3 mm
 
-    # =========== 2. ½â°ü X_vars[:, idx] ===========
+    # =========== 2. è§£åŒ… X_vars[:, idx] ===========
     X_vars_col = X_vars[:, idx]
-    # ÒÀÕÕ¼È¶¨Ë³Ğò½â°ü
-    TargetVelocity = TargetVel      # X_vars_col[0] # Ê¹ÓÃ TargetVel ¸²¸Ç¸ÃËÙ¶ÈÈ¡Öµ
+    # ä¾ç…§æ—¢å®šé¡ºåºè§£åŒ…
+    TargetVelocity = TargetVel      # X_vars_col[0] # ä½¿ç”¨ TargetVel è¦†ç›–è¯¥é€Ÿåº¦å–å€¼
     sprCpz         = X_vars_col[0]
     Kpx            = X_vars_col[1]
     Kpy            = Kpx                # X_vars_col[3]
@@ -765,8 +746,8 @@ def opt_CheckStable_Idx(WorkingDir, X_vars, tag, idx, TargetVel):
     Lx2            = X_vars_col[10]
     Lx3            = X_vars_col[11]
 
-    # =========== 3. Éú³É .subvar ÎÄ¼ş ===========
-    #   µ÷ÓÃ Import_Subvars_To_File_idx(...)
+    # =========== 3. ç”Ÿæˆ .subvar æ–‡ä»¶ ===========
+    #   è°ƒç”¨ Import_Subvars_To_File_idx(...)
     opt_WriteSubvarsFile_idx(
         WorkingDir=WorkingDir,
         tag=tag,
@@ -782,30 +763,30 @@ def opt_CheckStable_Idx(WorkingDir, X_vars, tag, idx, TargetVel):
         Lx1=Lx1, Lx2=Lx2, Lx3=Lx3
     )
 
-    # =========== 4. µ÷ÓÃ SIMPACK ·ÂÕæ ===========
-    spck_name = f"Vehicle4WDB_RigidCriticalVel_Opt_{tag}_{idx}.spck"
+    # =========== 4. è°ƒç”¨ SIMPACK ä»¿çœŸ ===========
+    spck_name = f"Vehicle4WDB_NativeRigidCriticalVel_Opt_{tag}_{idx}.spck"
     spck_path = os.path.join(WorkingDir, "BatchTmp", spck_name)
 
-    # ¹¹½¨ÔËĞĞÃüÁî
-    # ÀıÈç "simpack-slv.exe" + spck_path
+    # æ„å»ºè¿è¡Œå‘½ä»¤
+    # ä¾‹å¦‚ "simpack-slv.exe" + spck_path
     cmd = ["simpack-slv.exe", "--silent", spck_path]
 
-    # Ö´ĞĞÃüÁî
+    # æ‰§è¡Œå‘½ä»¤
     status = opt_RunSPCKCmd(cmd, WorkingDir, timeout_seconds = 10 * 60) # 10 * 60
     if status != 0:
-        print(f"[ERROR] SIMPACK·ÂÕæÊ§°Ü£¬ÃüÁî·µ»ØÂë: {status}")
+        print(f"[ERROR] SIMPACKä»¿çœŸå¤±è´¥ï¼Œå‘½ä»¤è¿”å›ç : {status}")
         return 0.1
     else:
-        # ·ÂÕæ³É¹¦, ¼ÌĞøºó´¦Àí -> ¶ÁÈ¡×î´óºáÒÆÁ¿
+        # ä»¿çœŸæˆåŠŸ, ç»§ç»­åå¤„ç† -> è¯»å–æœ€å¤§æ¨ªç§»é‡
         maxLatY = opt_MaxLatY_idx(WorkingDir, tag, idx)
         
-        # ÓëãĞÖµ±È½Ï
+        # ä¸é˜ˆå€¼æ¯”è¾ƒ
         if abs(maxLatY) >= UnstableThreshold:
-            return 0.2  # ±íÊ¾Ê§ÎÈ
+            return 0.2  # è¡¨ç¤ºå¤±ç¨³
         else:
-            return 1.0  # ±íÊ¾ÎÈ¶¨
+            return 1.0  # è¡¨ç¤ºç¨³å®š
 
-# ¶ş·ÖËÑË÷ÁÙ½çËÙ¶Èº¯Êı
+# äºŒåˆ†æœç´¢ä¸´ç•Œé€Ÿåº¦å‡½æ•°
 def opt_HalfSearchCrticalVelocity(
     WorkingDir,
     X_vars,
@@ -816,12 +797,12 @@ def opt_HalfSearchCrticalVelocity(
     N_depth
 ):
     
-    print("¿ªÊ¼¶ş·ÖËÑË÷£º")
-    # Äã¿ÉÒÔÔÚÕâÀï×ö¸ü¶à´òÓ¡£¬ÀàËÆÓÚMATLAB
+    print("å¼€å§‹äºŒåˆ†æœç´¢ï¼š")
+    # ä½ å¯ä»¥åœ¨è¿™é‡Œåšæ›´å¤šæ‰“å°ï¼Œç±»ä¼¼äºMATLAB
     print(f"  - tag: {tag}, idx: {idx}")
-    print(f"  - ÆğÊ¼ËÙ¶È£º{StartVel:.2f} m/s ({StartVel*3.6:.2f} km/h)")
-    print(f"  - ÖÕÖ¹ËÙ¶È£º{EndVel:.2f} m/s ({EndVel*3.6:.2f} km/h)")
-    print(f"  - ¶ş·Ö´ÎÊı£º{N_depth}")
+    print(f"  - èµ·å§‹é€Ÿåº¦ï¼š{StartVel:.2f} m/s ({StartVel*3.6:.2f} km/h)")
+    print(f"  - ç»ˆæ­¢é€Ÿåº¦ï¼š{EndVel:.2f} m/s ({EndVel*3.6:.2f} km/h)")
+    print(f"  - äºŒåˆ†æ¬¡æ•°ï¼š{N_depth}")
     print("-----------------------------------")
 
     low_vel = StartVel
@@ -829,121 +810,118 @@ def opt_HalfSearchCrticalVelocity(
 
     for i_depth in range(1, N_depth + 1):
         mid_vel = 0.5 * (low_vel + high_vel)
-        # µ÷ÓÃÎÈ¶¨ĞÔÅĞ¶Ïº¯Êı
+        # è°ƒç”¨ç¨³å®šæ€§åˆ¤æ–­å‡½æ•°
         is_stable = opt_CheckStable_Idx(
             WorkingDir=WorkingDir,
             X_vars=X_vars,
             tag=tag,
             idx=idx,
-            TargetVel=mid_vel # ´«Èë mid_vel ½øĞĞ²âÊÔ
+            TargetVel=mid_vel # ä¼ å…¥ mid_vel è¿›è¡Œæµ‹è¯•
         )
 
         if is_stable == 1.0:
-            # ³µÁ¾ÔÚ mid_vel ÏÂÎÈ¶¨ => ÁÙ½çËÙ¶È¿ÉÄÜ¸ü¸ß
+            # è½¦è¾†åœ¨ mid_vel ä¸‹ç¨³å®š => ä¸´ç•Œé€Ÿåº¦å¯èƒ½æ›´é«˜
             low_vel = mid_vel
-            print(f"Éî¶È {i_depth}: {mid_vel:.2f} m/s ÎÈ¶¨, ÊÕËõÇø¼äµ½ [{low_vel:.2f}, {high_vel:.2f}]")
+            print(f"æ·±åº¦ {i_depth}: {mid_vel:.2f} m/s ç¨³å®š, æ”¶ç¼©åŒºé—´åˆ° [{low_vel:.2f}, {high_vel:.2f}]")
         else:
-            # ·µ»Ø 0.1 »ò 0.2£¬¾ùÊÓÎª²»ÎÈ¶¨ => ÁÙ½çËÙ¶ÈÔÚ mid_vel ÒÔÏÂ
+            # è¿”å› 0.1 æˆ– 0.2ï¼Œå‡è§†ä¸ºä¸ç¨³å®š => ä¸´ç•Œé€Ÿåº¦åœ¨ mid_vel ä»¥ä¸‹
             high_vel = mid_vel
-            print(f"Ä£ĞÍ{idx}: ¶ş·ÖÉî¶È {i_depth} ÔËĞĞËÙ¶È{mid_vel:.2f} m/sÊ±²»ÎÈ¶¨, ÊÕËõÇø¼äµ½ [{low_vel:.2f}, {high_vel:.2f}]")
+            print(f"æ¨¡å‹{idx}: äºŒåˆ†æ·±åº¦ {i_depth} è¿è¡Œé€Ÿåº¦{mid_vel:.2f} m/sæ—¶ä¸ç¨³å®š, æ”¶ç¼©åŒºé—´åˆ° [{low_vel:.2f}, {high_vel:.2f}]")
 
-    # È¡ÊÕËõÇø¼äµÄÖĞÖµ×÷Îª½üËÆÁÙ½çËÙ¶È
+    # å–æ”¶ç¼©åŒºé—´çš„ä¸­å€¼ä½œä¸ºè¿‘ä¼¼ä¸´ç•Œé€Ÿåº¦
     critical_vel = 0.5 * (low_vel + high_vel)
 
     print("-----------------------------------")
-    print(f"ËÑË÷½áÊø£¬µÃµ½ÁÙ½çËÙ¶È ¡Ö {critical_vel:.2f} m/s ({critical_vel*3.6:.2f} km/h)\n")
+    print(f"æœç´¢ç»“æŸï¼Œå¾—åˆ°ä¸´ç•Œé€Ÿåº¦ â‰ˆ {critical_vel:.2f} m/s ({critical_vel*3.6:.2f} km/h)\n")
 
     return critical_vel
 
 
 ################################################################
-# 1) ²¢ĞĞ worker£ºÖ»·µ»Ø 4 ¸öÖµ£¬×îºóÒ»ÁĞÊÇÎÒÃÇ¹ØĞÄµÄµÚÈı¸öÄ¿±ê
+# 1) å¹¶è¡Œ workerï¼šåªè¿”å› 4 ä¸ªå€¼ï¼Œæœ€åä¸€åˆ—æ˜¯æˆ‘ä»¬å…³å¿ƒçš„ç¬¬ä¸‰ä¸ªç›®æ ‡
 ################################################################
 
-# ²¢ĞĞÈÎÎñº¯Êı
+# å¹¶è¡Œä»»åŠ¡å‡½æ•°
 def opt_parallel_worker(args):
     
     (col_idx_in_batch, start_idx, WorkingDir, X_vars, tag, StartVel, EndVel, N_depth) = args
     
-    # Êµ¼ÊÉÏµÄÈ«¾ÖÁĞË÷Òı
+    # å®é™…ä¸Šçš„å…¨å±€åˆ—ç´¢å¼•
     actual_idx = start_idx + col_idx_in_batch
 
-    # ²¢ĞĞÈÎÎñ×é
-    # ²¢ĞĞÈÎÎñ 1£ºµ÷ÓÃ°ëËÑË÷º¯Êı£¬·µ»ØÁÙ½çËÙ¶È
+    # å¹¶è¡Œä»»åŠ¡ç»„
+    # å¹¶è¡Œä»»åŠ¡ 1ï¼šè°ƒç”¨åŠæœç´¢å‡½æ•°ï¼Œè¿”å›ä¸´ç•Œé€Ÿåº¦
     CrticalVelocity = opt_HalfSearchCrticalVelocity(WorkingDir, X_vars, tag, actual_idx, StartVel, EndVel, N_depth)
     time.sleep(1)
 
-    # ²¢ĞĞÈÎÎñ 2£ºµ÷ÓÃÇúÏß¼ÆËãÄ£ĞÍ£¬·µ»ØÇúÏßÄ¥ºÄÊı¡¢ºáÒÆÁ¿
-    SumWearNumber_IRWCRV300m_CRV, maxLatDisp_IRWCRV300m_CRV = opt_CRVPerf_idx(WorkingDir, X_vars, tag, actual_idx)
+    # å¹¶è¡Œä»»åŠ¡ 2ï¼šè°ƒç”¨æ›²çº¿è®¡ç®—æ¨¡å‹ï¼Œè¿”å›æ›²çº¿ç£¨è€—æ•°ã€æ¨ªç§»é‡
+    SumWearNumber_NativeRigidCRV300m_CRV, maxLatDisp_NativeRigidCRV300m_CRV = opt_CRVPerf_idx(WorkingDir, X_vars, tag, actual_idx)
     time.sleep(1)
     
-    # ²¢ĞĞÈÎÎñ 3£ºµ÷ÓÃµäĞÍ AAR5 Ö±Ïß¼ÆËãÄ£ĞÍ ĞÔÄÜÆÀ¹À£¬·µ»ØSperlingÖ¸±ê
+    # å¹¶è¡Œä»»åŠ¡ 3ï¼šè°ƒç”¨å…¸å‹ AAR5 ç›´çº¿è®¡ç®—æ¨¡å‹ æ€§èƒ½è¯„ä¼°ï¼Œè¿”å› Sperling æŒ‡æ ‡ RMS å€¼
     SperlingY_AAR5, SperlingZ_AAR5 = opt_STRPerf_idx(WorkingDir, X_vars, tag, actual_idx)
     try:
-        SperlingYZ = math.sqrt(SperlingY_AAR5 ** 2 + SperlingZ_AAR5 ** 2)
+        SperlingYZ_RMS = math.sqrt( (SperlingY_AAR5 ** 2 + SperlingZ_AAR5 ** 2) / 2 )
     except Exception as e:
-        print(f"[ERROR] SperlingYZÖ¸±ê¼ÆËãÒì³££¬Òì³£ĞÅÏ¢£º{e}")
+        print(f"[ERROR] SperlingYZæŒ‡æ ‡è®¡ç®—å¼‚å¸¸ï¼Œå¼‚å¸¸ä¿¡æ¯ï¼š{e}")
         return +9.77
         
-    
     time.sleep(1)
-    # ·µ»Ø²¢ĞĞ¼ÆËã¸Ã idx µÄ½á¹û×éÏòÁ¿
-    # Èı¸öÄ¿±ê
-    return (col_idx_in_batch, CrticalVelocity,  SumWearNumber_IRWCRV300m_CRV, SperlingYZ)
-
-
+    # è¿”å›å¹¶è¡Œè®¡ç®—è¯¥ idx çš„ç»“æœç»„å‘é‡
+    # ä¸‰ä¸ªç›®æ ‡
+    return (col_idx_in_batch, CrticalVelocity,  SumWearNumber_NativeRigidCRV300m_CRV, SperlingYZ_RMS)
 
 ################################################################
-# 2) ·â×°¡°·ÖÅú²¢ĞĞ¡±Âß¼­µÄº¯Êı
+# 2) å°è£…â€œåˆ†æ‰¹å¹¶è¡Œâ€é€»è¾‘çš„å‡½æ•°
 ################################################################
 def opt_XEvalPrl(X, WorkingDir, tag, StartVel, EndVel, N_depth, BatchSize_parallel=5):
     """
-    X: shape=(N, 12)  # N¸ö½â, Ã¿¸ö½â12¸ö±äÁ¿
-    ·µ»Ø: shape=(N, 3) µÄÄ¿±ê¾ØÕóF
-          ÆäÖĞF[:, 0] = -cVel  (ÈôÒª×î´ó»¯cVel¾ÍÈ¡¸º)
-               F[:, 1] = IrwWN_CRV
-               F[:, 2] = SperlingYZ
+    X: shape=(N, 12)  # Nä¸ªè§£, æ¯ä¸ªè§£12ä¸ªå˜é‡
+    è¿”å›: shape=(N, 3) çš„ç›®æ ‡çŸ©é˜µF
+          å…¶ä¸­F[:, 0] = -cVel  (è‹¥è¦æœ€å¤§åŒ–cVelå°±å–è´Ÿ)
+               F[:, 1] = NativeRigidWN_CRV
+               F[:, 2] = SperlingYZ_RMS
     """
-    # ×ªÖÃ pymoo ´«¹ıÀ´µÄ²ÎÊı£¬ÒÔÓëºóĞø´úÂëËùĞèÆ¥Åä
+    # è½¬ç½® pymoo ä¼ è¿‡æ¥çš„å‚æ•°ï¼Œä»¥ä¸åç»­ä»£ç æ‰€éœ€åŒ¹é…
     X = X.T
 
-    print(f"==== Debug: ×ªÖÃºóµÄ X.shape = {X.shape}")
-    print("==== Debug: ÕâÅúºòÑ¡½â(°´12¸ö²ÎÊı±äÁ¿·Ö×é)£º\n", X[:12]) 
+    print(f"==== Debug: è½¬ç½®åçš„ X.shape = {X.shape}")
+    print("==== Debug: è¿™æ‰¹å€™é€‰è§£(æŒ‰12ä¸ªå‚æ•°å˜é‡åˆ†ç»„)ï¼š\n", X[:12]) 
     
-    # N¸ö½â
+    # Nä¸ªè§£
     N_opt = X.shape[1]
     
-    # Ã¿¸ö½âÒª¼ÆËã 3 ¸öÄ¿±ê(ÕâÀïµÄ 3 ÊÇÄúÏë±£ÁôµÄÖ¸±êÊıÁ¿)
+    # æ¯ä¸ªè§£è¦è®¡ç®— 3 ä¸ªç›®æ ‡(è¿™é‡Œçš„ 3 æ˜¯æ‚¨æƒ³ä¿ç•™çš„æŒ‡æ ‡æ•°é‡)
     result_dim = 3 
     
-    # ÓÃÓÚ´æ·ÅËùÓĞ½âµÄÄ¿±êÖµ(ÏÈÓÃ shape=(3, N) ´æ£¬×îºó×ªÖÃ)
+    # ç”¨äºå­˜æ”¾æ‰€æœ‰è§£çš„ç›®æ ‡å€¼(å…ˆç”¨ shape=(3, N) å­˜ï¼Œæœ€åè½¬ç½®)
     batch_result_full = np.zeros((result_dim, N_opt))
 
     num_batches = math.ceil(N_opt / BatchSize_parallel)
-    print("×ÜµÄ²ÎÊı×éºÏÊı = ÖÖÈº¸öÌåÊı£º", N_opt)
-    print("²¢ĞĞÈÎÎñÊı£º", BatchSize_parallel)
-    print("Åú´ÎÊıÁ¿£º", num_batches)
+    print("æ€»çš„å‚æ•°ç»„åˆæ•° = ç§ç¾¤ä¸ªä½“æ•°ï¼š", N_opt)
+    print("å¹¶è¡Œä»»åŠ¡æ•°ï¼š", BatchSize_parallel)
+    print("æ‰¹æ¬¡æ•°é‡ï¼š", num_batches)
     
     for batch_idx in range(num_batches):
         start_idx = batch_idx * BatchSize_parallel
         end_idx   = min((batch_idx + 1) * BatchSize_parallel, N_opt)
         
-        print(f"µÚ {batch_idx+1} / {num_batches} Åú£ºĞĞË÷Òı·¶Î§ [{start_idx}:{end_idx})")
+        print(f"ç¬¬ {batch_idx+1} / {num_batches} æ‰¹ï¼šè¡Œç´¢å¼•èŒƒå›´ [{start_idx}:{end_idx})")
         
-        # ============== ÇåÀí & Éú³ÉÎÄ¼ş ==============
+        # ============== æ¸…ç† & ç”Ÿæˆæ–‡ä»¶ ==============
         opt_ClearBatchTmpFolder(WorkingDir)
-        print("ÒÑÇåÀíÉÏ¸öĞ¡Åú´ÎµÄÎÄ¼ş")
+        print("å·²æ¸…ç†ä¸Šä¸ªå°æ‰¹æ¬¡çš„æ–‡ä»¶")
         
         opt_PrepareSpckFilesForEachBatch(WorkingDir, tag, start_idx, end_idx)
-        print("ÒÑ×¼±¸ºÃ±¾Ğ¡Åú´ÎµÄÎÄ¼ş")     
+        print("å·²å‡†å¤‡å¥½æœ¬å°æ‰¹æ¬¡çš„æ–‡ä»¶")     
         
-        # È¡±¾Åú´ÎµÄ½â(°´ĞĞÇĞ·Ö)
-        X_batch = X[:, start_idx:end_idx]  # ¶ø²»ÊÇ X[start_idx:end_idx, :]
+        # å–æœ¬æ‰¹æ¬¡çš„è§£(æŒ‰è¡Œåˆ‡åˆ†)
+        X_batch = X[:, start_idx:end_idx]  # è€Œä¸æ˜¯ X[start_idx:end_idx, :]
 
-        # ½á¹ûÔİ´æ (3ĞĞ x batch_sizeÁĞ)
+        # ç»“æœæš‚å­˜ (3è¡Œ x batch_sizeåˆ—)
         batch_result = np.zeros((result_dim, X_batch.shape[1]))
 
-        # ============== (b) ²¢ĞĞ´¦Àí ==============
+        # ============== (b) å¹¶è¡Œå¤„ç† ==============
         with concurrent.futures.ProcessPoolExecutor(max_workers=BatchSize_parallel) as executor:
             future_list = []
             for col_idx_in_batch in range(X_batch.shape[1]):
@@ -951,121 +929,122 @@ def opt_XEvalPrl(X, WorkingDir, tag, StartVel, EndVel, N_depth, BatchSize_parall
                 future = executor.submit(opt_parallel_worker, args)
                 future_list.append(future)
 
-            # ÊÕ¼¯½á¹û
+            # æ”¶é›†ç»“æœ
             for future in concurrent.futures.as_completed(future_list):
-                col_idx_in_batch, cVel, IrwWN_CRV, SperlingYZ = future.result()
-                # ²¢ĞĞ³Ø return 
+                col_idx_in_batch, cVel, NativeRigidWN_CRV, SperlingYZ_RMS = future.result()
+                # å¹¶è¡Œæ±  return 
                 batch_result[0, col_idx_in_batch] = cVel 
-                batch_result[1, col_idx_in_batch] = IrwWN_CRV
-                batch_result[2, col_idx_in_batch] = SperlingYZ
+                batch_result[1, col_idx_in_batch] = NativeRigidWN_CRV
+                batch_result[2, col_idx_in_batch] = SperlingYZ_RMS
                 
-        # ½«±¾Åú´Î½á¹û·Åµ½È«¾Ö big array
+        # å°†æœ¬æ‰¹æ¬¡ç»“æœæ”¾åˆ°å…¨å±€ big array
         batch_size_actual = end_idx - start_idx
         batch_result_full[:, start_idx:end_idx] = batch_result[:, :batch_size_actual]
         
-    # ÏÖÔÚ batch_result_full.shape=(3, N), ×ªÖÃ³É (N,3)
-    # ÀıÈç cVel Ô½´óÔ½ºÃ => -cVel
+    # ç°åœ¨ batch_result_full.shape=(3, N), è½¬ç½®æˆ (N,3)
+    # ä¾‹å¦‚ cVel è¶Šå¤§è¶Šå¥½ => -cVel
     cVel_all = batch_result_full[0, :]
-    IrwWN_CRV_all = batch_result_full[1, :]
+    NativeRigidWN_CRV_all = batch_result_full[1, :]
     SperlingYZ_all = batch_result_full[2, :]
 
-    # ¹¹Ôì×îÖÕ·µ»ØF: (N,3)
-    f1 = -cVel_all  # ÒòÎªÒª×î´ó»¯cVel, pymooÄ¬ÈÏ×îĞ¡»¯
-    f2 = IrwWN_CRV_all
-    # ×¢Òâ£¡¶ÔÓÚ Sperling Ö¸±ê£¬´Ë´¦³ËÒÔ·ÅËõÏµÊı 100
+    # æ„é€ æœ€ç»ˆè¿”å›F: (N,3)
+    f1 = -cVel_all  # å› ä¸ºè¦æœ€å¤§åŒ–cVel, pymooé»˜è®¤æœ€å°åŒ–
+    f2 = NativeRigidWN_CRV_all
+    # æ³¨æ„ï¼å¯¹äº Sperling æŒ‡æ ‡ï¼Œæ­¤å¤„ä¹˜ä»¥æ”¾ç¼©ç³»æ•° 100
     f3 = SperlingYZ_all * 100 
 
     F = np.vstack([f1, f2, f3]).T  # (3,N).T => (N,3)
-    print("==== Debug: ±¾ÂÖ pymoo ËùÓĞºòÑ¡½â£¨°üº¬¶à¸öĞ¡Åú´Î£©ÓÅ»¯Ä¿±ê»ã×Ü batch_result_full:\n ", batch_result_full) 
-    print("Sperling Ö¸±ê£¬´Ë´¦ÎªÔ­Ê¼Öµ£¬Êµ¼ÊÒÔ·ÅËõÏµÊı 100 ½øÈëÓÅ»¯µü´ú\n")
+    print("==== Debug: æœ¬è½® pymoo æ‰€æœ‰å€™é€‰è§£ï¼ˆåŒ…å«å¤šä¸ªå°æ‰¹æ¬¡ï¼‰ä¼˜åŒ–ç›®æ ‡æ±‡æ€» batch_result_full:\n ", batch_result_full) 
+    print("Sperling æŒ‡æ ‡ï¼Œæ­¤å¤„ä¸ºåŸå§‹å€¼ï¼Œå®é™…ä»¥æ”¾ç¼©ç³»æ•° 100 è¿›å…¥ä¼˜åŒ–è¿­ä»£\n")
     
     return F
 
-# ±£´æ×îÖÕ½á¹û£¬°üÀ¨ËùÓĞÀúÊ·µü´úÓÅ»¯µÄ¼ÇÂ¼
+# ä¿å­˜æœ€ç»ˆç»“æœï¼ŒåŒ…æ‹¬æ‰€æœ‰å†å²è¿­ä»£ä¼˜åŒ–çš„è®°å½•
 def SaveItersResult(res, filename):
     """
-    ½« pymoo 'Result' ¶ÔÏóµÄ²¿·ÖĞÅÏ¢Ğ´Èë npz ÎÄ¼ş:
+    å°† pymoo 'Result' å¯¹è±¡çš„éƒ¨åˆ†ä¿¡æ¯å†™å…¥ npz æ–‡ä»¶:
       - X, F, G, CV, history
 
-    ×¢Òâ:
-      - ²»°üº¬ 'feasible' µÈÆäËûÊôĞÔ, ÒÔ±ÜÃâÄ³Ğ©³¡¾°ÏÂ±¨´í.
-      - 'history' ÖĞ°üº¬Ã¿Ò»´úµÄ¿ìÕÕ, ÈôÎÊÌâ¹æÄ£ºÜ´ó, ÎÄ¼şÒ²¿ÉÄÜ½Ï´ó.
+    æ³¨æ„:
+      - ä¸åŒ…å« 'feasible' ç­‰å…¶ä»–å±æ€§, ä»¥é¿å…æŸäº›åœºæ™¯ä¸‹æŠ¥é”™.
+      - 'history' ä¸­åŒ…å«æ¯ä¸€ä»£çš„å¿«ç…§, è‹¥é—®é¢˜è§„æ¨¡å¾ˆå¤§, æ–‡ä»¶ä¹Ÿå¯èƒ½è¾ƒå¤§.
     """
     data_dict = {
-        "X"      : res.X,         # ·ÇÖ§Åä½â(¶àÄ¿±ê)»ò×îÓÅ½â(µ¥Ä¿±ê)
-        "F"      : res.F,         # ¶ÔÓ¦µÄÄ¿±êÖµ
-        "G"      : res.G,         # ²»µÈÊ½Ô¼Êø(ÈôÎŞÔò¿ÉÄÜÊÇ None)
-        "CV"     : res.CV,        # Ô¼ÊøÎ¥·´¶È (Constraint Violation), Í¬Ñù¿ÉÄÜ None
-        "history": res.history    # Èç¹û save_history=True, ÔòÕâÀïÓĞÃ¿´úÀúÊ·
+        "X"      : res.X,         # éæ”¯é…è§£(å¤šç›®æ ‡)æˆ–æœ€ä¼˜è§£(å•ç›®æ ‡)
+        "F"      : res.F,         # å¯¹åº”çš„ç›®æ ‡å€¼
+        "G"      : res.G,         # ä¸ç­‰å¼çº¦æŸ(è‹¥æ— åˆ™å¯èƒ½æ˜¯ None)
+        "CV"     : res.CV,        # çº¦æŸè¿ååº¦ (Constraint Violation), åŒæ ·å¯èƒ½ None
+        "history": res.history    # å¦‚æœ save_history=True, åˆ™è¿™é‡Œæœ‰æ¯ä»£å†å²
     }
-    # ±£´æÎª npz
+    # ä¿å­˜ä¸º npz
     np.savez(filename, **data_dict)
-    print(f"[SaveItersResult] ÒÑ½« X, F, G, CV, history ±£´æµ½ {filename}.")
+    print(f"[SaveItersResult] å·²å°† X, F, G, CV, history ä¿å­˜åˆ° {filename}.")
 
-# callback º¯Êı»Øµ÷£¬±£´æµü´ú¹ı³ÌÖĞµÄ X, F, G
+# callback å‡½æ•°å›è°ƒï¼Œä¿å­˜è¿­ä»£è¿‡ç¨‹ä¸­çš„ X, F, G
 def my_callback(algorithm, working_dir=None, **kwargs):
     """
-    ÔÚÃ¿Ò»´ú½áÊøºó±»µ÷ÓÃ:
-      - algorithm: µ±Ç°Ëã·¨¶ÔÏó(ÀıÈç NSGA2 instance)
-      - n_gen: µ±Ç°´úÊı (´Ó1¿ªÊ¼)
-      - **kwargs: ÆäËû²ÎÊı (pymoo ÄÚ²¿±£Áô²ÎÊı)
+    åœ¨æ¯ä¸€ä»£ç»“æŸåè¢«è°ƒç”¨:
+      - algorithm: å½“å‰ç®—æ³•å¯¹è±¡(ä¾‹å¦‚ NSGA2 instance)
+      - n_gen: å½“å‰ä»£æ•° (ä»1å¼€å§‹)
+      - **kwargs: å…¶ä»–å‚æ•° (pymoo å†…éƒ¨ä¿ç•™å‚æ•°)
 
-    ÕâÀï½«µ±Ç°ÖÖÈºµÄ X, F, G µÈ±£´æµ½ working_dir/ChkPnt ÏÂ£¬
-    ²¢ÇÒÌáÈ¡·ÇÖ§Åä½â (nd_X, nd_F, nd_G) ÁíÍâ±£´æ.
+    è¿™é‡Œå°†å½“å‰ç§ç¾¤çš„ X, F, G ç­‰ä¿å­˜åˆ° working_dir/ChkPnt ä¸‹ï¼Œ
+    å¹¶ä¸”æå–éæ”¯é…è§£ (nd_X, nd_F, nd_G) å¦å¤–ä¿å­˜.
     """
     
-    global history_F # È«¾ÖÁĞ±í£¬ÓÃÓÚ´æ´¢Àú´úÖÖÈºÄ¿±êÖµ
+    global history_F # å…¨å±€åˆ—è¡¨ï¼Œç”¨äºå­˜å‚¨å†ä»£ç§ç¾¤ç›®æ ‡å€¼
 
     n_gen = algorithm.n_gen
     pop = algorithm.pop
     X = pop.get("X")  # shape=(pop_size, n_var)
     F = pop.get("F")  # shape=(pop_size, n_obj)
-    G = pop.get("G")  # shape=(pop_size, n_ieq_constr) »ò None
+    G = pop.get("G")  # shape=(pop_size, n_ieq_constr) æˆ– None
     history_F.append(F.copy())
-    print(f"[Callback] µÚ {n_gen} ´ú, F_gen.shape = {F.shape}")
+    print(f"[Callback] ç¬¬ {n_gen} ä»£, F_gen.shape = {F.shape}")
     
-    # ×¼±¸ res ´ú¼Ê½á¹ûµÄÄ¿Â¼
+    # å‡†å¤‡ res ä»£é™…ç»“æœçš„ç›®å½•
     if working_dir is None:
         working_dir = os.getcwd() 
     chkpt_dir = os.path.join(working_dir, "ChkPnt")
     if not os.path.exists(chkpt_dir):
         os.makedirs(chkpt_dir, exist_ok=True)
 
-    # ÒÔ generation_{n_gen}.npz ĞÎÊ½±£´æËùÓĞ½â
+    # ä»¥ generation_{n_gen}.npz å½¢å¼ä¿å­˜æ‰€æœ‰è§£
     filename_all = os.path.join(chkpt_dir, f"generation_{n_gen}.npz")
-    print(f"[Callback] ÕıÔÚ±£´æµÚ {n_gen} ´úµÄËùÓĞÖÖÈºµ½ {filename_all}")
+    print(f"[Callback] æ­£åœ¨ä¿å­˜ç¬¬ {n_gen} ä»£çš„æ‰€æœ‰ç§ç¾¤åˆ° {filename_all}")
     np.savez(filename_all, X=X, F=F, G=G)
 
-    # ============== ÌáÈ¡µ±´ú·ÇÖ§Åä½â²¢µ¥¶À±£´æ ==============
+    # ============== æå–å½“ä»£éæ”¯é…è§£å¹¶å•ç‹¬ä¿å­˜ ==============
     nd_front = NonDominatedSorting().do(F, only_non_dominated_front=True)
     nd_X = X[nd_front]
     nd_F = F[nd_front]
     nd_G = G[nd_front] if G is not None else None
 
     filename_nd = os.path.join(chkpt_dir, f"generation_{n_gen}_nondom.npz")
-    print(f"[Callback] ÕıÔÚ±£´æµÚ {n_gen} ´úµÄ·ÇÖ§Åä½âµ½ {filename_nd} ...")
+    print(f"[Callback] æ­£åœ¨ä¿å­˜ç¬¬ {n_gen} ä»£çš„éæ”¯é…è§£åˆ° {filename_nd} ...")
     np.savez(filename_nd, X=nd_X, F=nd_F, G=nd_G)
 
-    print(f"[Callback] µÚ {n_gen} ´úÊı¾İ±£´æÍê±Ï, ÖÖÈº¹æÄ£ = {X.shape[0]}, ·ÇÖ§Åä½âÊıÁ¿ = {len(nd_front)}")
+    print(f"[Callback] ç¬¬ {n_gen} ä»£æ•°æ®ä¿å­˜å®Œæ¯•, ç§ç¾¤è§„æ¨¡ = {X.shape[0]}, éæ”¯é…è§£æ•°é‡ = {len(nd_front)}")
 
 class MyBatchProblem(Problem):
     def __init__(self,
                  batch_size=5,
                  WorkingDir=os.getcwd(),
-                 tag="demo",
+                 tag="demo",                # ä¿®æ”¹ç‚¹ 0
                  StartVel = 100/3.6,
                  EndVel = 900/3.6,
                  N_depth = 7,
                  **kwargs):
         """
-        Ê¹ÓÃ (N,12) ¾ö²ß±äÁ¿, 3 ¸öÄ¿±ê
+        # ä¿®æ”¹ç‚¹ 1
+        ä½¿ç”¨ (N,12) å†³ç­–å˜é‡, 3 ä¸ªç›®æ ‡ 
         xl=np.array([ 2000,  160000,  120000,  24000,  30000,   4000,  1600000,  10000,     100,    0,    0, -0.6]),
         xu=np.array([50000, 4000000, 3000000, 600000, 750000, 100000, 40000000, 250000, 3000000, 0.64, 0.64,  0.4]),
         """
         super().__init__(
             n_var=12,
             n_obj=3,
-            # 3¸öÔ¼ÊøÌõ¼ş£ºn_ieq_constr=3
+            # 3ä¸ªçº¦æŸæ¡ä»¶ï¼šn_ieq_constr=3
             n_ieq_constr = 3,  
             xl=np.array([ 2000,  50000,  120000,  15000,  15000,   2000,  1600000,  10000,     100,    0,    0, -0.6]),
             xu=np.array([50000, 4000000, 3000000, 600000, 750000, 100000, 60000000, 250000, 3000000, 0.64, 0.64,  0.4]),
@@ -1084,7 +1063,7 @@ class MyBatchProblem(Problem):
         """
         X.shape = (N, 12)
         """
-        # 1) ¼ÆËãÄ¿±êÖµ F (N,3)
+        # 1) è®¡ç®—ç›®æ ‡å€¼ F (N,3)
         F = opt_XEvalPrl(
             X,
             WorkingDir=self.WorkingDir,
@@ -1095,56 +1074,57 @@ class MyBatchProblem(Problem):
             BatchSize_parallel=self.batch_size
         )
         
-        # 2) ¼ÆËã²»µÈÊ½Ô¼Êø G (N,2)
-        # Ô¼Êø1: cVel >= 250/3.6 => -cVel <= -250/3.6 => f1 <= -250/3.6
+        # 2) è®¡ç®—ä¸ç­‰å¼çº¦æŸ G (N,2)
+        # çº¦æŸ1: cVel >= 250/3.6 => -cVel <= -250/3.6 => f1 <= -250/3.6
         # f1 = -cVel =>  g1 = f1 - (-250/3.6) = f1 + 250/3.6 <= 0
-        # Ô¼Êø2: f2 <= 1000 =>  g2 = f2 - 1000 <= 0
-        # Ô¼Êø3: f3 <= 300  =>  g3 = f3 - 300 <= 0
+        # çº¦æŸ2: f2 <= 1000 =>  g2 = f2 - 1000 <= 0
+        # çº¦æŸ3: f3 <= 300  =>  g3 = f3 - 300 <= 0
         G = np.zeros((F.shape[0], 3))
         
-        # Ê¹ f1 <= -250/3.6£¬¶ÔÓ¦ÓÚÁÙ½çËÙ¶È´óÓÚ 250 km/h
+        # ä½¿ f1 <= -250/3.6ï¼Œå¯¹åº”äºä¸´ç•Œé€Ÿåº¦å¤§äº 250 km/h
         G[:, 0] = F[:, 0] + 250.0/3.6 
-        # Ê¹ f2 <= 1000£¬¶ÔÓ¦ÓÚÄ¥ºÄÊıĞ¡ÓÚ 1000
+        # ä½¿ f2 <= 1000ï¼Œå¯¹åº”äºç£¨è€—æ•°å°äº 1000
         G[:, 1] = F[:, 1] - 1000.00 
-        # Ê¹ f3 <= 300£¬¶ÔÓ¦ÓÚ Sperling Ö¸±êĞ¡ÓÚ 3
-        G[:, 2] = F[:, 2] - math.sqrt(3 * 3 + 3 * 3) * 100
+        # ä½¿ f3 <= 300ï¼Œå¯¹åº”äº Sperling æŒ‡æ ‡å°äº 3
+        G[:, 2] = F[:, 2] - math.sqrt( (3 * 3 + 3 * 3) / 2 ) * 100
           
         out["F"] = F
         out["G"] = G
 
 ################################################################
-# 4) ²âÊÔÈë¿Ú
+# 4) æµ‹è¯•å…¥å£
 ################################################################
 def main():
     
-    # ÀúÊ·ÊÊÓ¦¶Èº¯Êı F
+    # å†å²é€‚åº”åº¦å‡½æ•° F
     global history_F
     history_F = []
     
-    # ¶¨ÒåÎÊÌâ
-    problem = MyBatchProblem( batch_size = 3) # ²¢ĞĞ¼ÆËã³Ø
+    # å®šä¹‰é—®é¢˜
+    # ä¿®æ”¹ç‚¹ 2ï¼šå¹¶è¡Œè®¡ç®—æ± 
+    problem = MyBatchProblem( batch_size = 10 ) 
     
     #--------------------------------------------------------------------------------------------#
-    # ¶àÄ¿±ê NSGA2 Ëã·¨
-    algorithm_NSGA2 = NSGA2(pop_size = 5)
-    # RNSGA2 Ëã·¨
-    ref_points = np.load('RefPnt_fromNSGA2.npy') # µ¼Èë Analysis_GenRefPnt.ipynb Éú³ÉµÄ²Î¿¼µã
+    # å¤šç›®æ ‡ NSGA2 ç®—æ³•
+    algorithm_NSGA2 = NSGA2( pop_size = 66 )
+    # RNSGA2 ç®—æ³•
+    ref_points = np.load('RefPnt_fromNSGA2.npy') # å¯¼å…¥ Analysis_GenRefPnt.ipynb ç”Ÿæˆçš„å‚è€ƒç‚¹
     algorithm_RNSGA2 = RNSGA2(ref_points=ref_points, pop_size=66, epsilon=15, normalization='no') 
-    # NSGA3 Ëã·¨
+    # NSGA3 ç®—æ³•
     ref_dirs = get_reference_directions("das-dennis", 3, n_partitions=17) 
-    # ×éºÏ½á¹ûC(17+2,2)=171<180=pop_size, pop_size is equal or larger than the number of reference directions. 
+    # ç»„åˆç»“æœC(17+2,2)=171<180=pop_size, pop_size is equal or larger than the number of reference directions. 
     algorithm_NSGA3 = NSGA3(pop_size=180,ref_dirs=ref_dirs)
     
-    # Ñ¡ÔñÒ»¸öÓÅ»¯Ëã·¨
-    selected_algorithm = algorithm_NSGA2  # ¿ÉÒÔÑ¡Ôñ algorithm_NSGA2 »ò algorithm_NSGA3
+    # ä¿®æ”¹ç‚¹ 3ï¼šé€‰æ‹©ä¼˜åŒ–ç®—æ³•
+    selected_algorithm = algorithm_NSGA2  # å¯ä»¥é€‰æ‹© algorithm_NSGA2 æˆ– algorithm_NSGA3
     #--------------------------------------------------------------------------------------------#
     
-    # tag ÔÚ1055ĞĞ¶¨Òå tag="demo"
+    # tag åœ¨1033è¡Œå®šä¹‰ tag="demo"
     
-    # ÖÕÖ¹Ìõ¼ş
-    termination = get_termination("n_gen", 88)  # ÒÅ´«µü´úÊı
+    # ä¿®æ”¹ç‚¹ 4ï¼šç»ˆæ­¢æ¡ä»¶
+    termination = get_termination("n_gen", 88)  # é—ä¼ è¿­ä»£æ•°
     
-    # ÔËĞĞÓÅ»¯
+    # è¿è¡Œä¼˜åŒ–
     res = minimize(
         problem, 
         selected_algorithm,
@@ -1152,54 +1132,54 @@ def main():
         seed=1,
         verbose = True, 
         save_history = True, 
-        callback = my_callback)  # ´«Èë»Øµ÷º¯Êı
+        callback = my_callback)  # ä¼ å…¥å›è°ƒå‡½æ•°
     
-    # ²é¿´½á¹û
-    print("\n==== ÓÅ»¯Íê³É ====")
-    print("·ÇÖ§Åä½âÊıÁ¿:", len(res.X))
-    print("Ê¾Àı½âX[0] :", res.X[0])
-    print("¶ÔÓ¦Ä¿±êF[0]:", res.F[0])
-    print("Ô¼ÊøG[0]:", res.G[0], "(×¢: G[i] <= 0±íÊ¾¿ÉĞĞ)")
+    # æŸ¥çœ‹ç»“æœ
+    print("\n==== ä¼˜åŒ–å®Œæˆ ====")
+    print("éæ”¯é…è§£æ•°é‡:", len(res.X))
+    print("ç¤ºä¾‹è§£X[0] :", res.X[0])
+    print("å¯¹åº”ç›®æ ‡F[0]:", res.F[0])
+    print("çº¦æŸG[0]:", res.G[0], "(æ³¨: G[i] <= 0è¡¨ç¤ºå¯è¡Œ)")
     
-    # ½á¹û±£´æ(2ÖÖ·½·¨£¬csv ºÍ npz)
+    # ç»“æœä¿å­˜(2ç§æ–¹æ³•ï¼Œcsv å’Œ npz)
     nd_X = res.X 
     nd_F = res.F
 
     np.savetxt("final_solutions.csv",
             np.hstack([nd_X, nd_F]),
             delimiter=",",
-            comments="",  # È¥µô×¢ÊÍ·ûºÅ
-            fmt="%.6f")   # ¿ØÖÆÊä³ö¾«¶È
+            comments="",  # å»æ‰æ³¨é‡Šç¬¦å·
+            fmt="%.6f")   # æ§åˆ¶è¾“å‡ºç²¾åº¦
     np.savez("final_solutions.npz", X=nd_X, F=nd_F)
     
-    # res µÄ½á¹û±£´æ
-    #  `res.X, res.F` => ×îÖÕ½â£»history_F => (list of arrays)
+    # res çš„ç»“æœä¿å­˜
+    #  `res.X, res.F` => æœ€ç»ˆè§£ï¼›history_F => (list of arrays)
     np.savez(
         "res_history.npz",
         final_X=res.X,
         final_F=res.F,
-        history_F=np.array(history_F, dtype=object) # history_F ÊÇÒ»¸öÁĞ±í, ÆäÖĞÃ¿´ú¶¼ÊÇÒ»¸ö (pop_size, n_obj) µÄÊı×é
+        history_F=np.array(history_F, dtype=object) # history_F æ˜¯ä¸€ä¸ªåˆ—è¡¨, å…¶ä¸­æ¯ä»£éƒ½æ˜¯ä¸€ä¸ª (pop_size, n_obj) çš„æ•°ç»„
     )
-    print("[Main] ÒÑ±£´æ final_X, final_F, ÒÔ¼°¸÷´ú F_gen µ½ res_history.npz.")
+    print("[Main] å·²ä¿å­˜ final_X, final_F, ä»¥åŠå„ä»£ F_gen åˆ° res_history.npz.")
 
 if __name__ == "__main__":
     main()
     
     """
-    ÃüÁîĞĞµ÷ÓÃ£º
+    å‘½ä»¤è¡Œè°ƒç”¨ï¼š
     
-    F:  # ÇĞ»»ÅÌ·û                                                                                                             
-    cd F:\ResearchMainStream\0.ResearchBySection\C.¶¯Á¦Ñ§Ä£ĞÍ\²ÎÊıÓÅ»¯\²ÎÊıÓÅ»¯ÊµÏÖ\ParallelSweepSimpack                        
-    python Opt_12vars_to_3dims.py # Ö´ĞĞ±¾³ÌĞò                                  
+    F:  # åˆ‡æ¢ç›˜ç¬¦                                                                                                             
+    cd F:\ResearchMainStream\0.ResearchBySection\C.åŠ¨åŠ›å­¦æ¨¡å‹\å‚æ•°ä¼˜åŒ–\å‚æ•°ä¼˜åŒ–å®ç°\ParallelSweepSimpack                        
+    python -X utf8  Opt_12vars_to_3dims.py # æ‰§è¡Œæœ¬ç¨‹åº                                  
     
 
-    ¸½Â¼A: MATLAB GA º¯Êı¶ÔÓ¦ÉèÖÃ
-    MaxGenerations (Generations) ¹¦ÄÜ£ºËã·¨µÄ×î´óµü´úÊı¡£Ä¬ÈÏ ga ÊÇ 100¡Á±äÁ¿Êı£¬gamultiobj ÊÇ 200¡Á±äÁ¿Êı¡£
-    PopulationSize ¹¦ÄÜ£ºÉèÖÃÖÖÈº´óĞ¡£¨¼´Ã¿Ò»´úµÄ¸öÌåÊıÁ¿£©¡£Èç¹û±äÁ¿Êı ¡Ü 5£¬Ä¬ÈÏ 50£»·ñÔòÄ¬ÈÏ 200¡£
+    é™„å½•A: MATLAB GA å‡½æ•°å¯¹åº”è®¾ç½®
+    MaxGenerations (Generations) åŠŸèƒ½ï¼šç®—æ³•çš„æœ€å¤§è¿­ä»£æ•°ã€‚é»˜è®¤ ga æ˜¯ 100Ã—å˜é‡æ•°ï¼Œgamultiobj æ˜¯ 200Ã—å˜é‡æ•°ã€‚
+    PopulationSize åŠŸèƒ½ï¼šè®¾ç½®ç§ç¾¤å¤§å°ï¼ˆå³æ¯ä¸€ä»£çš„ä¸ªä½“æ•°é‡ï¼‰ã€‚å¦‚æœå˜é‡æ•° â‰¤ 5ï¼Œé»˜è®¤ 50ï¼›å¦åˆ™é»˜è®¤ 200ã€‚
     
-    ¸½Â¼B: ºó´¦Àí
-    (1) ²é¿´ Pareto Front ·Ö²¼£¬Ïê¼û Analysis_OptsResults.ipynb
-    (2) ¸ù¾İ{X,F}¼ÆËã½á¹û£¬·ÖÎö²ÎÊı±ä»¯¶ÔÓÚ¸÷¶¯Á¦Ñ§Ö¸±êµÄÏà¹ØĞÔ£¬Ïê¼û Analysis_Corr.ipynb
-    (3) ¸ù¾İNSGA2×îÖÕÇ°ÑØ½â£¬ÄâºÏ·Ö²¼ÇúÃæÉÏµÄÉ¢µã×÷Îª²Î¿¼µã£¬Ïê¼û Analysis_GenRefPnt.ipynb
+    é™„å½•B: åå¤„ç†
+    (1) æŸ¥çœ‹ Pareto Front åˆ†å¸ƒï¼Œè¯¦è§ Analysis_OptsResults.ipynb
+    (2) æ ¹æ®{X,F}è®¡ç®—ç»“æœï¼Œåˆ†æå‚æ•°å˜åŒ–å¯¹äºå„åŠ¨åŠ›å­¦æŒ‡æ ‡çš„ç›¸å…³æ€§ï¼Œè¯¦è§ Analysis_Corr.ipynb
+    (3) æ ¹æ®NSGA2æœ€ç»ˆå‰æ²¿è§£ï¼Œæ‹Ÿåˆåˆ†å¸ƒæ›²é¢ä¸Šçš„æ•£ç‚¹ä½œä¸ºå‚è€ƒç‚¹ï¼Œè¯¦è§ Analysis_GenRefPnt.ipynb
 
     """
