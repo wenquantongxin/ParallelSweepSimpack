@@ -218,8 +218,9 @@ def main():
     # 调用 X_vars 生成函数, 以进行 正向参数扫略 / 前沿解回顾验证
 
     # 修改点 1
-    X_vars = GenerateVehicleParamater(WorkingDir, Filename="Overall_FinalSolutions.npz", method="FromNPZ")
-    # X_vars = GenerateVehicleParamater(WorkingDir, Filename="config_opt.xlsx", method="JustSweepL123")
+    X_vars = GenerateVehicleParamater(WorkingDir, Filename="config_opt.xlsx", method="JustSweepL123")
+    
+    # X_vars = GenerateVehicleParamater(WorkingDir, Filename="Overall_FinalSolutions.npz", method="FromNPZ")
     # 示例调用 1: X_vars = GenerateVehicleParamater(WorkingDir, Filename="res_history.npz", method="FromNPZ")
 
     # 创建子文件夹 ChkPnt（checkpoint (检查点)）如果不存在
