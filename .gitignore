@@ -52,13 +52,21 @@ ChkPnt/
 Thumbs.db
 
 # Office 临时文件
-~$*           # Word、Excel、PowerPoint 等的临时文件
-*.tmp         # 临时文件
-*.temp        # 临时文件
-~*.doc        # Word 备份文件
-~*.docx       # Word 备份文件
-~*.xls        # Excel 备份文件
-~*.xlsx       # Excel 备份文件
-~*.ppt        # PowerPoint 备份文件
-~*.pptx       # PowerPoint 备份文件
-.~lock.*      # LibreOffice 锁定文件
+~$*
+*.tmp
+
+# Excel 临时文件
+~$*.xlsx
+~$*.xls
+~$*.xlsm
+
+# Word 临时文件  
+~$*.docx
+~$*.doc
+
+# PowerPoint 临时文件
+~$*.pptx
+~$*.ppt
+
+# 其他 Office 临时文件
+*.~vsd*
