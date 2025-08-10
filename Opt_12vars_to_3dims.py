@@ -1030,7 +1030,7 @@ class MyBatchProblem(Problem):
     def __init__(self,
                  batch_size=5,
                  WorkingDir=os.getcwd(),
-                 tag="demo",                # 修改点 0
+                 tag="0811G2",                # 修改点 0
                  StartVel = 100/3.6,
                  EndVel = 900/3.6,
                  N_depth = 7,
@@ -1046,8 +1046,8 @@ class MyBatchProblem(Problem):
             n_obj=3,
             # 3个约束条件：n_ieq_constr=3
             n_ieq_constr = 3,  
-            xl=np.array([ 2000,  50000,  120000,  15000,  15000,   2000,  1600000,  10000,     100,    0,    0, -0.6]),
-            xu=np.array([50000, 4000000, 3000000, 600000, 750000, 100000, 60000000, 250000, 3000000, 0.64, 0.64,  0.4]),
+            xl=np.array([5000, 50000, 500000, 15000, 50000, 5000, 2000000, 10000, 100, 0, 0, -0.6]),
+            xu=np.array([60000, 15000000, 2000000, 500000, 600000, 60000, 20000000, 200000, 300000, 0.64, 0.64, 0.4]),
             elementwise_evaluation=False,
             **kwargs
         )
@@ -1102,11 +1102,11 @@ def main():
     
     # 定义问题
     # 修改点 2：并行计算池
-    problem = MyBatchProblem( batch_size = 10 ) 
+    problem = MyBatchProblem( batch_size = 21 ) 
     
     #--------------------------------------------------------------------------------------------#
     # 多目标 NSGA2 算法
-    algorithm_NSGA2 = NSGA2( pop_size = 66 )
+    algorithm_NSGA2 = NSGA2( pop_size = 100 )
     
     # # RNSGA2 算法
     # ref_points = np.load('RefPnt_fromNSGA2.npy') # 导入 Analysis_GenRefPnt.ipynb 生成的参考点
@@ -1123,7 +1123,7 @@ def main():
     # tag 在1033行定义 tag="demo"
     
     # 修改点 4：终止条件
-    termination = get_termination("n_gen", 88)  # 遗传迭代数
+    termination = get_termination("n_gen", 200)  # 遗传迭代数
     
     # 运行优化
     res = minimize(
@@ -1169,8 +1169,8 @@ if __name__ == "__main__":
     """
     命令行调用：
     
-    F:  # 切换盘符                                                                                                             
-    cd F:\ResearchMainStream\0.ResearchBySection\C.动力学模型\参数优化\参数优化实现\ParallelSweepSimpack                        
+    H:  # 切换盘符                                                                                                             
+    cd H:\TeamProjects\Mk\myProjects\ParallelSweepSimpack                        
     python -X utf8  Opt_12vars_to_3dims.py # 执行本程序                                  
     
 
