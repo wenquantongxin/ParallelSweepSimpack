@@ -1030,13 +1030,13 @@ class MyBatchProblem(Problem):
     def __init__(self,
                  batch_size=5,
                  WorkingDir=os.getcwd(),
-                 tag="0811G2",                # 修改点 0
+                 tag="0814G3",                # 修改点 0
                  StartVel = 100/3.6,
                  EndVel = 900/3.6,
                  N_depth = 7,
                  **kwargs):
         """
-        # 修改点 1
+        示例上下限
         使用 (N,12) 决策变量, 3 个目标 
         xl=np.array([ 2000,  160000,  120000,  24000,  30000,   4000,  1600000,  10000,     100,    0,    0, -0.6]),
         xu=np.array([50000, 4000000, 3000000, 600000, 750000, 100000, 40000000, 250000, 3000000, 0.64, 0.64,  0.4]),
@@ -1046,6 +1046,7 @@ class MyBatchProblem(Problem):
             n_obj=3,
             # 3个约束条件：n_ieq_constr=3
             n_ieq_constr = 3,  
+            # 修改点 1
             xl=np.array([5000, 50000, 500000, 15000, 50000, 5000, 2000000, 10000, 100, 0, 0, -0.6]),
             xu=np.array([60000, 15000000, 2000000, 500000, 600000, 60000, 20000000, 200000, 300000, 0.64, 0.64, 0.4]),
             elementwise_evaluation=False,
@@ -1102,22 +1103,24 @@ def main():
     
     # 定义问题
     # 修改点 2：并行计算池
-    problem = MyBatchProblem( batch_size = 21 ) 
+    problem = MyBatchProblem( batch_size = 22 ) 
     
     #--------------------------------------------------------------------------------------------#
     # 多目标 NSGA2 算法
-    algorithm_NSGA2 = NSGA2( pop_size = 100 )
+    # algorithm_NSGA2 = NSGA2( pop_size = 100 )
     
     # # RNSGA2 算法
     # ref_points = np.load('RefPnt_fromNSGA2.npy') # 导入 Analysis_GenRefPnt.ipynb 生成的参考点
     # algorithm_RNSGA2 = RNSGA2(ref_points=ref_points, pop_size=66, epsilon=15, normalization='no') 
+    
     # # NSGA3 算法
-    # ref_dirs = get_reference_directions("das-dennis", 3, n_partitions=17) 
+    ref_dirs = get_reference_directions("das-dennis", 3, n_partitions=17) 
     # # 组合结果C(17+2,2)=171<180=pop_size, pop_size is equal or larger than the number of reference directions. 
-    # algorithm_NSGA3 = NSGA3(pop_size=180,ref_dirs=ref_dirs)
+    algorithm_NSGA3 = NSGA3(pop_size=180,ref_dirs=ref_dirs)
     
     # 修改点 3：选择优化算法
-    selected_algorithm = algorithm_NSGA2  # 可以选择 algorithm_NSGA2 或 algorithm_NSGA3
+    # selected_algorithm = algorithm_NSGA2  # 可以选择 algorithm_NSGA2 或 algorithm_NSGA3
+    selected_algorithm = algorithm_NSGA3
     #--------------------------------------------------------------------------------------------#
     
     # tag 在1033行定义 tag="demo"

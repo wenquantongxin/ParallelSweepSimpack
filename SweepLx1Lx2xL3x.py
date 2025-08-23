@@ -208,7 +208,7 @@ def main():
     WorkingDir = os.getcwd()
     # 修改点 0
     # 实验标识符
-    tag="Sweep"  
+    tag="reNS23"  
     
     # 二分法速度上下限、二分深度
     StartVel = 100/3.6 
@@ -218,7 +218,8 @@ def main():
     # 调用 X_vars 生成函数, 以进行 正向参数扫略 / 前沿解回顾验证
 
     # 修改点 1
-    X_vars = GenerateVehicleParamater(WorkingDir, Filename="config_opt.xlsx", method="JustSweepL123")
+    # X_vars = GenerateVehicleParamater(WorkingDir, Filename="config_opt.xlsx", method="JustSweepL123")
+    X_vars = GenerateVehicleParamater(WorkingDir, Filename="merged_nsga_23nd.xlsx", method="FromExcel")
     
     # X_vars = GenerateVehicleParamater(WorkingDir, Filename="Overall_FinalSolutions.npz", method="FromNPZ")
     # 示例调用 1: X_vars = GenerateVehicleParamater(WorkingDir, Filename="res_history.npz", method="FromNPZ")
@@ -235,7 +236,7 @@ def main():
     
     # 3) 设置批次和并行
     # 修改点 2
-    BatchSize_parallel = 10
+    BatchSize_parallel = 22
     total_columns = X_vars.shape[1]
     num_batches = math.ceil(total_columns / BatchSize_parallel)
     print("总的参数组合数：", total_columns)
@@ -310,8 +311,8 @@ if __name__ == "__main__":
 
     # 需要启动 pypack 环境的命令行
     
-    F:  # 切换盘符                                                                                                             
-    cd F:\ResearchMainStream\0.ResearchBySection\C.动力学模型\参数优化\参数优化实现\ParallelSweepSimpack                           
+    H:  # 切换盘符                                                                                                             
+    cd H:\TeamProjects\Mk\myProjects\ParallelSweepSimpack                           
     python -X utf8 SweepLx1Lx2xL3x.py # 执行本程序                                                                                                                                   
 
 """

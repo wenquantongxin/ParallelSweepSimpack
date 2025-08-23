@@ -78,9 +78,9 @@ substr.attr.2d.height (             $S_IRWBogie_Rear              ) = 4.00000000
 ! Views
 !**********************************************************************
 view.type (                         $V_WorkingView                ) = 0                       ! Projection type
-view.pos (                1 ,       $V_WorkingView                ) = 4.09173774719238281E+00 ! Position
-view.pos (                2 ,       $V_WorkingView                ) = -2.57856864929199219E+01 ! Position
-view.pos (                3 ,       $V_WorkingView                ) = -3.20241203308105469E+01 ! Position
+view.pos (                1 ,       $V_WorkingView                ) = -9.15860843658447266E+00 ! Position
+view.pos (                2 ,       $V_WorkingView                ) = -1.54057626724243164E+01 ! Position
+view.pos (                3 ,       $V_WorkingView                ) = -2.09401168823242188E+01 ! Position
 view.orient (             1 ,       $V_WorkingView                ) = 2.24450503280066521E-01 ! Orientation
 view.orient (             2 ,       $V_WorkingView                ) = 9.01395636829838698E-01 ! Orientation
 view.orient (             3 ,       $V_WorkingView                ) = -3.54572750224170730E-01 ! Orientation
@@ -88,8 +88,8 @@ view.orient (             4 ,       $V_WorkingView                ) = -1.0670539
 view.angle (                        $V_WorkingView                ) = 7.85398185253143311E-01 ! Lens angle
 view.fclip.auto (                   $V_WorkingView                ) = 1                       ! Front clipping plane auto
 view.bclip.auto (                   $V_WorkingView                ) = 1                       ! Back clipping plane auto
-view.fclip.value (                  $V_WorkingView                ) = 9.96629536151885986E-01 ! Front clipping plane value
-view.bclip.value (                  $V_WorkingView                ) = 9.96629516601562500E+02 ! Back clipping plane value
+view.fclip.value (                  $V_WorkingView                ) = 9.87105071544647217E-01 ! Front clipping plane value
+view.bclip.value (                  $V_WorkingView                ) = 9.87105041503906250E+02 ! Back clipping plane value
 view.rotcenter.type (               $V_WorkingView                ) = 1                       ! Rotation center type
 view.rotcenter.ele (                $V_WorkingView                ) = $M_Isys_Track_Moved     ! Rotation center element
 view.rotcenter.adjust (             $V_WorkingView                ) = 1                       ! Adjust rotation center
@@ -101,9 +101,9 @@ view.motion.z (                     $V_WorkingView                ) = 1         
 view.motion.al (                    $V_WorkingView                ) = 1                       ! Moved camera direction alpha
 view.motion.be (                    $V_WorkingView                ) = 1                       ! Moved camera direction beta
 view.motion.ga (                    $V_WorkingView                ) = 1                       ! Moved camera direction gamma
-view.motion.pos (         1 ,       $V_WorkingView                ) = -4.65826225280761719E+00 ! Relative position
-view.motion.pos (         2 ,       $V_WorkingView                ) = -2.47856864929199219E+01 ! Relative position
-view.motion.pos (         3 ,       $V_WorkingView                ) = -3.08241203308105476E+01 ! Relative position
+view.motion.pos (         1 ,       $V_WorkingView                ) = -1.79086084365844727E+01 ! Relative position
+view.motion.pos (         2 ,       $V_WorkingView                ) = -1.44057626724243164E+01 ! Relative position
+view.motion.pos (         3 ,       $V_WorkingView                ) = -1.97401168823242195E+01 ! Relative position
 view.motion.orient (      1 ,       $V_WorkingView                ) = 2.24450503280066521E-01 ! Relative orientation
 view.motion.orient (      2 ,       $V_WorkingView                ) = 9.01395636829838698E-01 ! Relative orientation
 view.motion.orient (      3 ,       $V_WorkingView                ) = -3.54572750224170730E-01 ! Relative orientation
@@ -1695,10 +1695,6 @@ control.par (            23 ,       $S_IRWBogie_Front.$C_VelCtrl_D) = 0.00000000
 
 uele.excit (                        $S_IRWBogie_Front.$UE_Ref_Vel_X) = $E_Vehicle_RefVelX     ! Referenced Excitation
 
-joint.st.pos (            1 ,       $S_IRWBogie_Front.$S_IRW_Front.$J_DumAxle) = { 17500/2000+2.5/2 } ! Position
-joint.st.vel (            1 ,       $S_IRWBogie_Front.$S_IRW_Front.$J_DumAxle) = 1.66666666666666679E+01 ! Velocity
-
-
 joint.st.vel (            1 ,       $S_IRWBogie_Front.$S_IRW_Front.$J_IRW_L) = -3.87327161635993491E+01 ! Velocity
 
 
@@ -1709,14 +1705,12 @@ marker.pos (              2 ,       $S_IRWBogie_Front.$S_IRW_Front.$M_AxleBridge
 
 marker.pos (              2 ,       $S_IRWBogie_Front.$S_IRW_Front.$M_AxleBridge_LongiBar_B) = { $_Lx2/2 } ! Position
 
+joint.st.pos (            1 ,       $S_IRWBogie_Front.$S_IRW_Front.$J_AxleBridge) = { 17500/2000+2.5/2 } ! Position
+
 
 force.st.desc (           1 ,       $S_IRWBogie_Front.$S_IRW_Front.$F_RWContact_RWP_IRW_Left) = -2.62447781552461491E-04 ! Descriptive states
 
 force.st.desc (           1 ,       $S_IRWBogie_Front.$S_IRW_Front.$F_RWContact_RWP_IRW_Right) = -2.62447782889062243E-04 ! Descriptive states
-
-joint.st.pos (            1 ,       $S_IRWBogie_Front.$S_IRW_Rear.$J_DumAxle) = { 17500/2000-2.5/2 } ! Position
-joint.st.vel (            1 ,       $S_IRWBogie_Front.$S_IRW_Rear.$J_DumAxle) = 1.66666666666666679E+01 ! Velocity
-
 
 joint.st.vel (            1 ,       $S_IRWBogie_Front.$S_IRW_Rear.$J_IRW_L) = -3.87327161636119541E+01 ! Velocity
 
@@ -1727,6 +1721,8 @@ joint.st.vel (            1 ,       $S_IRWBogie_Front.$S_IRW_Rear.$J_IRW_R) = -3
 marker.pos (              2 ,       $S_IRWBogie_Front.$S_IRW_Rear.$M_AxleBridge_LongiBar_A) = { -$_Lx2/2 } ! Position
 
 marker.pos (              2 ,       $S_IRWBogie_Front.$S_IRW_Rear.$M_AxleBridge_LongiBar_B) = { $_Lx2/2 } ! Position
+
+joint.st.pos (            1 ,       $S_IRWBogie_Front.$S_IRW_Rear.$J_AxleBridge) = { 17500/2000-2.5/2 } ! Position
 
 
 force.st.desc (           1 ,       $S_IRWBogie_Front.$S_IRW_Rear.$F_RWContact_RWP_IRW_Left) = -2.62447781680553364E-04 ! Descriptive states
@@ -2090,10 +2086,6 @@ uinp.idx (                          $S_IRWBogie_Rear.$UI_UC_Simat ) = 7         
 
 uinp.idx (                          $S_IRWBogie_Rear.$UI_UD_Simat ) = 8                       ! External index
 
-joint.st.pos (            1 ,       $S_IRWBogie_Rear.$S_IRW_Front.$J_DumAxle) = { -17500/2000+2.5/2 } ! Position
-joint.st.vel (            1 ,       $S_IRWBogie_Rear.$S_IRW_Front.$J_DumAxle) = 1.66666666666666679E+01 ! Velocity
-
-
 joint.st.vel (            1 ,       $S_IRWBogie_Rear.$S_IRW_Front.$J_IRW_L) = -3.87327161635993491E+01 ! Velocity
 
 
@@ -2104,14 +2096,12 @@ marker.pos (              2 ,       $S_IRWBogie_Rear.$S_IRW_Front.$M_AxleBridge_
 
 marker.pos (              2 ,       $S_IRWBogie_Rear.$S_IRW_Front.$M_AxleBridge_LongiBar_B) = { $_Lx2/2 } ! Position
 
+joint.st.pos (            1 ,       $S_IRWBogie_Rear.$S_IRW_Front.$J_AxleBridge) = { -17500/2000+2.5/2 } ! Position
+
 
 force.st.desc (           1 ,       $S_IRWBogie_Rear.$S_IRW_Front.$F_RWContact_RWP_IRW_Left) = -2.62447781552461491E-04 ! Descriptive states
 
 force.st.desc (           1 ,       $S_IRWBogie_Rear.$S_IRW_Front.$F_RWContact_RWP_IRW_Right) = -2.62447782889062243E-04 ! Descriptive states
-
-joint.st.pos (            1 ,       $S_IRWBogie_Rear.$S_IRW_Rear.$J_DumAxle) = { -17500/2000-2.5/2 } ! Position
-joint.st.vel (            1 ,       $S_IRWBogie_Rear.$S_IRW_Rear.$J_DumAxle) = 1.66666666666666679E+01 ! Velocity
-
 
 joint.st.vel (            1 ,       $S_IRWBogie_Rear.$S_IRW_Rear.$J_IRW_L) = -3.87327161636119541E+01 ! Velocity
 
@@ -2122,6 +2112,8 @@ joint.st.vel (            1 ,       $S_IRWBogie_Rear.$S_IRW_Rear.$J_IRW_R) = -3.
 marker.pos (              2 ,       $S_IRWBogie_Rear.$S_IRW_Rear.$M_AxleBridge_LongiBar_A) = { -$_Lx2/2 } ! Position
 
 marker.pos (              2 ,       $S_IRWBogie_Rear.$S_IRW_Rear.$M_AxleBridge_LongiBar_B) = { $_Lx2/2 } ! Position
+
+joint.st.pos (            1 ,       $S_IRWBogie_Rear.$S_IRW_Rear.$J_AxleBridge) = { -17500/2000-2.5/2 } ! Position
 
 
 force.st.desc (           1 ,       $S_IRWBogie_Rear.$S_IRW_Rear.$F_RWContact_RWP_IRW_Left) = -2.62447781680553364E-04 ! Descriptive states
