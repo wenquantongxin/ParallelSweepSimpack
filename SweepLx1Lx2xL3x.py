@@ -63,7 +63,7 @@ def parallel_worker(args):
     
     args 是一个元组，包含：
         (col_idx_in_batch, start_idx, WorkingDir, X_vars, tag, StartVel, EndVel, N_depth)
-    我们在函数中解包后执行 HalfSearch_CrticalVelocity。
+    在函数中解包后执行 HalfSearch_CrticalVelocity。
     返回 (col_idx_in_batch, cVel)，外部可由此了解各列的结果
     """
     (col_idx_in_batch, start_idx, WorkingDir, X_vars, tag, StartVel, EndVel, N_depth) = args

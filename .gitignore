@@ -3,6 +3,7 @@ BatchTmp/
 ChkPnt/
 *.output/
 /结果分析组/**
+/Results_OrthogonalDoE/**
 
 # 数据文件
 *.mat
@@ -14,6 +15,10 @@ ChkPnt/
 *.intinfo
 *.log
 *.csv
+*.png
+
+# MATLAB 文件
+*.mlx
 
 # 几何模型文件
 *.STL
@@ -71,3 +76,7 @@ Thumbs.db
 # 其他 Office 临时文件
 *.~vsd*
 merged_nsga_23nd.xlsx
+ParallelSweep_OrthogonalDoE-first50.xlsx
+IRW_RW_OrthogonalDoE.xlsx
+ParallelSweep_OrthogonalDoE.xlsx
+Analysis_doe.py

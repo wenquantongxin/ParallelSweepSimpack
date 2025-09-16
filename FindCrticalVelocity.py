@@ -331,7 +331,7 @@ def Check_SPCK_IsStable_Idx(WorkingDir, X_vars, tag, idx, TargetVel):
     )
 
     # =========== 4. 调用 SIMPACK 仿真 ===========
-    #   需要根据你在 prepare_SpckFiles_eachBatch 中生成的 .spck 文件名确定下列名称
+    #   需要根据在 prepare_SpckFiles_eachBatch 中生成的 .spck 文件名确定下列名称
     #   例如: Vehicle_Opt_{tag}_{idx}.spck
     # spck_name = f"Vehicle_Opt_{tag}_{idx}.spck"
     spck_name = f"Vehicle4WDB_NativeRigidCriticalVel_Opt_{tag}_{idx}.spck"
@@ -392,7 +392,7 @@ def HalfSearch_CrticalVelocity(
 
     # 这里可根据需要打印一些提示信息
     print("开始二分搜索：")
-    # 你可以在这里做更多打印，类似于MATLAB
+    # 可在这里做更多打印，类似于 MATLAB
     print(f"  - tag: {tag}, idx: {idx}")
     print(f"  - 起始速度：{StartVel:.2f} m/s ({StartVel*3.6:.2f} km/h)")
     print(f"  - 终止速度：{EndVel:.2f} m/s ({EndVel*3.6:.2f} km/h)")

@@ -798,7 +798,7 @@ def opt_HalfSearchCrticalVelocity(
 ):
     
     print("开始二分搜索：")
-    # 你可以在这里做更多打印，类似于MATLAB
+    # 可在这里做更多打印，类似于MATLAB
     print(f"  - tag: {tag}, idx: {idx}")
     print(f"  - 起始速度：{StartVel:.2f} m/s ({StartVel*3.6:.2f} km/h)")
     print(f"  - 终止速度：{EndVel:.2f} m/s ({EndVel*3.6:.2f} km/h)")
@@ -838,7 +838,7 @@ def opt_HalfSearchCrticalVelocity(
 
 
 ################################################################
-# 1) 并行 worker：只返回 4 个值，最后一列是我们关心的第三个目标
+# 1) 并行 worker：只返回 4 个值，最后一列是第三个目标
 ################################################################
 
 # 并行任务函数

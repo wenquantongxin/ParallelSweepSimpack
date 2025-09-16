@@ -47,7 +47,7 @@ def ClearBatchTmpFolder(WorkingDir):
                 print(f"跳过问题文件/文件夹: {path}，WinError: {winerror}")
                 return
         
-        # 如果不是我们要跳过的错误，抛出异常
+        # 如果不是要跳过的错误，抛出异常
         raise
 
     # 如果子文件夹已经存在，尝试删除它以及它包含的所有内容
