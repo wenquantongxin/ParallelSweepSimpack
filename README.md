@@ -1,7 +1,7 @@
 ﻿# ParallelSweepSimpack
 
 ## 项目简介
-ParallelSweepSimpack 面向城市轨道交通车辆转向架悬挂参数的并行仿真与多目标优化。项目通过 Python 脚本批量生成 SIMPACK 所需的 .spck/.spf/.subvar 文件，自动调用 `simpack-cmd` 完成多体动力学仿真，并以临界速度 (critical velocity)、轮轨磨耗指标 (wear number)、Sperling 指标 (ride comfort) 等多项性能指标为目标进行优化。整体流程支持大规模参数敏感性分析、正交试验 (Orthogonal DoE) 以及多目标遗传算法 (NSGA-II/NSGA-III/R-NSGA-II) 的运行。
+ParallelSweepSimpack 面向轨道交通车辆转向架悬挂参数的并行仿真与多目标优化。项目通过 Python 脚本批量生成 SIMPACK 所需的 .spck/.spf/.subvar 文件，自动调用 `simpack-cmd` 完成多体动力学仿真，并以临界速度 (critical velocity)、轮轨磨耗指标 (wear number)、Sperling 指标 (ride comfort) 等多项性能指标为目标进行优化。整体流程支持大规模参数敏感性分析、正交试验 (Orthogonal DoE) 以及多目标遗传算法 (NSGA-II/NSGA-III/R-NSGA-II) 的运行。
 
 ## 功能特性
 - 并行批量仿真 (parallel sweep)，利用 `concurrent.futures` 同时调度多个 SIMPACK 任务。
@@ -24,7 +24,7 @@ ParallelSweepSimpack
 |-- config_opt.xlsx               # 参数范围、batch 设置、权重等配置
 |-- ref_files/                    # 模型基准文件和参考几何
 |-- SbrExport_SPCKResult.qs       # SIMPACK post 处理脚本 (qs)
-|-- Analysis_*.ipynb / *.mlx      # 数据分析、可视化与参考点生成
+|-- Analysis_*.ipynb              # 数据分析、可视化与参考点生成
 ```
 
 ## 环境依赖
@@ -63,7 +63,6 @@ pip install pymoo scikit-learn SALib ipympl plotly open3d
 7. **结果分析与可视化**  
    - `Analysis_OptsResults.ipynb`：综合分析 NSGA 结果。  
    - `Analysis_Corr.ipynb`：参数-指标相关性与敏感性研究。  
-   - `Analysis_L1L2L3Sweep.mlx`：MATLAB Live Script 版扫频可视化。  
    运行前请在 Jupyter Notebook / MATLAB 中切换至项目根目录。
 
 ## 主要工作流说明
