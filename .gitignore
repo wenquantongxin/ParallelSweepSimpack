@@ -5,6 +5,9 @@ ChkPnt/
 /结果分析组/**
 /Results_OrthogonalDoE/**
 
+# 已废弃/过时的文件
+deprecated_*
+
 # 数据文件
 *.mat
 *.npy
