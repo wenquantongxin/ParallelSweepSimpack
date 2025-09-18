@@ -1,318 +1,662 @@
-# -*- coding: utf-8 -*-
+﻿# -*- coding: utf-8 -*-
 
-# SweepLx1Lx2xL3x.py
-import os
-import pandas as pd
-import numpy as np
+"""
+ParallelSweepSimpack · Lx1/Lx2/Lx3 扫略与批量评估入口
+
+本脚本负责：
+- 按不同来源（固定 Lx1/Lx2/Lx3 网格、Excel、NPZ）生成待评估的整车参数矩阵 `X_vars`；
+- 为每一批组合生成 SIMPACK 的 .spck/.spf/.subvar 文件；
+- 并发调用临界速度搜索（HalfSearch）、曲线工况（CRV）与直线工况（STR）的评估函数；
+- 将批次结果保存到 `ChkPnt/` 下，最终汇总为 `Result_<tag>.npy` 与 `Xvars_<tag>.npy`。
+
+相较于旧版本散落的“# 修改点”，本版本通过命令行参数统一配置：
+- 修改点 0（实验标识 tag）→ `--tag`；
+- 修改点 1（参数来源/输入文件）→ `--mode` + `--input` [以及 `--excel-sheet`]；
+- 修改点 2（并发批量大小）→ `--batch-size`；
+- 修改点 3（结果指标维度）→ 由 `METRIC_NAMES` 自动推导（无需再改）；
+- 修改点 4（结果写入映射）→ 已集中于 `execute_batches` 内部，不再手动改写。
+
+使用示例见文件末尾注释块。
+"""
+
+import argparse
+import concurrent.futures
 import itertools
 import math
-import concurrent.futures
-import matplotlib
-import matplotlib.pyplot as plt
-matplotlib.use("TkAgg")
 import shutil
 import time
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Optional
+
+import numpy as np
+import pandas as pd
+
+import matplotlib
+try:
+    matplotlib.use("TkAgg")
+except Exception:
+    # Fallback for headless environments (no GUI backend available)
+    matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import traceback
 
 from PrepareBatchFiles import (
     read_config_opt_excel,
     ClearBatchTmpFolder,
-    prepare_SpckFiles_eachBatch
+    prepare_SpckFiles_eachBatch,
 )
+from FindCrticalVelocity import HalfSearch_CrticalVelocity
+from STRPerf import STRPerf_idx
+from CRVPerf import CRVPerf_idx
 
-from FindCrticalVelocity import (HalfSearch_CrticalVelocity)
-from STRPerf import (STRPerf_idx)
-from CRVPerf import (CRVPerf_idx)
+SUPPORTED_MODES = ("JustSweepL123", "FromExcel", "FromNPZ")
+# 结果指标名称（按行顺序写入 `final_results`）
+METRIC_NAMES = (
+    "critical_velocity",
+    "rigid_wear_number",
+    "rigid_max_lateral_displacement",
+    "irw_wear_number",
+    "irw_max_lateral_displacement",
+    "sperling_y_aar5",
+    "sperling_z_aar5",
+)
+RESULT_DIM = len(METRIC_NAMES)
 
-# 做三维图，显示 临界速度与 L1、L2 的关系
-def ShowMeshgrid():
-    CriticalVel = np.load("myCriticalVel.npy") 
-    Xvars = np.load("myXvars.npy") 
-    Z = CriticalVel
-    lx1_all = Xvars[29,:] 
-    lx2_all = Xvars[30,:] 
 
-    # 1) 找到唯一值并排序
-    lx1_unique = np.unique(lx1_all)
-    lx2_unique = np.unique(lx2_all)
-    m = len(lx1_unique)
-    n = len(lx2_unique)
-    print("lx1_unique:", lx1_unique)
-    print("lx2_unique:", lx2_unique)
-    print("m,n =", m,n)
-    # 2) 做 meshgrid
-    # 注意 meshgrid 的默认 (x, y) => X.shape = (n,m), Y.shape = (n,m)
-    X, Y = np.meshgrid(lx1_unique, lx2_unique)
-    print("X.shape = ", X.shape)  # (n,m)
-    # 3) reshape Z
-    Z_mat = Z.reshape(n, m)  # 因为 n 行, m 列 => shape=(len(lx2_unique), len(lx1_unique))
-    # 4) 画 surf
-    fig = plt.figure()
-    ax = fig.add_subplot(projection='3d')
-    surf = ax.plot_surface(X, Y, Z_mat, cmap='viridis')
-    ax.set_xlabel("Lx1")
-    ax.set_ylabel("Lx2")
-    ax.invert_yaxis()  # 使得 Y 轴反向递增
-    ax.set_zlabel("Critical Velocity (m/s)")
-    fig.colorbar(surf, shrink=0.5)
-    plt.show()
-    
-# 并行任务函数
+@dataclass
+class SimulationConfig:
+    working_dir: Path
+    tag: str
+    mode: str
+    input_path: Optional[Path]
+    excel_sheet: str
+    start_velocity: float
+    end_velocity: float
+    search_depth: int
+    batch_size: int
+    checkpoint_name: str
+
+    @property
+    def checkpoint_dir(self) -> Path:
+        return self.working_dir / self.checkpoint_name
+
+
+# 解析命令行参数 —— 见下方参数说明
+def parse_args() -> SimulationConfig:
+    parser = argparse.ArgumentParser(
+        description="Run SIMPACK sweeps with configurable parameter sources."
+    )
+    parser.add_argument(
+        "--mode",
+        choices=SUPPORTED_MODES,
+        default="JustSweepL123",
+        help="Parameter source mode."
+    )
+    parser.add_argument(
+        "--input",
+        type=Path,
+        help="Input file used when --mode is FromExcel or FromNPZ."
+    )
+    parser.add_argument(
+        "--excel-sheet",
+        default="Sheet1",
+        help="Sheet name to read when --mode is FromExcel."
+    )
+    parser.add_argument(
+        "--tag",
+        default="reNS23",
+        help="Identifier appended to generated batches and result files."
+    )
+    parser.add_argument(
+        "--start-vel",
+        type=float,
+        default=100.0 / 3.6,
+        help="Binary search start velocity in m/s (default: 100 km/h)."
+    )
+    parser.add_argument(
+        "--end-vel",
+        type=float,
+        default=900.0 / 3.6,
+        help="Binary search end velocity in m/s (default: 900 km/h)."
+    )
+    parser.add_argument(
+        "--depth",
+        type=int,
+        default=7,
+        help="Binary search depth for HalfSearch_CrticalVelocity."
+    )
+    parser.add_argument(
+        "--batch-size",
+        type=int,
+        default=22,
+        help="Number of worker processes to spawn per batch."
+    )
+    parser.add_argument(
+        "--working-dir",
+        type=Path,
+        default=Path.cwd(),
+        help="Working directory containing SIMPACK templates."
+    )
+    parser.add_argument(
+        "--checkpoint",
+        default="ChkPnt",
+        help="Folder name (relative to working dir) used for checkpoint outputs."
+    )
+
+    args = parser.parse_args()
+    working_dir = args.working_dir.resolve()
+
+    input_path: Optional[Path] = None
+    if args.input is not None:
+        input_path = args.input
+        if not input_path.is_absolute():
+            input_path = (working_dir / input_path).resolve()
+
+    if args.mode in {"FromExcel", "FromNPZ"} and input_path is None:
+        parser.error("--input is required when --mode is FromExcel or FromNPZ.")
+    if args.mode == "FromExcel" and input_path is not None and input_path.suffix.lower() not in {".xlsx", ".xls", ".xlsm"}:
+        parser.error("--input must be an Excel file when --mode is FromExcel.")
+    if args.mode == "FromNPZ" and input_path is not None and input_path.suffix.lower() != ".npz":
+        parser.error("--input must be an NPZ file when --mode is FromNPZ.")
+
+    return SimulationConfig(
+        working_dir=working_dir,
+        tag=args.tag,
+        mode=args.mode,
+        input_path=input_path,
+        excel_sheet=args.excel_sheet,
+        start_velocity=args.start_vel,
+        end_velocity=args.end_vel,
+        search_depth=args.depth,
+        batch_size=args.batch_size,
+        checkpoint_name=args.checkpoint,
+    )
+
+
+# 生成 Lx1/Lx2/Lx3 的网格扫略矩阵；其他变量取基准值
+# 返回 X_vars: shape=(N_params, N_cases)，按列为一个设计点
+def generate_lx123_sweep(working_dir: Path) -> np.ndarray:
+    print("[INFO] Sweeping Lx1/Lx2/Lx3 while keeping other variables at baseline.")
+    opt_config = read_config_opt_excel(str(working_dir))
+    x_base = opt_config["基准值"].to_list()
+
+    lx1 = np.arange(0.0, 0.64 + 0.001, 0.04)
+    lx2 = np.arange(0.0, 0.60 + 0.001, 0.04)
+    lx3 = np.arange(-0.6, 0.40 + 0.001, 0.1)
+
+    columns = []
+    for lx1_val, lx2_val, lx3_val in itertools.product(lx1, lx2, lx3):
+        x_temp = x_base.copy()
+        x_temp[29] = lx1_val
+        x_temp[30] = lx2_val
+        x_temp[31] = lx3_val
+        columns.append(x_temp)
+
+    x_vars = np.column_stack(columns)
+    print(f"[INFO] Generated sweep grid with shape {x_vars.shape}.")
+    return x_vars
+
+
+# 从 Excel 读取参数矩阵：按“是否优化”为 1 的行依次回填（从第2列起）
+# 特殊耦合：第3行复制至第4行，第7行复制至第8行
+def load_parameters_from_excel(config: SimulationConfig) -> np.ndarray:
+    if config.input_path is None:
+        raise ValueError("Excel mode requires --input to be set.")
+
+    print(f"[INFO] Loading vehicle parameters from Excel: {config.input_path}")
+    opt_config = read_config_opt_excel(str(config.working_dir), excel_name="config_opt.xlsx")
+    x_base = opt_config["基准值"].to_list()
+    is_to_opt = opt_config["是否优化"].to_list()
+
+    param_sweep_df = pd.read_excel(config.input_path, sheet_name=config.excel_sheet, header=None)
+    changing_vars = param_sweep_df.iloc[:, 1:]
+    n_cases = changing_vars.shape[1]
+    n_total = len(is_to_opt)
+    n_opt = int(np.sum(is_to_opt))
+
+    # 行数一致性检查，避免静默错配
+    if changing_vars.shape[0] != n_opt:
+        need, got = n_opt, changing_vars.shape[0]
+        print(
+            f"[WARN] Excel 行数({got}) 与 is_to_opt==1 计数({need}) 不一致；"
+            f"将仅使用前 {min(got, need)} 行进行匹配。"
+        )
+        # 打印前后两行索引帮助对齐（若行数足够）
+        head_idx = list(range(min(2, need)))
+        tail_idx = list(range(max(0, need - 2), need))
+        print(f"[HINT] 期望匹配的优化变量行索引样例（前/后）：{head_idx} ... {tail_idx}")
+        changing_vars = changing_vars.iloc[:need, :]
+
+    x_vars = np.zeros((n_total, n_cases))
+    opt_row_idx = 0
+    for line_idx, flag in enumerate(is_to_opt):
+        if flag == 0:
+            x_vars[line_idx] = float(x_base[line_idx])
+        else:
+            if opt_row_idx >= changing_vars.shape[0]:
+                raise ValueError(
+                    "Excel does not contain enough rows for optimized variables "
+                    f"(needed {n_opt}, got {changing_vars.shape[0]})."
+                )
+            x_vars[line_idx] = changing_vars.iloc[opt_row_idx, :].to_numpy(dtype=float)
+            opt_row_idx += 1
+
+    x_vars[3] = x_vars[2]
+    x_vars[7] = x_vars[6]
+    print(f"[INFO] Loaded parameter grid with shape {x_vars.shape}.")
+    return x_vars
+
+
+# 从 NPZ 读取 final_X 或 X，并按“是否优化”为 1 的行依次回填
+# 特殊耦合：第3行复制至第4行，第7行复制至第8行
+def load_parameters_from_npz(config: SimulationConfig) -> np.ndarray:
+    if config.input_path is None:
+        raise ValueError("NPZ mode requires --input to be set.")
+
+    print(f"[INFO] Loading vehicle parameters from NPZ: {config.input_path}")
+    with np.load(config.input_path, allow_pickle=True) as data:
+        if "final_X" in data:
+            final_x = data["final_X"].T
+            print("[INFO] Found 'final_X' in NPZ file.")
+        elif "X" in data:
+            final_x = data["X"].T
+            print("[INFO] Falling back to 'X' in NPZ file.")
+        else:
+            keys = list(data.keys())
+            raise KeyError(f"NPZ must contain 'final_X' or 'X'. Found keys: {keys}")
+
+    opt_config = read_config_opt_excel(str(config.working_dir), excel_name="config_opt.xlsx")
+    x_base = opt_config["基准值"].to_list()
+    is_to_opt = opt_config["是否优化"].to_list()
+
+    n_cases = final_x.shape[1]
+    n_total = len(is_to_opt)
+
+    x_vars = np.zeros((n_total, n_cases))
+    opt_row_idx = 0
+    for line_idx, flag in enumerate(is_to_opt):
+        if flag == 0:
+            x_vars[line_idx] = x_base[line_idx]
+        else:
+            if opt_row_idx >= final_x.shape[0]:
+                raise ValueError(
+                    "NPZ does not contain enough rows for optimized variables "
+                    f"(needed {int(np.sum(is_to_opt))}, got {final_x.shape[0]} with shape {final_x.shape})."
+                )
+            x_vars[line_idx] = final_x[opt_row_idx, :]
+            opt_row_idx += 1
+
+    x_vars[3] = x_vars[2]
+    x_vars[7] = x_vars[6]
+    print(f"[INFO] Loaded parameter grid with shape {x_vars.shape}.")
+    return x_vars
+
+
+# 根据 --mode 选择参数来源（Lx123/Excel/NPZ）
+def generate_vehicle_parameters(config: SimulationConfig) -> np.ndarray:
+    if config.mode == "JustSweepL123":
+        return generate_lx123_sweep(config.working_dir)
+    if config.mode == "FromExcel":
+        return load_parameters_from_excel(config)
+    if config.mode == "FromNPZ":
+        return load_parameters_from_npz(config)
+    raise ValueError(f"Unsupported mode: {config.mode}")
+
+
+# 并行子进程：评估单个设计点，返回 (批内列索引, 指标..)，指标顺序见 METRIC_NAMES
 def parallel_worker(args):
-    """
-    顶层作用域定义的并行任务函数，避免pickle错误。
-    
-    args 是一个元组，包含：
-        (col_idx_in_batch, start_idx, WorkingDir, X_vars, tag, StartVel, EndVel, N_depth)
-    在函数中解包后执行 HalfSearch_CrticalVelocity。
-    返回 (col_idx_in_batch, cVel)，外部可由此了解各列的结果
-    """
-    (col_idx_in_batch, start_idx, WorkingDir, X_vars, tag, StartVel, EndVel, N_depth) = args
-    
-    # 实际上的全局列索引
+    """Worker executed in a separate process to evaluate one design point."""
+    (
+        col_idx_in_batch,
+        start_idx,
+        working_dir,
+        x_vars,
+        tag,
+        start_vel,
+        end_vel,
+        depth,
+    ) = args
+
     actual_idx = start_idx + col_idx_in_batch
 
-    # 并行任务组
-    # 并行任务 1：调用半搜索函数，返回临界速度
-    CrticalVelocity = HalfSearch_CrticalVelocity(WorkingDir, X_vars, tag, actual_idx, StartVel, EndVel, N_depth)
+    critical_velocity = HalfSearch_CrticalVelocity(
+        working_dir,
+        x_vars,
+        tag,
+        actual_idx,
+        start_vel,
+        end_vel,
+        depth,
+    )
     time.sleep(1)
-    # print("[INFO] 测试，临时跳过临界速度计算")  
-    # CrticalVelocity = 666.66
-    
-    # 并行任务 2：调用曲线计算模型，返回曲线磨耗数、横移量
-    SumWearNumber_RigidCRV300m_CRV, maxLatDisp_RigidCRV300m_CRV, SumWearNumber_IRWCRV300m_CRV, maxLatDisp_IRWCRV300m_CRV = CRVPerf_idx(WorkingDir, X_vars, tag, actual_idx)
+
+    rigid_wear, rigid_lat_disp, irw_wear, irw_lat_disp = CRVPerf_idx(
+        working_dir,
+        x_vars,
+        tag,
+        actual_idx,
+    )
     time.sleep(1)
-    
-    # 并行任务 3：调用典型 AAR5 直线计算模型 性能评估，返回Sperling指标
-    SperlingY_AAR5, SperlingZ_AAR5 = STRPerf_idx(WorkingDir, X_vars, tag, actual_idx)
+
+    sperling_y, sperling_z = STRPerf_idx(
+        working_dir,
+        x_vars,
+        tag,
+        actual_idx,
+    )
     time.sleep(1)
-    
-    # 返回并行计算该 idx 的结果组向量
-    return (col_idx_in_batch, CrticalVelocity, SumWearNumber_RigidCRV300m_CRV, maxLatDisp_RigidCRV300m_CRV, SumWearNumber_IRWCRV300m_CRV, maxLatDisp_IRWCRV300m_CRV, SperlingY_AAR5, SperlingZ_AAR5)
 
-# 生成计算所需的完整车辆参数组合 X_vars
-def GenerateVehicleParamater(WorkingDir, Filename, method="JustSweepL123"):
-    
-    if method == "JustSweepL123":
-         
-        # 示例调用: X_vars = GenerateVehicleParamater(WorkingDir, Filename="config_opt.xlsx", method="JustSweepL123")
-        
-        print(f"[INFO] 仅需扫略 L1、L2、L3 三个参数, 其他车辆参数保持与基准值相同") # 扫略 L1、L2、L3
-        
-        # 1) 调用函数读取 config_opt.xlsx，获取基准值 X_base
-        Opt_Config = read_config_opt_excel(WorkingDir)
-        X_base = Opt_Config["基准值"].to_list()
-        # print("基准值 X_base:", X_base)
+    return (
+        col_idx_in_batch,
+        critical_velocity,
+        rigid_wear,
+        rigid_lat_disp,
+        irw_wear,
+        irw_lat_disp,
+        sperling_y,
+        sperling_z,
+    )
 
-        # 2) 生成 X_vars (32 x N_combos)
-        Lx1_sweep = np.arange(0, 0.64 + 0.001, 0.04)    # 从0到0.64，共17个元素
-        Lx2_sweep = np.arange(0, 0.60 + 0.001, 0.04)    # 从0到0.60，共16个元素
-        Lx3_sweep = np.arange(-0.6, 0.40 + 0.001, 0.1)  # Lx3_sweep = np.arange(0, 0.001, 0.1)         
+# ========== 内存映射版本（减少进程间拷贝 + 容错） ==========
+_XVARS_MM = None  # type: Optional[np.ndarray]
 
-        Lx123_combinations = list(itertools.product(Lx1_sweep, Lx2_sweep, Lx3_sweep))
-        X_vars_columns = []
+def _init_xvars_memmap(xvars_path_str: str):
+    """ProcessPool initializer: 在子进程中打开只读内存映射的 X_vars。"""
+    global _XVARS_MM
+    _XVARS_MM = np.load(xvars_path_str, mmap_mode="r")
 
-        for (lx1, lx2, lx3) in Lx123_combinations:
-            x_temp = X_base.copy()
-            x_temp[29] = lx1 # 从 0 开始编号
-            x_temp[30] = lx2
-            x_temp[31] = lx3
-            X_vars_columns.append(x_temp)
+def parallel_worker_mm(args):
+    """子进程评估单点（memmap 版本，避免传递大对象），包含容错返回。"""
+    (
+        col_idx_in_batch,
+        start_idx,
+        working_dir,
+        tag,
+        start_vel,
+        end_vel,
+        depth,
+    ) = args
 
-        X_vars = np.column_stack(X_vars_columns)
-        print("用于扫略计算的 X_vars的形状: ", X_vars.shape)
-        
-    elif method == "FromExcel":
-        
-        # 示例调用: X_vars = GenerateVehicleParamater(WorkingDir, Filename="ParameterSweep_fromExcel.xlsx", method="FromExcel")
-        
-        print(f"[INFO] 从 EXCEL 表格中获取车辆参数, 该表格记录了前沿解对应的被优化参数")
-        print("元文件名称:", Filename)
-        # 读取 config_opt.xlsx 获取基准值 X_base 和是否优化的标志 is2opt
-        Opt_Config = read_config_opt_excel(WorkingDir, excel_name="config_opt.xlsx")
-        X_base = Opt_Config["基准值"].to_list()
-        is2opt = Opt_Config["是否优化"].to_list()
+    global _XVARS_MM
+    actual_idx = start_idx + col_idx_in_batch
 
-        # 读取外部文件 ParameterSweep_fromExcel.xlsx
-        Param_Sweep_Config = pd.read_excel(f"{WorkingDir}/{Filename}", sheet_name="Sheet1", header=None)
-        N_Xvars = Param_Sweep_Config.shape[1] - 1 # 从Excel 表格中读取到的有多少组 X_vars 需要被计算
-        ChangingVars = Param_Sweep_Config.iloc[..., 1: Param_Sweep_Config.shape[1]]
+    try:
+        critical_velocity = HalfSearch_CrticalVelocity(
+            working_dir, _XVARS_MM, tag, actual_idx, start_vel, end_vel, depth
+        )
+        time.sleep(1)
 
-        N_2opt = len(is2opt) # X_vars 有多少维度, 应该是32
-                
-        # 根据外部excel行数初始化 X_vars
-        X_vars = np.zeros((N_2opt, N_Xvars)) 
+        rigid_wear, rigid_lat_disp, irw_wear, irw_lat_disp = CRVPerf_idx(
+            working_dir, _XVARS_MM, tag, actual_idx
+        )
+        time.sleep(1)
 
-        optCount = 0
-        for LineId in range(0, N_2opt):
-            if is2opt[LineId] == 0:
-                X_vars[LineId] = X_base[LineId] * np.ones((1, N_Xvars))
-            elif is2opt[LineId] == 1:
-                X_vars[LineId] = ChangingVars.iloc[optCount, ].to_numpy()
-                optCount = optCount + 1 
-        # 特别关心  $_Kpy	一系悬挂刚度-横向，与3耦合； $_Ksy	二系悬挂刚度-横向，与7耦合
-        X_vars[3]  = X_vars[2]
-        X_vars[7]  = X_vars[6]
+        sperling_y, sperling_z = STRPerf_idx(
+            working_dir, _XVARS_MM, tag, actual_idx
+        )
+        time.sleep(1)
 
-        print("用于扫略计算的 X_vars的形状: ", X_vars.shape)  # 打印 X_vars 的形状
-        
-    elif method == "FromNPZ":
-                
-        # 示例调用 1: X_vars = GenerateVehicleParamater(WorkingDir, Filename="res_history.npz", method="FromNPZ")
-        # 示例调用 2: X_vars = GenerateVehicleParamater(WorkingDir, Filename="generation_150_nondom.npz", method="FromNPZ")
-        
-        # print(f"[INFO] 从 res_history.npz 或者 generation_i_nondom.npz 中获取车辆参数, 该 .npz 文件记录了前沿解的 final_X")
-        data = np.load(Filename, allow_pickle=True)
-        
-        try:
-            # 尝试加载final_X
-            final_X = data["final_X"].T
-            print(f"[INFO] 从 res_history.npz 中获取车辆参数, 该 .npz 文件记录了最终前沿解的 final_X")
-            print("元文件名称:", Filename)
-        except KeyError:
-            # 如果没有final_X，尝试加载X
-            final_X = data["X"].T
-            print(f"[INFO] 从 generation_i_nondom.npz 中获取车辆参数, 该 .npz 文件记录了某一代际前沿解的 final_X")
-            print("元文件名称:", Filename)
+        return (
+            col_idx_in_batch,
+            critical_velocity,
+            rigid_wear,
+            rigid_lat_disp,
+            irw_wear,
+            irw_lat_disp,
+            sperling_y,
+            sperling_z,
+            "",  # err
+        )
+    except Exception as e:
+        err = f"{type(e).__name__}: {e}\n{traceback.format_exc()}"
+        return (
+            col_idx_in_batch,
+            np.nan, np.nan, np.nan, np.nan, np.nan, np.nan, np.nan,
+            err,
+        )
 
-        Opt_Config = read_config_opt_excel(WorkingDir, excel_name="config_opt.xlsx")
-        X_base = Opt_Config["基准值"].to_list()
-        is2opt = Opt_Config["是否优化"].to_list()
 
-        N_Xvars = len(final_X[0])
-        N_2opt = len(is2opt) # X_vars 有多少维度, 应该是32
-                        
-        # 初始化 X_vars
-        X_vars = np.zeros((N_2opt, N_Xvars)) 
-
-        optCount = 0
-        for LineId in range(0, N_2opt):
-            if is2opt[LineId] == 0:
-                    X_vars[LineId] = X_base[LineId] * np.ones((1, N_Xvars))
-            elif is2opt[LineId] == 1:
-                    X_vars[LineId] = final_X[optCount, ]
-                    optCount = optCount + 1 
-            # 特别关心  $_Kpy	一系悬挂刚度-横向，与3耦合； $_Ksy	二系悬挂刚度-横向，与7耦合
-            X_vars[3]  = X_vars[2]
-            X_vars[7]  = X_vars[6]
-
-        print("用于扫略计算的 X_vars的形状: ", X_vars.shape)  # 打印 X_vars 的形状
-
-    return X_vars
-
-# 主函数
-def main():
-    
-    start_time = time.time()  # 获取当前时间戳(秒)
-    
-    # 工作目录路径定义
-    WorkingDir = os.getcwd()
-    # 修改点 0
-    # 实验标识符
-    tag="reNS23"  
-    
-    # 二分法速度上下限、二分深度
-    StartVel = 100/3.6 
-    EndVel =  900/3.6
-    N_depth = 7 
-    
-    # 调用 X_vars 生成函数, 以进行 正向参数扫略 / 前沿解回顾验证
-
-    # 修改点 1
-    # X_vars = GenerateVehicleParamater(WorkingDir, Filename="config_opt.xlsx", method="JustSweepL123")
-    X_vars = GenerateVehicleParamater(WorkingDir, Filename="merged_nsga_23nd.xlsx", method="FromExcel")
-    
-    # X_vars = GenerateVehicleParamater(WorkingDir, Filename="Overall_FinalSolutions.npz", method="FromNPZ")
-    # 示例调用 1: X_vars = GenerateVehicleParamater(WorkingDir, Filename="res_history.npz", method="FromNPZ")
-
-    # 创建子文件夹 ChkPnt（checkpoint (检查点)）如果不存在
-    checkpoint_dir = os.path.join(WorkingDir, "ChkPnt")
-     # 如果子文件夹已经存在且不为空，先删除它以及它包含的所有内容
-    if os.path.exists(checkpoint_dir):
+# 创建或清空检查点目录，并返回路径
+def prepare_checkpoint_dir(config: SimulationConfig) -> Path:
+    checkpoint_dir = config.checkpoint_dir
+    if checkpoint_dir.exists():
         shutil.rmtree(checkpoint_dir)
-    # 再次新建一个空白的 ChkPnt(checkpoint) 文件夹，便于后续写入
-    os.makedirs(checkpoint_dir, exist_ok=True)
-    # 保存 X_vars 
-    np.save(os.path.join(checkpoint_dir, f"myXvars_{tag}.npy"), X_vars)
-    
-    # 3) 设置批次和并行
-    # 修改点 2
-    BatchSize_parallel = 22
-    total_columns = X_vars.shape[1]
-    num_batches = math.ceil(total_columns / BatchSize_parallel)
-    print("总的参数组合数：", total_columns)
-    print("并行任务数：", BatchSize_parallel)
-    print("批次数量：", num_batches)
+    checkpoint_dir.mkdir(parents=True, exist_ok=True)
+    return checkpoint_dir
 
-    # 假设每个组合计算和保存的维度数
-    # 修改点 3
-    result_dim = 7  
+
+# 按批次并发执行评估；每批保存到 ChkPnt/batch_result_<tag>_batch<i>.npy
+# 返回 final_results: shape=(RESULT_DIM, N_cases)
+def execute_batches(
+    config: SimulationConfig,
+    x_vars: np.ndarray,
+    checkpoint_dir: Path,
+) -> np.ndarray:
+    total_columns = x_vars.shape[1]
+    if total_columns == 0:
+        raise ValueError("No parameter combinations available for evaluation.")
+
+    batch_size = max(1, config.batch_size)
+    num_batches = math.ceil(total_columns / batch_size)
+
+    print(f"[INFO] Total parameter combinations: {total_columns}")
+    print(f"[INFO] Parallel workers per batch: {batch_size}")
+    print(f"[INFO] Number of batches: {num_batches}")
+
     all_batch_results = []
+    working_dir_str = str(config.working_dir)
+    # 使用已保存到 checkpoint 的 X_vars 作为 memmap 源
+    xvars_mm_path = str(checkpoint_dir / f"myXvars_{config.tag}.npy")
 
     for batch_idx in range(num_batches):
-        start_idx = batch_idx * BatchSize_parallel
-        end_idx   = min((batch_idx + 1) * BatchSize_parallel, total_columns)
+        start_idx = batch_idx * batch_size
+        end_idx = min((batch_idx + 1) * batch_size, total_columns)
 
-        # ============== (a) 清理 & 生成文件 ==============
-        ClearBatchTmpFolder(WorkingDir)
-        prepare_SpckFiles_eachBatch(WorkingDir, tag, start_idx, end_idx)
+        ClearBatchTmpFolder(working_dir_str)
+        prepare_SpckFiles_eachBatch(working_dir_str, config.tag, start_idx, end_idx)
 
-        X_vars_batch = X_vars[:, start_idx:end_idx]
-        print(f"第 {batch_idx+1} 批：列索引范围 [{start_idx}:{end_idx}), 批量大小 = {X_vars_batch.shape[1]}")
+        batch_columns = end_idx - start_idx
+        print(
+            f"[INFO] Batch {batch_idx + 1}/{num_batches}: column range [{start_idx}:{end_idx}), size={batch_columns}"
+        )
 
-        # 用来存储本批次的结果 (shape=(1, batch_size))
-        batch_result = np.zeros((result_dim, X_vars_batch.shape[1]))
+        batch_result = np.zeros((RESULT_DIM, batch_columns))
+        worker_count = min(batch_size, batch_columns)
+        if worker_count == 0:
+            continue
 
-        # ============== (b) 并行处理 ==============
-        with concurrent.futures.ProcessPoolExecutor(max_workers=BatchSize_parallel) as executor:
-            future_list = []
-            for col_idx_in_batch in range(X_vars_batch.shape[1]):
-                args = (col_idx_in_batch, start_idx, WorkingDir, X_vars, tag, StartVel, EndVel, N_depth)
-                future = executor.submit(parallel_worker, args)
-                future_list.append(future)
+        t0 = time.time()
+        failed = 0
+        with concurrent.futures.ProcessPoolExecutor(
+            max_workers=worker_count,
+            initializer=_init_xvars_memmap,
+            initargs=(xvars_mm_path,)
+        ) as executor:
+            futures = []
+            for col_idx_in_batch in range(batch_columns):
+                args = (
+                    col_idx_in_batch,
+                    start_idx,
+                    working_dir_str,
+                    config.tag,
+                    config.start_velocity,
+                    config.end_velocity,
+                    config.search_depth,
+                )
+                futures.append(executor.submit(parallel_worker_mm, args))
 
-            # 收集结果
-            for future in concurrent.futures.as_completed(future_list):
-                col_idx_in_batch, cVel, RigidWN_CRV, RigidLatMax_CRV, IrwWN_CRV, IrwLatMax_CRV, SperlingY_AAR5, SperlingZ_AAR5 = future.result()
-                # 修改点 4
-                # 并行池 return (col_idx_in_batch, cVel, WearNumber_CRV, LatDispMax_CRV, SperlingY_AAR5, SperlingZ_AAR5)
-                batch_result[0, col_idx_in_batch] = cVel 
-                batch_result[1, col_idx_in_batch] = RigidWN_CRV
-                batch_result[2, col_idx_in_batch] = RigidLatMax_CRV
-                batch_result[3, col_idx_in_batch] = IrwWN_CRV
-                batch_result[4, col_idx_in_batch] = IrwLatMax_CRV
-                batch_result[5, col_idx_in_batch] = SperlingY_AAR5
-                batch_result[6, col_idx_in_batch] = SperlingZ_AAR5
-        
+            for future in concurrent.futures.as_completed(futures):
+                (
+                    col_idx,
+                    critical_velocity,
+                    rigid_wear,
+                    rigid_lat_disp,
+                    irw_wear,
+                    irw_lat_disp,
+                    sperling_y,
+                    sperling_z,
+                    err,
+                ) = future.result()
+
+                if err:
+                    print(f"[WARN] idx={start_idx + col_idx} failed.\n{err}")
+                    failed += 1
+
+                metrics = (
+                    critical_velocity,
+                    rigid_wear,
+                    rigid_lat_disp,
+                    irw_wear,
+                    irw_lat_disp,
+                    sperling_y,
+                    sperling_z,
+                )
+                for metric_idx, value in enumerate(metrics):
+                    batch_result[metric_idx, col_idx] = value
+
         all_batch_results.append(batch_result)
-        # 这里 all_batch_results 是一个 list，其中每个元素都是当前批次的结果 (batch_result)
+        batch_file = checkpoint_dir / f"batch_result_{config.tag}_batch{batch_idx}.npy"
+        np.save(batch_file, batch_result)
+        print(f"[INFO] Batch {batch_idx + 1} finished in {time.time()-t0:.2f}s, failed={failed}/{batch_columns}")
 
-        batch_result_toSave = batch_result # 保存数据解耦，避免保存“列表”时，NumPy 内部会尝试把 all_batch_results 转成一个统一的 ndarray
-        np.save(os.path.join(checkpoint_dir, f"batch_result_{tag}_batch{batch_idx}.npy"), batch_result_toSave)
-
-    # 拼接所有批次的结果
     final_results = np.concatenate(all_batch_results, axis=1)
-    print("final_results shape:", final_results.shape)
-    print("计算完成，前10列临界速度 = ", final_results[0, :10])
-    
-    # 代码计时
+    return final_results
+
+
+# 基于保存的 Result/Xvars 绘制 Lx1-Lx2-临界速度曲面图（需要 GUI 后端）
+def show_meshgrid_from_result(
+    tag: str,
+    working_dir: Optional[Path] = None,
+    lx3: Optional[float] = None,  # 指定 Lx3 切片；None 表示对 Lx3 聚合
+    agg: str = "max",             # 当 lx3=None 时，对 (Lx1,Lx2) 维度的聚合方式：max/min/mean/median
+    atol: float = 1e-9,            # Lx3 匹配容差
+) -> None:
+    base_dir = working_dir or Path.cwd()
+    result_path = base_dir / f"Result_{tag}.npy"
+    xvars_path = base_dir / f"Xvars_{tag}.npy"
+
+    R = np.load(result_path)  # shape = (RESULT_DIM, N_cases)
+    X = np.load(xvars_path)   # shape = (N_params, N_cases)
+    cv = R[0, :]
+
+    lx1_all = X[29, :]
+    lx2_all = X[30, :]
+    lx3_all = X[31, :]
+
+    # 选择切片或对 Lx3 聚合
+    if lx3 is not None:
+        mask = np.isclose(lx3_all, lx3, atol=atol)
+        if not np.any(mask):
+            raise ValueError(f"No samples found for Lx3 ≈ {lx3} (atol={atol}).")
+        lx1_vals = lx1_all[mask]
+        lx2_vals = lx2_all[mask]
+        z_vals = cv[mask]
+        title_suffix = f"Lx3={lx3}"
+    else:
+        df = pd.DataFrame({"lx1": lx1_all, "lx2": lx2_all, "cv": cv})
+        if agg == "max":
+            grouped = df.groupby(["lx1", "lx2"])['cv'].max()
+        elif agg == "min":
+            grouped = df.groupby(["lx1", "lx2"])['cv'].min()
+        elif agg == "mean":
+            grouped = df.groupby(["lx1", "lx2"])['cv'].mean()
+        elif agg == "median":
+            grouped = df.groupby(["lx1", "lx2"])['cv'].median()
+        else:
+            raise ValueError("Unsupported agg. Choose from max/min/mean/median.")
+        pairs = np.array(list(grouped.index))
+        lx1_vals, lx2_vals = pairs[:, 0], pairs[:, 1]
+        z_vals = grouped.values
+        title_suffix = f"agg={agg}"
+
+    # 生成网格，并以 NaN 填充缺失项
+    lx1_unique = np.unique(lx1_vals)
+    lx2_unique = np.unique(lx2_vals)
+    Xg, Yg = np.meshgrid(lx1_unique, lx2_unique)
+    Z = np.full_like(Xg, np.nan, dtype=float)
+    idx1 = {v: j for j, v in enumerate(lx1_unique)}
+    idx2 = {v: i for i, v in enumerate(lx2_unique)}
+    for x1, x2, z in zip(lx1_vals, lx2_vals, z_vals):
+        Z[idx2[x2], idx1[x1]] = z
+
+    fig = plt.figure()
+    ax = fig.add_subplot(projection="3d")
+    surf = ax.plot_surface(Xg, Yg, Z, cmap="viridis")
+    ax.set_xlabel("Lx1")
+    ax.set_ylabel("Lx2")
+    ax.invert_yaxis()
+    ax.set_zlabel("Critical Velocity (m/s)")
+    ax.set_title(f"Critical Velocity vs Lx1/Lx2 ({title_suffix})")
+    fig.colorbar(surf, shrink=0.5)
+    plt.show()
+
+
+# 旧接口兼容封装
+def ShowMeshgrid(
+    tag: str = "reNS23",
+    working_dir: Optional[Path] = None,
+    lx3: Optional[float] = None,
+    agg: str = "max",
+    atol: float = 1e-9,
+) -> None:
+    """向后兼容封装：允许直接指定 Lx3 切片或聚合方式。"""
+    show_meshgrid_from_result(tag, working_dir, lx3=lx3, agg=agg, atol=atol)
+
+# 主流程入口
+def main() -> None:
+    config = parse_args()
+    start_time = time.time()
+
+    print(f"[INFO] Working directory: {config.working_dir}")
+    print(f"[INFO] Sweep mode: {config.mode}")
+    if config.input_path:
+        print(f"[INFO] Input file: {config.input_path}")
+
+    x_vars = generate_vehicle_parameters(config)
+
+    checkpoint_dir = prepare_checkpoint_dir(config)
+    np.save(checkpoint_dir / f"myXvars_{config.tag}.npy", x_vars)
+
+    final_results = execute_batches(config, x_vars, checkpoint_dir)
+
+    np.save(config.working_dir / f"Xvars_{config.tag}.npy", x_vars)
+    np.save(config.working_dir / f"Result_{config.tag}.npy", final_results)
+
+    if final_results.shape[1] > 0:
+        preview = final_results[0, : min(10, final_results.shape[1])]
+        print(f"[INFO] First {preview.size} critical velocities: {preview}")
+
     elapsed = time.time() - start_time
-    print(f"该代码块耗时: {elapsed:.6f} 秒")
-    
-    # 最终结果保存
-    np.save(f"Xvars_{tag}.npy", X_vars)
-    np.save(f"Result_{tag}.npy", final_results)
-    
+    print(f"[INFO] Completed sweep in {elapsed:.2f} s.")
+    print(f"[INFO] Results saved to {config.working_dir / f'Result_{config.tag}.npy'}")
+
+
 if __name__ == "__main__":
     main()
-    # ShowMeshgrid()
-    
-"""
-命令行调用：
 
-    # 需要启动 pypack 环境的命令行
-    
-    H:  # 切换盘符                                                                                                             
-    cd H:\TeamProjects\Mk\myProjects\ParallelSweepSimpack                           
-    python -X utf8 SweepLx1Lx2xL3x.py # 执行本程序                                                                                                                                   
+'''
 
-"""
+ 命令行调用示例（Windows）
+
+# cmd.exe 多行（使用 ^ 续行）:
+    F:  # 切换盘符                                                                                                             
+    cd F:\ResearchMainStream\0.ResearchBySection\C.动力学模型\C23参数优化\参数优化实现\ParallelSweepSimpack
+
+    python -X utf8 SweepLx1Lx2xL3x.py ^
+       --mode FromExcel ^
+       --input IRWnRW_OrthogonalDoE.xlsx ^
+       --excel-sheet Sheet1 ^
+       --tag ExcelRun ^
+       --batch-size 5
+
+# 从其他数据（内置Lx组合/Excel表格/npz数据包）来源读取并扫略计算:
+   - 仅扫略 Lx1/Lx2/Lx3:
+     python -X utf8 SweepLx1Lx2xL3x.py --mode JustSweepL123 --tag L123Grid --batch-size 22
+   - 从 NPZ 导入:
+     python -X utf8 SweepLx1Lx2xL3x.py --mode FromNPZ --input res_history.npz --tag NPZRun --batch-size 16
+   - 自定义临界速度搜索区间与深度:
+     python -X utf8 SweepLx1Lx2xL3x.py --mode FromExcel --input ParameterSweep_fromExcel.xlsx --tag TestVel --start-vel 27.78 --end-vel 250 --depth 7 --checkpoint ChkPnt
+
+'''
+

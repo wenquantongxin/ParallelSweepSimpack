@@ -60,7 +60,7 @@ subvar.str (                        $_Iwz                         ) = '560'     
 
 subvar.str (                        $_Lx1                         ) = '0.32'                   ! Definition
 
-subvar.str (                        $_Lx2                         ) = '0.44'                   ! Definition
+subvar.str (                        $_Lx2                         ) = '0.02'                   ! Definition
 
 subvar.str (                        $_Lx3                         ) = '0.0'                  ! Definition
 

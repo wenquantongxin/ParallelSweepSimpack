@@ -77,18 +77,18 @@ substr.attr.2d.height (             $S_NativeRigidWSBogie_Rear    ) = 4.00000000
 ! Views
 !**********************************************************************
 view.type (                         $V_WorkingView                ) = 0                       ! Projection type
-view.pos (                1 ,       $V_WorkingView                ) = -3.26692504882812500E+01 ! Position
-view.pos (                2 ,       $V_WorkingView                ) = -2.82656974792480469E+01 ! Position
-view.pos (                3 ,       $V_WorkingView                ) = -2.16094284057617188E+01 ! Position
-view.orient (             1 ,       $V_WorkingView                ) = 3.86738809648477844E-01 ! Orientation
-view.orient (             2 ,       $V_WorkingView                ) = 7.29256694612444356E-01 ! Orientation
-view.orient (             3 ,       $V_WorkingView                ) = -4.82681694998313426E-01 ! Orientation
-view.orient (             4 ,       $V_WorkingView                ) = -2.92636545544410043E-01 ! Orientation
+view.pos (                1 ,       $V_WorkingView                ) = -1.36809062957763672E+01 ! Position
+view.pos (                2 ,       $V_WorkingView                ) = -7.94065046310424805E+00 ! Position
+view.pos (                3 ,       $V_WorkingView                ) = -1.04710187911987305E+01 ! Position
+view.orient (             1 ,       $V_WorkingView                ) = -3.01812022924423218E-01 ! Orientation
+view.orient (             2 ,       $V_WorkingView                ) = -8.24987590312957764E-01 ! Orientation
+view.orient (             3 ,       $V_WorkingView                ) = 4.21494901180267334E-01 ! Orientation
+view.orient (             4 ,       $V_WorkingView                ) = 2.25048899650573730E-01 ! Orientation
 view.angle (                        $V_WorkingView                ) = 7.85398185253143311E-01 ! Lens angle
 view.fclip.auto (                   $V_WorkingView                ) = 1                       ! Front clipping plane auto
 view.bclip.auto (                   $V_WorkingView                ) = 1                       ! Back clipping plane auto
-view.fclip.value (                  $V_WorkingView                ) = 4.04770326614379883E+00 ! Front clipping plane value
-view.bclip.value (                  $V_WorkingView                ) = 4.04770312500000000E+03 ! Back clipping plane value
+view.fclip.value (                  $V_WorkingView                ) = 4.02051830291748047E+00 ! Front clipping plane value
+view.bclip.value (                  $V_WorkingView                ) = 4.02051831054687500E+03 ! Back clipping plane value
 view.rotcenter.type (               $V_WorkingView                ) = 1                       ! Rotation center type
 view.rotcenter.ele (                $V_WorkingView                ) = $M_Isys_Track_Moved     ! Rotation center element
 view.rotcenter.adjust (             $V_WorkingView                ) = 1                       ! Adjust rotation center
@@ -100,13 +100,13 @@ view.motion.z (                     $V_WorkingView                ) = 1         
 view.motion.al (                    $V_WorkingView                ) = 1                       ! Moved camera direction alpha
 view.motion.be (                    $V_WorkingView                ) = 1                       ! Moved camera direction beta
 view.motion.ga (                    $V_WorkingView                ) = 1                       ! Moved camera direction gamma
-view.motion.pos (         1 ,       $V_WorkingView                ) = -4.14192504882812500E+01 ! Relative position
-view.motion.pos (         2 ,       $V_WorkingView                ) = -2.72656974792480469E+01 ! Relative position
-view.motion.pos (         3 ,       $V_WorkingView                ) = -2.04094284057617195E+01 ! Relative position
-view.motion.orient (      1 ,       $V_WorkingView                ) = 3.86738809648477955E-01 ! Relative orientation
-view.motion.orient (      2 ,       $V_WorkingView                ) = 7.29256694612444356E-01 ! Relative orientation
-view.motion.orient (      3 ,       $V_WorkingView                ) = -4.82681694998313593E-01 ! Relative orientation
-view.motion.orient (      4 ,       $V_WorkingView                ) = -2.92636545544410154E-01 ! Relative orientation
+view.motion.pos (         1 ,       $V_WorkingView                ) = -2.24309062957763672E+01 ! Relative position
+view.motion.pos (         2 ,       $V_WorkingView                ) = -6.94065046310424805E+00 ! Relative position
+view.motion.pos (         3 ,       $V_WorkingView                ) = -9.27101879119873118E+00 ! Relative position
+view.motion.orient (      1 ,       $V_WorkingView                ) = 3.01812025896213754E-01 ! Relative orientation
+view.motion.orient (      2 ,       $V_WorkingView                ) = 8.24987598436193847E-01 ! Relative orientation
+view.motion.orient (      3 ,       $V_WorkingView                ) = -4.21494905330514702E-01 ! Relative orientation
+view.motion.orient (      4 ,       $V_WorkingView                ) = -2.25048901866516576E-01 ! Relative orientation
 
 view.type (                         $V_Perspective_Moved          ) = 0                       ! Projection type
 view.pos (                1 ,       $V_Perspective_Moved          ) = -1.14629710518056527E+00 ! Position
@@ -1604,30 +1604,6 @@ force.par (               7 ,       $S_NativeRigidWSBogie_Front.$F_AntiHuntingDm
 force.disabled (                    $S_NativeRigidWSBogie_Front.$F_AntiHuntingDmp_B) = 0      ! Disabled
 force.par (               7 ,       $S_NativeRigidWSBogie_Front.$F_AntiHuntingDmp_B) = $_Chx  ! [Ns/m] Damping in x
 
-force.disabled (                    $S_NativeRigidWSBogie_Front.$F_Motor_A) = 0               ! Disabled
-
-force.disabled (                    $S_NativeRigidWSBogie_Front.$F_Motor_B) = 0               ! Disabled
-
-force.disabled (                    $S_NativeRigidWSBogie_Front.$F_Motor_C) = 0               ! Disabled
-
-force.disabled (                    $S_NativeRigidWSBogie_Front.$F_Motor_D) = 0               ! Disabled
-
-force.disabled (                    $S_NativeRigidWSBogie_Front.$F_Motor_A_Simat) = 1         ! Disabled
-force.par (               2 ,       $S_NativeRigidWSBogie_Front.$F_Motor_A_Simat) = null      ! [-] u-Vector Element force y
-force.par (               5 ,       $S_NativeRigidWSBogie_Front.$F_Motor_A_Simat) = $S_NativeRigidWSBogie_Front.$UE_UA_Simat ! [-] u-Vector Element torque y
-
-force.disabled (                    $S_NativeRigidWSBogie_Front.$F_Motor_B_Simat) = 1         ! Disabled
-force.par (               2 ,       $S_NativeRigidWSBogie_Front.$F_Motor_B_Simat) = null      ! [-] u-Vector Element force y
-force.par (               5 ,       $S_NativeRigidWSBogie_Front.$F_Motor_B_Simat) = $S_NativeRigidWSBogie_Front.$UE_UB_Simat ! [-] u-Vector Element torque y
-
-force.disabled (                    $S_NativeRigidWSBogie_Front.$F_Motor_C_Simat) = 1         ! Disabled
-force.par (               2 ,       $S_NativeRigidWSBogie_Front.$F_Motor_C_Simat) = null      ! [-] u-Vector Element force y
-force.par (               5 ,       $S_NativeRigidWSBogie_Front.$F_Motor_C_Simat) = $S_NativeRigidWSBogie_Front.$UE_UC_Simat ! [-] u-Vector Element torque y
-
-force.disabled (                    $S_NativeRigidWSBogie_Front.$F_Motor_D_Simat) = 1         ! Disabled
-force.par (               2 ,       $S_NativeRigidWSBogie_Front.$F_Motor_D_Simat) = null      ! [-] u-Vector Element force y
-force.par (               5 ,       $S_NativeRigidWSBogie_Front.$F_Motor_D_Simat) = $S_NativeRigidWSBogie_Front.$UE_UD_Simat ! [-] u-Vector Element torque y
-
 control.par (            10 ,       $S_NativeRigidWSBogie_Front.$C_Ref_Speed_AllWheels) = $S_NativeRigidWSBogie_Front.$UE_Ref_Vel_X ! [-]  Ch 1: u-Vector Element
 
 control.par (            13 ,       $S_NativeRigidWSBogie_Front.$C_RotToVelX_A) = { -860/2000 } ! [-]  Ch 1: Gain factor C
@@ -1694,6 +1670,10 @@ joint.st.pos (            1 ,       $S_NativeRigidWSBogie_Front.$S_RigidWS_Front
 joint.st.vel (            1 ,       $S_NativeRigidWSBogie_Front.$S_RigidWS_Front.$J_RigidWS) = 2.22222222222222214E+01 ! Velocity
 
 
+marker.pos (              2 ,       $S_NativeRigidWSBogie_Front.$S_RigidWS_Front.$M_AxleBridge_LongiBar_A) = { -$_Lx2/2 } ! Position
+
+marker.pos (              2 ,       $S_NativeRigidWSBogie_Front.$S_RigidWS_Front.$M_AxleBridge_LongiBar_B) = { $_Lx2/2 } ! Position
+
 joint.st.vel (            1 ,       $S_NativeRigidWSBogie_Front.$S_RigidWS_Front.$J_AxleBridge) = 5.16436295284793161E+01 ! Velocity
 
 
@@ -1704,6 +1684,10 @@ force.st.desc (           1 ,       $S_NativeRigidWSBogie_Front.$S_RigidWS_Front
 joint.st.pos (            1 ,       $S_NativeRigidWSBogie_Front.$S_RigidWS_Rear.$J_RigidWS) = { 17500/2000-2.5/2 } ! Position
 joint.st.vel (            1 ,       $S_NativeRigidWSBogie_Front.$S_RigidWS_Rear.$J_RigidWS) = 2.22222222222222214E+01 ! Velocity
 
+
+marker.pos (              2 ,       $S_NativeRigidWSBogie_Front.$S_RigidWS_Rear.$M_AxleBridge_LongiBar_A) = { -$_Lx2/2 } ! Position
+
+marker.pos (              2 ,       $S_NativeRigidWSBogie_Front.$S_RigidWS_Rear.$M_AxleBridge_LongiBar_B) = { $_Lx2/2 } ! Position
 
 joint.st.vel (            1 ,       $S_NativeRigidWSBogie_Front.$S_RigidWS_Rear.$J_AxleBridge) = 5.16436295285854712E+01 ! Velocity
 
@@ -1975,30 +1959,6 @@ force.par (               7 ,       $S_NativeRigidWSBogie_Rear.$F_AntiHuntingDmp
 force.disabled (                    $S_NativeRigidWSBogie_Rear.$F_AntiHuntingDmp_B) = 0       ! Disabled
 force.par (               7 ,       $S_NativeRigidWSBogie_Rear.$F_AntiHuntingDmp_B) = $_Chx   ! [Ns/m] Damping in x
 
-force.disabled (                    $S_NativeRigidWSBogie_Rear.$F_Motor_A) = 0                ! Disabled
-
-force.disabled (                    $S_NativeRigidWSBogie_Rear.$F_Motor_B) = 0                ! Disabled
-
-force.disabled (                    $S_NativeRigidWSBogie_Rear.$F_Motor_C) = 0                ! Disabled
-
-force.disabled (                    $S_NativeRigidWSBogie_Rear.$F_Motor_D) = 0                ! Disabled
-
-force.disabled (                    $S_NativeRigidWSBogie_Rear.$F_Motor_A_Simat) = 1          ! Disabled
-force.par (               2 ,       $S_NativeRigidWSBogie_Rear.$F_Motor_A_Simat) = null       ! [-] u-Vector Element force y
-force.par (               5 ,       $S_NativeRigidWSBogie_Rear.$F_Motor_A_Simat) = $S_NativeRigidWSBogie_Rear.$UE_UA_Simat ! [-] u-Vector Element torque y
-
-force.disabled (                    $S_NativeRigidWSBogie_Rear.$F_Motor_B_Simat) = 1          ! Disabled
-force.par (               2 ,       $S_NativeRigidWSBogie_Rear.$F_Motor_B_Simat) = null       ! [-] u-Vector Element force y
-force.par (               5 ,       $S_NativeRigidWSBogie_Rear.$F_Motor_B_Simat) = $S_NativeRigidWSBogie_Rear.$UE_UB_Simat ! [-] u-Vector Element torque y
-
-force.disabled (                    $S_NativeRigidWSBogie_Rear.$F_Motor_C_Simat) = 1          ! Disabled
-force.par (               2 ,       $S_NativeRigidWSBogie_Rear.$F_Motor_C_Simat) = null       ! [-] u-Vector Element force y
-force.par (               5 ,       $S_NativeRigidWSBogie_Rear.$F_Motor_C_Simat) = $S_NativeRigidWSBogie_Rear.$UE_UC_Simat ! [-] u-Vector Element torque y
-
-force.disabled (                    $S_NativeRigidWSBogie_Rear.$F_Motor_D_Simat) = 1          ! Disabled
-force.par (               2 ,       $S_NativeRigidWSBogie_Rear.$F_Motor_D_Simat) = null       ! [-] u-Vector Element force y
-force.par (               5 ,       $S_NativeRigidWSBogie_Rear.$F_Motor_D_Simat) = $S_NativeRigidWSBogie_Rear.$UE_UD_Simat ! [-] u-Vector Element torque y
-
 control.par (             4 ,       $S_NativeRigidWSBogie_Rear.$C_VelDiff_A_Left) = $C_CurveLeft ! [-] Input Element ch. 2
 
 control.st.dyn (          2 ,       $S_NativeRigidWSBogie_Rear.$C_VelCtrl_A) = 0.00000000000000000E+00 ! Dynamic States
@@ -2069,6 +2029,10 @@ joint.st.pos (            1 ,       $S_NativeRigidWSBogie_Rear.$S_RigidWS_Front.
 joint.st.vel (            1 ,       $S_NativeRigidWSBogie_Rear.$S_RigidWS_Front.$J_RigidWS) = 2.22222222222222214E+01 ! Velocity
 
 
+marker.pos (              2 ,       $S_NativeRigidWSBogie_Rear.$S_RigidWS_Front.$M_AxleBridge_LongiBar_A) = { -$_Lx2/2 } ! Position
+
+marker.pos (              2 ,       $S_NativeRigidWSBogie_Rear.$S_RigidWS_Front.$M_AxleBridge_LongiBar_B) = { $_Lx2/2 } ! Position
+
 joint.st.vel (            1 ,       $S_NativeRigidWSBogie_Rear.$S_RigidWS_Front.$J_AxleBridge) = 5.16436295284793161E+01 ! Velocity
 
 
@@ -2079,6 +2043,10 @@ force.st.desc (           1 ,       $S_NativeRigidWSBogie_Rear.$S_RigidWS_Front.
 joint.st.pos (            1 ,       $S_NativeRigidWSBogie_Rear.$S_RigidWS_Rear.$J_RigidWS) = { -17500/2000-2.5/2 } ! Position
 joint.st.vel (            1 ,       $S_NativeRigidWSBogie_Rear.$S_RigidWS_Rear.$J_RigidWS) = 2.22222222222222214E+01 ! Velocity
 
+
+marker.pos (              2 ,       $S_NativeRigidWSBogie_Rear.$S_RigidWS_Rear.$M_AxleBridge_LongiBar_A) = { -$_Lx2/2 } ! Position
+
+marker.pos (              2 ,       $S_NativeRigidWSBogie_Rear.$S_RigidWS_Rear.$M_AxleBridge_LongiBar_B) = { $_Lx2/2 } ! Position
 
 joint.st.vel (            1 ,       $S_NativeRigidWSBogie_Rear.$S_RigidWS_Rear.$J_AxleBridge) = 5.16436295285854712E+01 ! Velocity
 

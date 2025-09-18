@@ -68,18 +68,18 @@ substr.add.searchpath (   1 ,       $S_RigidWS_Rear               ) = '../databa
 ! Views
 !**********************************************************************
 view.type (                         $V_WorkingView                ) = 0                       ! Projection type
-view.pos (                1 ,       $V_WorkingView                ) = -1.73110342025756836E+00 ! Position
-view.pos (                2 ,       $V_WorkingView                ) = 4.42666625976562500E+00 ! Position
-view.pos (                3 ,       $V_WorkingView                ) = -3.44030904769897461E+00 ! Position
-view.orient (             1 ,       $V_WorkingView                ) = 8.41477559487686211E-01 ! Orientation
-view.orient (             2 ,       $V_WorkingView                ) = 2.08991807343859332E-01 ! Orientation
-view.orient (             3 ,       $V_WorkingView                ) = -1.62384909779920122E-01 ! Orientation
-view.orient (             4 ,       $V_WorkingView                ) = -4.71029810540226801E-01 ! Orientation
+view.pos (                1 ,       $V_WorkingView                ) = -2.56357622146606445E+00 ! Position
+view.pos (                2 ,       $V_WorkingView                ) = -1.39334654808044434E+00 ! Position
+view.pos (                3 ,       $V_WorkingView                ) = -2.66793727874755859E+00 ! Position
+view.orient (             1 ,       $V_WorkingView                ) = 2.28191763162612915E-01 ! Orientation
+view.orient (             2 ,       $V_WorkingView                ) = 8.77494394779205322E-01 ! Orientation
+view.orient (             3 ,       $V_WorkingView                ) = -3.96330922842025757E-01 ! Orientation
+view.orient (             4 ,       $V_WorkingView                ) = -1.44408851861953735E-01 ! Orientation
 view.angle (                        $V_WorkingView                ) = 7.85398185253143311E-01 ! Lens angle
 view.fclip.auto (                   $V_WorkingView                ) = 1                       ! Front clipping plane auto
 view.bclip.auto (                   $V_WorkingView                ) = 1                       ! Back clipping plane auto
-view.fclip.value (                  $V_WorkingView                ) = 2.00521540641784668E+00 ! Front clipping plane value
-view.bclip.value (                  $V_WorkingView                ) = 2.00521533203125000E+03 ! Back clipping plane value
+view.fclip.value (                  $V_WorkingView                ) = 1.60229706764221191E+00 ! Front clipping plane value
+view.bclip.value (                  $V_WorkingView                ) = 2.00317370605468750E+03 ! Back clipping plane value
 view.rotcenter.type (               $V_WorkingView                ) = 0                       ! Rotation center type
 view.rotcenter.adjust (             $V_WorkingView                ) = 1                       ! Adjust rotation center
 view.motion.active (                $V_WorkingView                ) = 1                       ! Camera is moved
@@ -90,13 +90,13 @@ view.motion.z (                     $V_WorkingView                ) = 1         
 view.motion.al (                    $V_WorkingView                ) = 1                       ! Moved camera direction alpha
 view.motion.be (                    $V_WorkingView                ) = 1                       ! Moved camera direction beta
 view.motion.ga (                    $V_WorkingView                ) = 1                       ! Moved camera direction gamma
-view.motion.pos (         1 ,       $V_WorkingView                ) = -1.73110342025756836E+00 ! Relative position
-view.motion.pos (         2 ,       $V_WorkingView                ) = 4.42666625976562500E+00 ! Relative position
-view.motion.pos (         3 ,       $V_WorkingView                ) = -3.44030904769897461E+00 ! Relative position
-view.motion.orient (      1 ,       $V_WorkingView                ) = 8.41477559487686211E-01 ! Relative orientation
-view.motion.orient (      2 ,       $V_WorkingView                ) = 2.08991807343859332E-01 ! Relative orientation
-view.motion.orient (      3 ,       $V_WorkingView                ) = -1.62384909779920122E-01 ! Relative orientation
-view.motion.orient (      4 ,       $V_WorkingView                ) = -4.71029810540226801E-01 ! Relative orientation
+view.motion.pos (         1 ,       $V_WorkingView                ) = -2.56357622146606445E+00 ! Relative position
+view.motion.pos (         2 ,       $V_WorkingView                ) = -1.39334654808044434E+00 ! Relative position
+view.motion.pos (         3 ,       $V_WorkingView                ) = -2.66793727874755859E+00 ! Relative position
+view.motion.orient (      1 ,       $V_WorkingView                ) = 2.28191761959918499E-01 ! Relative orientation
+view.motion.orient (      2 ,       $V_WorkingView                ) = 8.77494390154333725E-01 ! Relative orientation
+view.motion.orient (      3 ,       $V_WorkingView                ) = -3.96330920753146743E-01 ! Relative orientation
+view.motion.orient (      4 ,       $V_WorkingView                ) = -1.44408851100840729E-01 ! Relative orientation
 
 view.type (                         $V_Perspective_Moved          ) = 0                       ! Projection type
 view.pos (                1 ,       $V_Perspective_Moved          ) = -1.14629710518056527E+00 ! Position
@@ -1718,98 +1718,6 @@ force.par (              21 ,       $F_AntiHuntingDmp_B           ) = null      
 force.par (              22 ,       $F_AntiHuntingDmp_B           ) = null                    ! [-] Expression for Fy
 force.par (              23 ,       $F_AntiHuntingDmp_B           ) = null                    ! [-] Expression for Fz
 force.par (              27 ,       $F_AntiHuntingDmp_B           ) = 0.00000000000000000E+00 ! [-] Output force in To Marker
-
-force.type (                        $F_Motor_A                    ) = 110                     ! Type
-force.from (                        $F_Motor_A                    ) = $M_Frame_Motor_A        ! From Marker
-force.to (                          $F_Motor_A                    ) = $M_Isys                 ! To Marker
-force.disabled (                    $F_Motor_A                    ) = 1                       ! Disabled
-force.par (               1 ,       $F_Motor_A                    ) = $C_VelCtrl_A            ! [-] Input Control Element 1
-force.par (               2 ,       $F_Motor_A                    ) = 1.00000000000000000E+00 ! [-] -> Output Value u1
-force.par (               3 ,       $F_Motor_A                    ) = null                    ! [-] Input Control Element 2
-force.par (               4 ,       $F_Motor_A                    ) = 0.00000000000000000E+00 ! [-] -> Output Value u2
-force.par (               5 ,       $F_Motor_A                    ) = 2.00000000000000000E+00 ! [-] Output type
-force.par (               7 ,       $F_Motor_A                    ) = 2.00000000000000000E+00 ! [-] Axis of torque
-force.par (               8 ,       $F_Motor_A                    ) = 1.00000000000000000E+00 ! [Nm] K: Drive constant L=K*(u1+u2)
-
-force.type (                        $F_Motor_B                    ) = 110                     ! Type
-force.from (                        $F_Motor_B                    ) = $M_Frame_Motor_B        ! From Marker
-force.to (                          $F_Motor_B                    ) = $M_Isys                 ! To Marker
-force.disabled (                    $F_Motor_B                    ) = 1                       ! Disabled
-force.par (               1 ,       $F_Motor_B                    ) = $C_VelCtrl_B            ! [-] Input Control Element 1
-force.par (               2 ,       $F_Motor_B                    ) = 1.00000000000000000E+00 ! [-] -> Output Value u1
-force.par (               3 ,       $F_Motor_B                    ) = null                    ! [-] Input Control Element 2
-force.par (               4 ,       $F_Motor_B                    ) = 0.00000000000000000E+00 ! [-] -> Output Value u2
-force.par (               5 ,       $F_Motor_B                    ) = 2.00000000000000000E+00 ! [-] Output type
-force.par (               7 ,       $F_Motor_B                    ) = 2.00000000000000000E+00 ! [-] Axis of torque
-force.par (               8 ,       $F_Motor_B                    ) = 1.00000000000000000E+00 ! [Nm] K: Drive constant L=K*(u1+u2)
-
-force.type (                        $F_Motor_C                    ) = 110                     ! Type
-force.from (                        $F_Motor_C                    ) = $M_Frame_Motor_C        ! From Marker
-force.to (                          $F_Motor_C                    ) = $M_Isys                 ! To Marker
-force.disabled (                    $F_Motor_C                    ) = 1                       ! Disabled
-force.par (               1 ,       $F_Motor_C                    ) = $C_VelCtrl_C            ! [-] Input Control Element 1
-force.par (               2 ,       $F_Motor_C                    ) = 1.00000000000000000E+00 ! [-] -> Output Value u1
-force.par (               3 ,       $F_Motor_C                    ) = null                    ! [-] Input Control Element 2
-force.par (               4 ,       $F_Motor_C                    ) = 0.00000000000000000E+00 ! [-] -> Output Value u2
-force.par (               5 ,       $F_Motor_C                    ) = 2.00000000000000000E+00 ! [-] Output type
-force.par (               7 ,       $F_Motor_C                    ) = 2.00000000000000000E+00 ! [-] Axis of torque
-force.par (               8 ,       $F_Motor_C                    ) = 1.00000000000000000E+00 ! [Nm] K: Drive constant L=K*(u1+u2)
-
-force.type (                        $F_Motor_D                    ) = 110                     ! Type
-force.from (                        $F_Motor_D                    ) = $M_Frame_Motor_D        ! From Marker
-force.to (                          $F_Motor_D                    ) = $M_Isys                 ! To Marker
-force.disabled (                    $F_Motor_D                    ) = 1                       ! Disabled
-force.par (               1 ,       $F_Motor_D                    ) = $C_VelCtrl_D            ! [-] Input Control Element 1
-force.par (               2 ,       $F_Motor_D                    ) = 1.00000000000000000E+00 ! [-] -> Output Value u1
-force.par (               3 ,       $F_Motor_D                    ) = null                    ! [-] Input Control Element 2
-force.par (               4 ,       $F_Motor_D                    ) = 0.00000000000000000E+00 ! [-] -> Output Value u2
-force.par (               5 ,       $F_Motor_D                    ) = 2.00000000000000000E+00 ! [-] Output type
-force.par (               7 ,       $F_Motor_D                    ) = 2.00000000000000000E+00 ! [-] Axis of torque
-force.par (               8 ,       $F_Motor_D                    ) = 1.00000000000000000E+00 ! [Nm] K: Drive constant L=K*(u1+u2)
-
-force.type (                        $F_Motor_A_Simat              ) = 93                      ! Type
-force.from (                        $F_Motor_A_Simat              ) = $M_Frame_Motor_A        ! From Marker
-force.to (                          $F_Motor_A_Simat              ) = $M_Isys                 ! To Marker
-force.disabled (                    $F_Motor_A_Simat              ) = 1                       ! Disabled
-force.par (               1 ,       $F_Motor_A_Simat              ) = null                    ! [-] u-Vector Element force x
-force.par (               2 ,       $F_Motor_A_Simat              ) = null                    ! [-] u-Vector Element force y
-force.par (               3 ,       $F_Motor_A_Simat              ) = null                    ! [-] u-Vector Element force z
-force.par (               4 ,       $F_Motor_A_Simat              ) = null                    ! [-] u-Vector Element torque x
-force.par (               5 ,       $F_Motor_A_Simat              ) = $UE_UA_Simat            ! [-] u-Vector Element torque y
-force.par (               6 ,       $F_Motor_A_Simat              ) = null                    ! [-] u-Vector Element torque z
-
-force.type (                        $F_Motor_B_Simat              ) = 93                      ! Type
-force.from (                        $F_Motor_B_Simat              ) = $M_Frame_Motor_B        ! From Marker
-force.to (                          $F_Motor_B_Simat              ) = $M_Isys                 ! To Marker
-force.disabled (                    $F_Motor_B_Simat              ) = 1                       ! Disabled
-force.par (               1 ,       $F_Motor_B_Simat              ) = null                    ! [-] u-Vector Element force x
-force.par (               2 ,       $F_Motor_B_Simat              ) = null                    ! [-] u-Vector Element force y
-force.par (               3 ,       $F_Motor_B_Simat              ) = null                    ! [-] u-Vector Element force z
-force.par (               4 ,       $F_Motor_B_Simat              ) = null                    ! [-] u-Vector Element torque x
-force.par (               5 ,       $F_Motor_B_Simat              ) = $UE_UB_Simat            ! [-] u-Vector Element torque y
-force.par (               6 ,       $F_Motor_B_Simat              ) = null                    ! [-] u-Vector Element torque z
-
-force.type (                        $F_Motor_C_Simat              ) = 93                      ! Type
-force.from (                        $F_Motor_C_Simat              ) = $M_Frame_Motor_C        ! From Marker
-force.to (                          $F_Motor_C_Simat              ) = $M_Isys                 ! To Marker
-force.disabled (                    $F_Motor_C_Simat              ) = 1                       ! Disabled
-force.par (               1 ,       $F_Motor_C_Simat              ) = null                    ! [-] u-Vector Element force x
-force.par (               2 ,       $F_Motor_C_Simat              ) = null                    ! [-] u-Vector Element force y
-force.par (               3 ,       $F_Motor_C_Simat              ) = null                    ! [-] u-Vector Element force z
-force.par (               4 ,       $F_Motor_C_Simat              ) = null                    ! [-] u-Vector Element torque x
-force.par (               5 ,       $F_Motor_C_Simat              ) = $UE_UC_Simat            ! [-] u-Vector Element torque y
-force.par (               6 ,       $F_Motor_C_Simat              ) = null                    ! [-] u-Vector Element torque z
-
-force.type (                        $F_Motor_D_Simat              ) = 93                      ! Type
-force.from (                        $F_Motor_D_Simat              ) = $M_Frame_Motor_D        ! From Marker
-force.to (                          $F_Motor_D_Simat              ) = $M_Isys                 ! To Marker
-force.disabled (                    $F_Motor_D_Simat              ) = 1                       ! Disabled
-force.par (               1 ,       $F_Motor_D_Simat              ) = null                    ! [-] u-Vector Element force x
-force.par (               2 ,       $F_Motor_D_Simat              ) = null                    ! [-] u-Vector Element force y
-force.par (               3 ,       $F_Motor_D_Simat              ) = null                    ! [-] u-Vector Element force z
-force.par (               4 ,       $F_Motor_D_Simat              ) = null                    ! [-] u-Vector Element torque x
-force.par (               5 ,       $F_Motor_D_Simat              ) = $UE_UD_Simat            ! [-] u-Vector Element torque y
-force.par (               6 ,       $F_Motor_D_Simat              ) = null                    ! [-] u-Vector Element torque z
 
 !**********************************************************************
 ! Control Elements

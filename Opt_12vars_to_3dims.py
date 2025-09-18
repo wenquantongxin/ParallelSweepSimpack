@@ -325,18 +325,18 @@ def opt_RunSPCKCmd (cmd, work_dir, timeout_seconds):
         else:
             # 打印标准错误输出
             print(f"[ERROR] simpack 执行失败，返回码={process.returncode}")
-            return -99.5  # 返回错误码
+            return -999.5  # 返回错误码
 
     except subprocess.TimeoutExpired:
         # 如果超时，终止进程
         print("[ERROR] simpack 执行超时，终止进程！")
         process.terminate()
         process.wait()  # 确保进程被完全终止
-        return -99.4  # 返回超时错误码
+        return -999.4  # 返回超时错误码
 
     except Exception as e:
         print(f"[ERROR] 执行命令失败: {e}")
-        return -99.3  # 其他错误
+        return -999.3  # 其他错误
 
 #############################################################################################################
 ##########################                直曲线单线程计算组(命令启动+后处理)           #####################
@@ -434,7 +434,7 @@ def opt_CRVCal_idx(
     result = opt_RunSPCKCmd(cmd, work_dir, timeout_seconds = 10 * 60)
     if result != 0:
         print(f"运行失败，错误码：{result}")
-        return (+999.0131, +999.0132)
+        return (+999.333, +999.444)
     else:
         print(f"成功执行 qs 脚本调用")
         print("命令执行完成")
@@ -445,15 +445,15 @@ def opt_CRVCal_idx(
     dat_path = out_result_full_prefix + ".dat"
     if not os.path.isfile(dat_path):
         print(f"[ERROR] 后处理结果文件未找到: {dat_path}")
-        return (+999.0151, +999.0152) 
+        return (+999.555, +999.666) 
       
     # 3) 解析文件
     try:
         SumWearNumber_CRV_fromDat, maxLatDisp_CRV_fromDat = opt_ReadCRVDat(dat_path)
     except Exception as e:
         print(f"[ERROR] 解析 {dat_path} 时出现异常: {e}")
-        SumWearNumber_CRV = +9.025
-        maxLatDisp_CRV = +9.026
+        SumWearNumber_CRV = +999.777
+        maxLatDisp_CRV = +999.888
     else:
         SumWearNumber_CRV = SumWearNumber_CRV_fromDat
         maxLatDisp_CRV = maxLatDisp_CRV_fromDat
@@ -605,7 +605,7 @@ def opt_CRVPerf_idx(WorkingDir, X_vars, tag, idx):
 
     if result != 0:
         print(f"运行失败，错误码：{result}")
-        return (+999.21, +999.22)
+        return (+999.111, +999.222)
     else:
         print(f"成功执行 qs 脚本调用")
         # print("命令执行完成")
@@ -692,7 +692,6 @@ def opt_STRPerf_idx(WorkingDir, X_vars, tag, idx):
         return (+99.31, +99.32)
     else:
         print(f"成功执行 qs 脚本调用")
-        # print("命令执行完成")
         
     time.sleep(1)
 
@@ -1030,7 +1029,7 @@ class MyBatchProblem(Problem):
     def __init__(self,
                  batch_size=5,
                  WorkingDir=os.getcwd(),
-                 tag="0814G3",                # 修改点 0
+                 tag="0918G3",                # 修改点 0
                  StartVel = 100/3.6,
                  EndVel = 900/3.6,
                  N_depth = 7,
@@ -1038,8 +1037,8 @@ class MyBatchProblem(Problem):
         """
         示例上下限
         使用 (N,12) 决策变量, 3 个目标 
-        xl=np.array([ 2000,  160000,  120000,  24000,  30000,   4000,  1600000,  10000,     100,    0,    0, -0.6]),
-        xu=np.array([50000, 4000000, 3000000, 600000, 750000, 100000, 40000000, 250000, 3000000, 0.64, 0.64,  0.4]),
+        xl=np.array([ 2000,  160000,  120000,  24000,  30000,   4000,  1600000,  10000,     100,    0,    0, -0.2]),
+        xu=np.array([50000, 4000000, 3000000, 600000, 750000, 100000, 40000000, 250000, 3000000, 0.64, 0.64,  0.2]),
         """
         super().__init__(
             n_var=12,
@@ -1078,7 +1077,7 @@ class MyBatchProblem(Problem):
         # 2) 计算不等式约束 G (N,2)
         # 约束1: cVel >= 250/3.6 => -cVel <= -250/3.6 => f1 <= -250/3.6
         # f1 = -cVel =>  g1 = f1 - (-250/3.6) = f1 + 250/3.6 <= 0
-        # 约束2: f2 <= 1000 =>  g2 = f2 - 1000 <= 0
+        # 约束2: f2 <= 2000 =>  g2 = f2 - 2000 <= 0
         # 约束3: f3 <= 300  =>  g3 = f3 - 300 <= 0
         G = np.zeros((F.shape[0], 3))
         
@@ -1123,7 +1122,7 @@ def main():
     selected_algorithm = algorithm_NSGA3
     #--------------------------------------------------------------------------------------------#
     
-    # tag 在1033行定义 tag="demo"
+    # tag 在 1033 行处已定义
     
     # 修改点 4：终止条件
     termination = get_termination("n_gen", 200)  # 遗传迭代数
